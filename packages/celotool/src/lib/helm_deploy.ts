@@ -528,6 +528,7 @@ async function helmParameters(celoEnv: string) {
       getVerificationPoolSMSURL(celoEnv)
     )}`,
     `--set geth.verbosity=${fetchEnvOrFallback('GETH_VERBOSITY', '4')}`,
+    `--set geth.vmodule=${fetchEnvOrFallback('GETH_VMODULE', '')}`,
     `--set geth.node.cpu_request=${fetchEnv('GETH_NODE_CPU_REQUEST')}`,
     `--set geth.node.memory_request=${fetchEnv('GETH_NODE_MEMORY_REQUEST')}`,
     `--set geth.genesisFile=${Buffer.from(generateGenesisFromEnv()).toString('base64')}`,

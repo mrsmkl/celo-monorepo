@@ -212,6 +212,7 @@ spec:
           --ethstats=${HOSTNAME}:${ETHSTATS_SECRET}@${ETHSTATS_SVC} \
           --consoleformat=json \
           --consoleoutput=stdout \
+          --vmodule={{ .Values.geth.vmodule }} \
           --verbosity={{ .Values.geth.verbosity }} \
           --metrics"
         ports:
