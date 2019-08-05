@@ -1,0 +1,18 @@
+diff a/packages/protocol/contracts/governance/test/MockBondedDeposits.sol b/packages/protocol/contracts/governance/test/MockBondedDeposits.sol	(rejected hunks)
+@@ -14,6 +14,16 @@ contract MockBondedDeposits {
+   mapping(address => address) public voters;
+   // Maps an account address to their validating delegate.
+   mapping(address => address) public validators;
++  // Maps a delegating address to slashing rights.
++  mapping(address => bool) public slashers;
++
++  function isSlasher(address account) external view returns (bool) {
++    return slashers[account];
++  }
++
++  function giveSlashingRights(address account) external {
++    slashers[account] = true;
++  }
+ 
+   function setWeight(address account, uint256 weight) external {
+     weights[account] = weight;

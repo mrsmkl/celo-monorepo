@@ -67,6 +67,15 @@ contract UsingBondedDeposits is UsingRegistry {
   }
 
   /**
+   * @notice Returns whether a contract has slashing rights.
+   * @param contractAddr The address of the contract.
+   * @return `true` if contract has slashing rights, `false` otherwise.
+   */
+  function isSlasher(address contractAddr) internal view returns (bool) {
+    return getBondedDeposits().isSlasher(contractAddr);
+  }
+
+  /**
    * @notice Returns the bonded deposit value for particular account and notice period.
    * @param account The address of the account.
    * @param noticePeriod The notice period of the bonded deposit.

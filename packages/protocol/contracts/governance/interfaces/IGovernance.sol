@@ -49,4 +49,5 @@ interface IGovernance {
   function isVoting(address) external view returns (bool);
   function isQueued(uint256) external view returns (bool);
   function isProposalPassing(uint256) external view returns (bool);
+  function balanceUpvote(address, uint256, uint256, uint256) external;
 }

@@ -59,6 +59,10 @@ contract BondedDeposits is IBondedDeposits, ReentrancyGuard, Initializable, Usin
   // Maps a block number to the cumulative reward for an account with weight 1 since genesis.
   mapping(uint256 => FractionUtil.Fraction) public cumulativeRewardWeights;
 
+  FractionUtil.Fraction public slashRewardProportion;
+  FractionUtil.Fraction public slashWeightMultiplier;
+  mapping(address => bool) public slashers;
+
   event MaxNoticePeriodSet(
     uint256 maxNoticePeriod
   );
@@ -113,6 +117,7 @@ contract BondedDeposits is IBondedDeposits, ReentrancyGuard, Initializable, Usin
     _transferOwnership(msg.sender);
     setRegistry(registryAddress);
     maxNoticePeriod = _maxNoticePeriod;
+    // TODO(yorke): initialize isSlasher
   }
 
   /**
@@ -265,6 +270,7 @@ contract BondedDeposits is IBondedDeposits, ReentrancyGuard, Initializable, Usin
     Account storage account = accounts[msg.sender];
     Deposit storage bonded = account.deposits.bonded[noticePeriod];
     updateBondedDeposit(account, uint256(bonded.value).add(msg.value), noticePeriod);
+    account.balances.staked = account.balances.staked.add(msg.value);
     emit DepositBonded(msg.sender, msg.value, noticePeriod);
     return account.weight;
   }
@@ -350,12 +356,58 @@ contract BondedDeposits is IBondedDeposits, ReentrancyGuard, Initializable, Usin
     Deposit storage notified = account.deposits.notified[availabilityTime];
     uint256 value = notified.value;
     require(value > 0);
+    require(account.balances.staked.sub(account.balances.slashed).sub(value) >= 0);
     updateNotifiedDeposit(account, 0, availabilityTime);
+    account.balances.staked = account.balances.staked.sub(value);
 
     IERC20Token goldToken = IERC20Token(registry.getAddressFor(GOLD_TOKEN_REGISTRY_ID));
     require(goldToken.transfer(msg.sender, value));
     emit Withdrawal(msg.sender, value);
     return account.weight;
+  }
+
+/**
+ * @notice Allocates slashed balance to selected bonds.
+ * @param targetNoticePeriods list of notice periods which key bonds
+ * @param bondedValueDecrements list of values to decrement targetNoticePeriods with
+ * @param targetAvailabilityTimes list of availability times which key notified bonds
+ * @param notifiedValueDecrements list of values to decrement targetNoticePeriods with
+ *
+*/
+  function rebalanceBondsWithSlashes(
+    uint256[] calldata targetNoticePeriods,
+    uint256[] calldata bondedValueDecrements,
+    uint256[] calldata targetAvailabilityTimes,
+    uint256[] calldata notifiedValueDecrements
+  ) external isAccount(msg.sender) {
+    require(
+      targetNoticePeriods.length == bondedValueDecrements.length &&
+      targetAvailabilityTimes.length == notifiedValueDecrements.length
+    );
+
+    Account storage account = accounts[msg.sender];
+
+    uint256 idx;
+    uint256 noticePeriod;
+    uint256 availabilityTime;
+    uint256 decrement;
+    for (idx = 0; idx < targetNoticePeriods.length; idx++) {
+      noticePeriod = targetNoticePeriods[idx];
+      Deposit storage bonded = account.deposits.bonded[noticePeriod];
+      decrement = bondedValueDecrements[idx];
+      require(bonded.value >= decrement);
+      bonded.value = uint128(uint256(bonded.value).sub(decrement));
+      account.balances.slashed = account.balances.slashed.sub(decrement);
+    }
+
+    for (idx = 0; idx < targetAvailabilityTimes.length; idx++) {
+      availabilityTime = targetAvailabilityTimes[idx];
+      Deposit storage notified = account.deposits.notified[availabilityTime];
+      decrement = notifiedValueDecrements[idx];
+      require(notified.value >= decrement);
+      notified.value = uint128(uint256(notified.value).sub(decrement));
+      account.balances.slashed = account.balances.slashed.sub(decrement);
+    }
   }
 
   /**

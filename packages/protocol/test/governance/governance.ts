@@ -960,6 +960,70 @@ contract('Governance', (accounts: string[]) => {
     })
   })
 
+  describe('#balanceUpvote', () => {
+    const weight = new BigNumber(5)
+    const proposalId = new BigNumber(1)
+    const slasher = accounts[0]
+    const voter = accounts[1]
+
+    beforeEach(async () => {
+      await mockBondedDeposits.setWeight(voter, weight)
+      await governance.propose(
+        setRegistryTransaction.value,
+        setRegistryTransaction.destination,
+        setRegistryTransaction.data,
+        // @ts-ignore: TODO(mcortesi) fix typings for TransactionDetails
+        { value: minDeposit }
+      )
+    })
+
+    it('should revert when caller does not have slashing rights', async () => {
+      await assertRevert(governance.balanceVote(voter, weight, NULL_ADDRESS, NULL_ADDRESS))
+    })
+
+    it('should have no effect when voter has not voted', async () => {
+      await mockBondedDeposits.giveSlashingRights(slasher)
+      await governance.balanceVote(voter, weight, NULL_ADDRESS, NULL_ADDRESS)
+    })
+
+    it('should have no effect when weight has not changed', async () => {
+      await mockBondedDeposits.giveSlashingRights(slasher)
+      await governance.upvote(proposalId, NULL_ADDRESS, NULL_ADDRESS, { from: voter })
+      await governance.balanceUpvote(voter, weight, NULL_ADDRESS, NULL_ADDRESS)
+    })
+
+    describe('when voter has voted and weight has changed', () => {
+      const weightDelta = 3
+      const newWeight = weight.minus(weightDelta)
+
+      beforeEach(async () => {
+        await mockBondedDeposits.giveSlashingRights(slasher)
+        await governance.upvote(proposalId, NULL_ADDRESS, NULL_ADDRESS, { from: voter })
+        await mockBondedDeposits.setWeight(voter, newWeight)
+      })
+
+      it('should change upvotes by weight delta', async () => {
+        assert.equal(await governance.getUpvotes(proposalId), weight)
+        await governance.balanceUpvote(voter, weight, NULL_ADDRESS, NULL_ADDRESS)
+        assert.equal(await governance.getUpvotes(proposalId), newWeight)
+      })
+
+      it('should emit the ProposalUpvoted event with new weight', async () => {
+        const resp = await governance.balanceVote(voter, weight, NULL_ADDRESS, NULL_ADDRESS)
+        assert.equal(resp.logs.length, 1)
+        const log = resp.logs[0]
+        assertLogMatches2(log, {
+          event: 'ProposalUpvoted',
+          args: {
+            proposalId,
+            account: voter,
+            upvotes: newWeight,
+          },
+        })
+      })
+    })
+  })
+
   describe('#revokeUpvote()', () => {
     const weight = new BigNumber(10)
     const proposalId = new BigNumber(1)

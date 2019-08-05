@@ -478,6 +478,36 @@ contract Validators is IValidators, Ownable, ReentrancyGuard, Initializable, Usi
   }
 
   /**
+   * @notice Recasts a vote for a validator group with updated weight.
+   * @param account The validator to update the vote of.
+   * @param oldWeight The validator's outdated weight.
+   * @param lesser The group receiving fewer votes than `group`, or 0 if `group` has the
+   *   fewest votes of any validator group.
+   * @param greater The group receiving more votes than `group`, or 0 if `group` has the
+   *   most votes of any validator group.
+   * @dev Fails if caller is not a slasher.
+   */
+  function balanceVote(address account, uint256 oldWeight, address lesser, address greater)
+    external
+  {
+    require(isSlasher(msg.sender));
+    address group = voters[account];
+    uint256 weight = getAccountWeight(account);
+    if (!votes.contains(group) || oldWeight == weight) {
+      return;
+    }
+
+    uint256 upvotes = votes.getValue(group).sub(oldWeight).add(weight);
+    votes.update(
+      group,
+      upvotes,
+      lesser,
+      greater
+    );
+    emit ValidatorGroupVoteCast(account, group, weight);
+  }
+
+  /**
    * @notice Revokes an outstanding vote for a validator group.
    * @param lesser The group receiving fewer votes than the group for which the vote was revoked,
    *   or 0 if that group has the fewest votes of any validator group.

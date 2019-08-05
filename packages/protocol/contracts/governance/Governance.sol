@@ -442,7 +442,7 @@ contract Governance is IGovernance, Ownable, Initializable, UsingBondedDeposits,
       (voter.upvotedProposal == 0 || !queue.contains(voter.upvotedProposal)) &&
       weight > 0
     );
-    uint256 upvotes = queue.getValue(proposalId).add(uint256(weight));
+    uint256 upvotes = queue.getValue(proposalId).add(weight);
     queue.update(
       proposalId,
       upvotes,
@@ -452,6 +452,27 @@ contract Governance is IGovernance, Ownable, Initializable, UsingBondedDeposits,
     voter.upvotedProposal = proposalId;
     emit ProposalUpvoted(proposalId, account, weight);
     return true;
+  }
+
+  function balanceUpvote(address account, uint256 oldWeight, uint256 lesser, uint256 greater)
+    external
+  {
+    require(isSlasher(msg.sender));
+    Voter storage voter = voters[account];
+    uint256 proposalId = voter.upvotedProposal;
+    uint256 weight = getAccountWeight(account);
+    if (!isQueued(proposalId) || weight == oldWeight) {
+      return;
+    }
+
+    uint256 upvotes = queue.getValue(proposalId).sub(oldWeight).add(weight);
+    queue.update(
+      proposalId,
+      upvotes,
+      lesser,
+      greater
+    );
+    emit ProposalUpvoted(proposalId, account, weight);
   }
 
   /**

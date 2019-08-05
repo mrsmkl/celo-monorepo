@@ -1,0 +1,10 @@
+diff a/packages/protocol/package.json b/packages/protocol/package.json	(rejected hunks)
+@@ -7,7 +7,7 @@
+     "lint": "./scripts/bash/lint.sh",
+     "lint-checks": "yarn run lint",
+     "compile-typescript": "rm -f migrations/*.js* && tsc -b",
+-    "clean": "rm -rf ../types/typechain && rm -rf build/* && rm -rf migrations/*.js* && rm -rf test/**/*.js* && rm -f lib/*.js*",
++    "clean": "rm -rf ../types/typechain && rm -rf build/**/* && rm -rf migrations/*.js* && rm -rf test/**/*.js* && rm -f lib/*.js*",
+     "pretest": "yarn run contract-types && yarn run compile-typescript",
+     "test": "node runTests.js",
+     "test:local": "yarn run test --local",

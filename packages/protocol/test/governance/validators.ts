@@ -1187,6 +1187,63 @@ contract('Validators', (accounts: string[]) => {
     })
   })
 
+  describe('#balanceVote', () => {
+    const weight = new BigNumber(5)
+    const slasher = accounts[0]
+    const voter = accounts[1]
+    const validator = accounts[2]
+    const group = accounts[3]
+    beforeEach(async () => {
+      await registerValidatorGroupWithMembers(group, [validator])
+      await mockBondedDeposits.setWeight(voter, weight)
+    })
+
+    it('should revert when caller does not have slashing rights', async () => {
+      await assertRevert(validators.balanceVote(voter, weight, NULL_ADDRESS, NULL_ADDRESS))
+    })
+
+    it('should have no effect when voter has not voted', async () => {
+      await mockBondedDeposits.giveSlashingRights(slasher)
+      await validators.balanceVote(voter, weight, NULL_ADDRESS, NULL_ADDRESS)
+    })
+
+    it('should have no effect when weight has not changed', async () => {
+      await mockBondedDeposits.giveSlashingRights(slasher)
+      await validators.vote(group, NULL_ADDRESS, NULL_ADDRESS, { from: voter })
+      await validators.balanceVote(voter, weight, NULL_ADDRESS, NULL_ADDRESS)
+    })
+
+    describe('when voter has voted and weight has changed', () => {
+      const weightDelta = 3
+      const newWeight = weight.minus(weightDelta)
+
+      beforeEach(async () => {
+        await mockBondedDeposits.giveSlashingRights(slasher)
+        await validators.vote(group, NULL_ADDRESS, NULL_ADDRESS, { from: voter })
+        await mockBondedDeposits.setWeight(voter, newWeight)
+      })
+
+      it('should change votes to new weight', async () => {
+        await validators.balanceVote(voter, weight, NULL_ADDRESS, NULL_ADDRESS)
+        assert.equal(await validators.getVotesReceived(group), newWeight)
+      })
+
+      it('should emit the ValidatorGroupVoteCast event with new weight', async () => {
+        const resp = await validators.balanceVote(voter, weight, NULL_ADDRESS, NULL_ADDRESS)
+        assert.equal(resp.logs.length, 1)
+        const log = resp.logs[0]
+        assertContainSubset(log, {
+          event: 'ValidatorGroupVoteCast',
+          args: {
+            account: voter,
+            group,
+            weight: newWeight,
+          },
+        })
+      })
+    })
+  })
+
   describe('#revokeVote', () => {
     const weight = 5
     const voter = accounts[0]

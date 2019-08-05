@@ -1,0 +1,30 @@
+diff a/packages/protocol/contracts/governance/BondedDeposits.sol b/packages/protocol/contracts/governance/BondedDeposits.sol	(rejected hunks)
+@@ -672,7 +683,7 @@ contract BondedDeposits is IBondedDeposits, ReentrancyGuard, Initializable, Usin
+    * @param enforcer The address of the rewards recipient.
+    */
+   function slash(address validator, uint256 amount, address enforcer) external {
+-    require(isSlasher[msg.sender] && isValidating(validator));
++    require(isSlasher(msg.sender) && isValidating(validator));
+ 
+     address account = getAccountFromValidator(validator);
+     Balances storage balances = accounts[account].balances;
+@@ -694,7 +705,7 @@ contract BondedDeposits is IBondedDeposits, ReentrancyGuard, Initializable, Usin
+    * @dev Fails if the `accountOrDelegate` is a non-validating delegate.
+    * @return The associated account.
+    */
+-  function getAccountFromValidator(address accountOrDelegate) external view returns (address) {
++  function getAccountFromValidator(address accountOrDelegate) public view returns (address) {
+     address delegatingAccount = delegations[accountOrDelegate];
+     if (delegatingAccount != address(0)) {
+       require(accounts[delegatingAccount].validating.delegate == accountOrDelegate);
+@@ -704,6 +715,10 @@ contract BondedDeposits is IBondedDeposits, ReentrancyGuard, Initializable, Usin
+     }
+   }
+ 
++  function isSlasher(address addr) public view returns (bool) {
++    return slashers[addr];
++  }
++
+   /**
+    * @notice Returns the account associated with the provided account or rewards delegate.
+    * @param accountOrDelegate The address of the account or rewards delegate.

@@ -1,0 +1,783 @@
+From 2c5c77d3800654047bb9ac39850c22a3162aafa7 Mon Sep 17 00:00:00 2001
+From: Yorke Rhodes <yorkerhodesiv@gmail.com>
+Date: Mon, 17 Jun 2019 14:55:26 -0700
+Subject: [PATCH 1/5] Apply slash with constant weight modifier
+
+---
+ .../contracts/governance/BondedDeposits.sol   | 69 ++++++++++++++++---
+ 1 file changed, 59 insertions(+), 10 deletions(-)
+
+diff --git a/packages/protocol/contracts/governance/BondedDeposits.sol b/packages/protocol/contracts/governance/BondedDeposits.sol
+index aa2c0a8df1..7c3d23f732 100644
+--- a/packages/protocol/contracts/governance/BondedDeposits.sol
++++ b/packages/protocol/contracts/governance/BondedDeposits.sol
+@@ -65,10 +65,16 @@ contract BondedDeposits is IBondedDeposits, ReentrancyGuard, Initializable, Usin
+     address delegate;
+   }
+ 
++  struct Balances {
++    uint256 staked;
++    uint256 slashed;
++  }
++
+   struct Account {
+     bool exists;
+     // The weight of the account in validator elections, governance, and block rewards.
+     uint256 weight;
++    Balances balances;
+     Voting voting;
+     Rewards rewards;
+     Deposits deposits;
+@@ -84,6 +90,10 @@ contract BondedDeposits is IBondedDeposits, ReentrancyGuard, Initializable, Usin
+   // Maps a block number to the cumulative reward for an account with weight 1 since genesis.
+   mapping(uint256 => FractionUtil.Fraction) public cumulativeRewardWeights;
+ 
++  FractionUtil.Fraction public slashRewardProportion;
++  FractionUtil.Fraction public slashWeightMultiplier;
++  mapping(address => bool) public isSlasher;
++
+   event MaxNoticePeriodSet(
+     uint256 maxNoticePeriod
+   );
+@@ -172,6 +182,7 @@ contract BondedDeposits is IBondedDeposits, ReentrancyGuard, Initializable, Usin
+     _transferOwnership(msg.sender);
+     setRegistry(registryAddress);
+     maxNoticePeriod = _maxNoticePeriod;
++    // TODO(yorke): initialize isSlasher
+   }
+ 
+   /**
+@@ -381,6 +392,7 @@ contract BondedDeposits is IBondedDeposits, ReentrancyGuard, Initializable, Usin
+     Account storage account = accounts[msg.sender];
+     Deposit storage bonded = account.deposits.bonded[noticePeriod];
+     updateBondedDeposit(account, uint256(bonded.value).add(msg.value), noticePeriod);
++    account.balances.staked = account.balances.staked.add(msg.value);
+     emit DepositBonded(msg.sender, msg.value, noticePeriod);
+     return account.weight;
+   }
+@@ -469,7 +481,9 @@ contract BondedDeposits is IBondedDeposits, ReentrancyGuard, Initializable, Usin
+     Deposit storage notified = account.deposits.notified[availabilityTime];
+     uint256 value = notified.value;
+     require(value > 0);
++    require(account.balances.staked.sub(account.balances.slashed).sub(value) >= 0);
+     updateNotifiedDeposit(account, 0, availabilityTime);
++    account.balances.staked = account.balances.staked.sub(value);
+ 
+     IERC20Token goldToken = IERC20Token(registry.getAddressFor(GOLD_TOKEN_REGISTRY_ID));
+     require(goldToken.transfer(msg.sender, value));
+@@ -528,6 +542,11 @@ contract BondedDeposits is IBondedDeposits, ReentrancyGuard, Initializable, Usin
+     return account.rewards.lastRedeemed;
+   }
+ 
++  function isValidating(address validator) public view returns (bool) {
++    IValidators validators = IValidators(registry.getAddressFor(VALIDATORS_REGISTRY_ID));
++    return validators.isValidating(validator);
++  }
++
+   /**
+    * @notice Returns the notice periods of all bonded deposits for an account.
+    * @param _account The address of the account.
+@@ -603,6 +622,46 @@ contract BondedDeposits is IBondedDeposits, ReentrancyGuard, Initializable, Usin
+   }
+ 
+   /**
++   * @notice Returns the weight of a specified account.
++   * @param _account The address of the account.
++   * @return The weight of the specified account.
++   */
++  function getAccountWeight(address _account) external view returns (uint256) {
++    Account storage account = accounts[_account];
++    uint256 slashWeight = slashWeightMultiplier.mul(account.balances.slashed);
++    return account.weight.sub(slashWeight);
++  }
++
++  /**
++   * @notice Slashes the specified validator's stake.
++   * @param validator The address of the misbehaving validator.
++   * @param amount The amount of stake to slash.
++   * @param enforcer The address of the rewards recipient.
++   */
++  function slash(address validator, uint256 amount, address enforcer) external {
++    require(isSlasher[msg.sender] && isValidating(validator));
++
++    address account = getAccountFromValidator(validator);
++    Balances storage balances = accounts[account].balances;
++    balances.slashed = balances.slashed.add(amount);
++
++    uint256 slashWeight = slashWeightMultiplier.mul(amount);
++    totalWeight = totalWeight.sub(slashWeight);
++
++    uint256 reward = slashRewardProportion.mul(amount);
++    uint256 reserve = amount.sub(reward);
++    IERC20Token goldToken = IERC20Token(registry.getAddressFor(GOLD_TOKEN_REGISTRY_ID));
++    require(goldToken.transfer(registry.getAddressFor(RESERVE_REGISTRY_ID), reserve));
++    require(goldToken.transfer(enforcer, reward));
++  }
++
++  function updateAccountWeight(address _account) internal {
++    
++    Account storage account = accounts[_account];
++    // account.weight = account.weight.sub()
++  }
++
++   /**
+    * @notice Returns the account associated with the provided account or validating delegate.
+    * @param accountOrDelegate The address of the account or validating delegate.
+    * @dev Fails if the `accountOrDelegate` is a non-validating delegate.
+@@ -618,16 +677,6 @@ contract BondedDeposits is IBondedDeposits, ReentrancyGuard, Initializable, Usin
+     }
+   }
+ 
+-  /**
+-   * @notice Returns the weight of a specified account.
+-   * @param _account The address of the account.
+-   * @return The weight of the specified account.
+-   */
+-  function getAccountWeight(address _account) external view returns (uint256) {
+-    Account storage account = accounts[_account];
+-    return account.weight;
+-  }
+-
+   /**
+    * @notice Returns the account associated with the provided account or rewards delegate.
+    * @param accountOrDelegate The address of the account or rewards delegate.
+
+From 2392a00b7296dd9656eeaf8524cf12e82c931c1a Mon Sep 17 00:00:00 2001
+From: Yorke Rhodes <yorkerhodesiv@gmail.com>
+Date: Mon, 17 Jun 2019 15:36:06 -0700
+Subject: [PATCH 2/5] Implement bond rebalancing
+
+---
+ .../protocol/contracts/common/Slasher.sol     | 34 ++++++++++++++++
+ .../contracts/governance/BondedDeposits.sol   | 39 ++++++++++++++++---
+ 2 files changed, 67 insertions(+), 6 deletions(-)
+ create mode 100644 packages/protocol/contracts/common/Slasher.sol
+
+diff --git a/packages/protocol/contracts/common/Slasher.sol b/packages/protocol/contracts/common/Slasher.sol
+new file mode 100644
+index 0000000000..0116095481
+--- /dev/null
++++ b/packages/protocol/contracts/common/Slasher.sol
+@@ -0,0 +1,34 @@
++pragma solidity ^0.5.8;
++
++import "./UsingRegistry.sol";
++
++import "../governance/interfaces/IBondedDeposits.sol";
++import "../governance/interfaces/IGovernance.sol";
++import "../governance/interfaces/IValidators.sol";
++
++contract Slasher is UsingRegistry {
++  function evalSlashCondition(address account) public view returns (bool);
++  function getSlashAmount(address account) public view returns (uint256);
++  function cleanupSlashCondition(address account) private; 
++
++  function claimSlashCondition(address account) public {
++    require(evalSlashCondition(account));
++    
++    IBondedDeposits bondedDeposits = IBondedDeposits(
++      registry.getAddressFor(BONDED_DEPOSITS_REGISTRY_ID)
++    );
++    bondedDeposits.slash(account, getSlashAmount(account), msg.sender);
++
++    IGovernance governance = IGovernance(
++      registry.getAddressFor(GOVERNANCE_REGISTRY_ID)
++    );
++    // require(governance.updateProposalQueue(account));
++
++    IValidators validators = IValidators(
++      registry.getAddressFor(VALIDATORS_REGISTRY_ID)
++    );
++    // require(validators.updateGroupVotes(account));
++    
++    cleanupSlashCondition(account);
++  }
++}
+\ No newline at end of file
+diff --git a/packages/protocol/contracts/governance/BondedDeposits.sol b/packages/protocol/contracts/governance/BondedDeposits.sol
+index 7c3d23f732..7389201019 100644
+--- a/packages/protocol/contracts/governance/BondedDeposits.sol
++++ b/packages/protocol/contracts/governance/BondedDeposits.sol
+@@ -491,6 +491,39 @@ contract BondedDeposits is IBondedDeposits, ReentrancyGuard, Initializable, Usin
+     return account.weight;
+   }
+ 
++  function rebalanceBondsWithSlashes(
++    uint256[] targetNoticePeriods,
++    uint256[] bondedValueDecrements,
++    uint256[] targetAvailabilityTimes,
++    uint256[] notifiedValueDecrements
++  ) external isAccount(msg.sender) {
++    require(
++      targetNoticePeriods.length == bondedValueDecrements.length && 
++      targetAvailabilityTimes.length == notifiedValueDecrements.length
++    );
++
++    Account storage account = accounts[msg.sender];
++
++    uint256 idx;
++    for (idx = 0; idx < targetNoticePeriods.length; idx++) {
++      uint256 noticePeriod = targetNoticePeriods[idx];
++      Deposit storage bonded = account.deposits.bonded[noticePeriod];
++      uint256 decrement = bondedValueDecrements[idx];
++      require(bonded.value >= decrement);
++      bonded.value = bonded.value.sub(decrement);
++      account.balances.slashed = account.balances.slashed.sub(decrement);
++    }
++
++    for (idx = 0; idx < targetAvailabilityTimes.length; idx++) {
++      uint256 availabilityTime = targetAvailabilityTimes[idx];
++      Deposit storage notified = account.deposits.notified[availabilityTime];
++      uint256 decrement = notifiedValueDecrements[idx];
++      require(notified.value >= decrement);
++      notified.value = notified.value.sub(decrement);
++      account.balances.slashed = account.balances.slashed.sub(decrement);
++    }
++  }
++
+   /**
+    * @notice Increases the notice period for all or part of a bonded deposit.
+    * @param value The amount of the bonded deposit to increase the notice period for.
+@@ -655,12 +688,6 @@ contract BondedDeposits is IBondedDeposits, ReentrancyGuard, Initializable, Usin
+     require(goldToken.transfer(enforcer, reward));
+   }
+ 
+-  function updateAccountWeight(address _account) internal {
+-    
+-    Account storage account = accounts[_account];
+-    // account.weight = account.weight.sub()
+-  }
+-
+    /**
+    * @notice Returns the account associated with the provided account or validating delegate.
+    * @param accountOrDelegate The address of the account or validating delegate.
+
+From d755aeea74516b94b597519504da52a8de80d353 Mon Sep 17 00:00:00 2001
+From: Yorke Rhodes <yorkerhodesiv@gmail.com>
+Date: Mon, 17 Jun 2019 16:52:55 -0700
+Subject: [PATCH 3/5] Rebalance sorted lists
+
+---
+ .../protocol/contracts/common/Slasher.sol     | 26 +++++++-----
+ .../contracts/governance/BondedDeposits.sol   | 41 +++++++++++++------
+ .../contracts/governance/Governance.sol       | 23 ++++++++++-
+ .../governance/UsingBondedDeposits.sol        |  9 ++++
+ .../contracts/governance/Validators.sol       | 30 ++++++++++++++
+ .../governance/interfaces/IBondedDeposits.sol |  2 +
+ .../governance/interfaces/IGovernance.sol     |  1 +
+ .../governance/interfaces/IValidators.sol     |  1 +
+ packages/protocol/package.json                |  2 +-
+ 9 files changed, 110 insertions(+), 25 deletions(-)
+
+diff --git a/packages/protocol/contracts/common/Slasher.sol b/packages/protocol/contracts/common/Slasher.sol
+index 0116095481..7cad45393f 100644
+--- a/packages/protocol/contracts/common/Slasher.sol
++++ b/packages/protocol/contracts/common/Slasher.sol
+@@ -11,24 +11,30 @@ contract Slasher is UsingRegistry {
+   function getSlashAmount(address account) public view returns (uint256);
+   function cleanupSlashCondition(address account) private; 
+ 
+-  function claimSlashCondition(address account) public {
++  function claimSlashCondition(
++    address account,
++    uint256 lesserProposalId,
++    uint256 greaterProposalId,
++    address lesserValidatorGroup,
++    address greaterValidatorGroup
++  ) public {
+     require(evalSlashCondition(account));
+     
+     IBondedDeposits bondedDeposits = IBondedDeposits(
+       registry.getAddressFor(BONDED_DEPOSITS_REGISTRY_ID)
+     );
++    uint256 oldWeight = bondedDeposits.getAccountWeight(account);
++    require(oldWeight > 0); // TODO: evaluate effects
+     bondedDeposits.slash(account, getSlashAmount(account), msg.sender);
+ 
+-    IGovernance governance = IGovernance(
+-      registry.getAddressFor(GOVERNANCE_REGISTRY_ID)
+-    );
+-    // require(governance.updateProposalQueue(account));
++    IGovernance governance = IGovernance(registry.getAddressFor(GOVERNANCE_REGISTRY_ID));
++    governance.balanceUpvote(account, oldWeight, lesserProposalId, greaterProposalId);
++    // TOOD(yorke): investigate changing referendum proposal tallies
++    // requires modifying how history of VoteRecords is kept
+ 
+-    IValidators validators = IValidators(
+-      registry.getAddressFor(VALIDATORS_REGISTRY_ID)
+-    );
+-    // require(validators.updateGroupVotes(account));
++    IValidators validators = IValidators(registry.getAddressFor(VALIDATORS_REGISTRY_ID));
++    validators.balanceVote(account, oldWeight, lesserValidatorGroup, greaterValidatorGroup);
+     
+     cleanupSlashCondition(account);
+   }
+-}
+\ No newline at end of file
++}
+diff --git a/packages/protocol/contracts/governance/BondedDeposits.sol b/packages/protocol/contracts/governance/BondedDeposits.sol
+index 7389201019..deea0721b0 100644
+--- a/packages/protocol/contracts/governance/BondedDeposits.sol
++++ b/packages/protocol/contracts/governance/BondedDeposits.sol
+@@ -92,7 +92,7 @@ contract BondedDeposits is IBondedDeposits, ReentrancyGuard, Initializable, Usin
+ 
+   FractionUtil.Fraction public slashRewardProportion;
+   FractionUtil.Fraction public slashWeightMultiplier;
+-  mapping(address => bool) public isSlasher;
++  mapping(address => bool) public slashers;
+ 
+   event MaxNoticePeriodSet(
+     uint256 maxNoticePeriod
+@@ -491,11 +491,19 @@ contract BondedDeposits is IBondedDeposits, ReentrancyGuard, Initializable, Usin
+     return account.weight;
+   }
+ 
++/**
++ * @notice Allocates slashed balance to selected bonds. 
++ * @param targetNoticePeriods list of notice periods which key bonds
++ * @param bondedValueDecrements list of values to decrement targetNoticePeriods with
++ * @param targetAvailabilityTimes list of availability times which key notified bonds
++ * @param notifiedValueDecrements list of values to decrement targetNoticePeriods with
++ * 
++*/
+   function rebalanceBondsWithSlashes(
+-    uint256[] targetNoticePeriods,
+-    uint256[] bondedValueDecrements,
+-    uint256[] targetAvailabilityTimes,
+-    uint256[] notifiedValueDecrements
++    uint256[] calldata targetNoticePeriods,
++    uint256[] calldata bondedValueDecrements,
++    uint256[] calldata targetAvailabilityTimes,
++    uint256[] calldata notifiedValueDecrements
+   ) external isAccount(msg.sender) {
+     require(
+       targetNoticePeriods.length == bondedValueDecrements.length && 
+@@ -505,21 +513,24 @@ contract BondedDeposits is IBondedDeposits, ReentrancyGuard, Initializable, Usin
+     Account storage account = accounts[msg.sender];
+ 
+     uint256 idx;
++    uint256 noticePeriod;
++    uint256 availabilityTime;
++    uint256 decrement;
+     for (idx = 0; idx < targetNoticePeriods.length; idx++) {
+-      uint256 noticePeriod = targetNoticePeriods[idx];
++      noticePeriod = targetNoticePeriods[idx];
+       Deposit storage bonded = account.deposits.bonded[noticePeriod];
+-      uint256 decrement = bondedValueDecrements[idx];
++      decrement = bondedValueDecrements[idx];
+       require(bonded.value >= decrement);
+-      bonded.value = bonded.value.sub(decrement);
++      bonded.value = uint128(uint256(bonded.value).sub(decrement));
+       account.balances.slashed = account.balances.slashed.sub(decrement);
+     }
+ 
+     for (idx = 0; idx < targetAvailabilityTimes.length; idx++) {
+-      uint256 availabilityTime = targetAvailabilityTimes[idx];
++      availabilityTime = targetAvailabilityTimes[idx];
+       Deposit storage notified = account.deposits.notified[availabilityTime];
+-      uint256 decrement = notifiedValueDecrements[idx];
++      decrement = notifiedValueDecrements[idx];
+       require(notified.value >= decrement);
+-      notified.value = notified.value.sub(decrement);
++      notified.value = uint128(uint256(notified.value).sub(decrement));
+       account.balances.slashed = account.balances.slashed.sub(decrement);
+     }
+   }
+@@ -672,7 +683,7 @@ contract BondedDeposits is IBondedDeposits, ReentrancyGuard, Initializable, Usin
+    * @param enforcer The address of the rewards recipient.
+    */
+   function slash(address validator, uint256 amount, address enforcer) external {
+-    require(isSlasher[msg.sender] && isValidating(validator));
++    require(isSlasher(msg.sender) && isValidating(validator));
+ 
+     address account = getAccountFromValidator(validator);
+     Balances storage balances = accounts[account].balances;
+@@ -694,7 +705,7 @@ contract BondedDeposits is IBondedDeposits, ReentrancyGuard, Initializable, Usin
+    * @dev Fails if the `accountOrDelegate` is a non-validating delegate.
+    * @return The associated account.
+    */
+-  function getAccountFromValidator(address accountOrDelegate) external view returns (address) {
++  function getAccountFromValidator(address accountOrDelegate) public view returns (address) {
+     address delegatingAccount = delegations[accountOrDelegate];
+     if (delegatingAccount != address(0)) {
+       require(accounts[delegatingAccount].validating.delegate == accountOrDelegate);
+@@ -704,6 +715,10 @@ contract BondedDeposits is IBondedDeposits, ReentrancyGuard, Initializable, Usin
+     }
+   }
+ 
++  function isSlasher(address addr) public view returns (bool) {
++    return slashers[addr];
++  }
++
+   /**
+    * @notice Returns the account associated with the provided account or rewards delegate.
+    * @param accountOrDelegate The address of the account or rewards delegate.
+diff --git a/packages/protocol/contracts/governance/Governance.sol b/packages/protocol/contracts/governance/Governance.sol
+index d5b7ff68f0..1664a69e98 100644
+--- a/packages/protocol/contracts/governance/Governance.sol
++++ b/packages/protocol/contracts/governance/Governance.sol
+@@ -431,7 +431,7 @@ contract Governance is IGovernance, Ownable, Initializable, UsingBondedDeposits,
+       (voter.upvotedProposal == 0 || !queue.contains(voter.upvotedProposal)) &&
+       weight > 0
+     );
+-    uint256 upvotes = queue.getValue(proposalId).add(uint256(weight));
++    uint256 upvotes = queue.getValue(proposalId).add(weight);
+     queue.update(
+       proposalId,
+       upvotes,
+@@ -443,6 +443,27 @@ contract Governance is IGovernance, Ownable, Initializable, UsingBondedDeposits,
+     return true;
+   }
+ 
++  function balanceUpvote(address account, uint256 oldWeight, uint256 lesser, uint256 greater) 
++    external 
++  {
++    require(isSlasher(msg.sender));
++    Voter storage voter = voters[account];
++    uint256 proposalId = voter.upvotedProposal;
++    if (!isQueued(proposalId)) {
++      return;
++    }
++
++    uint256 weight = getAccountWeight(account);
++    uint256 upvotes = queue.getValue(proposalId).sub(oldWeight).add(weight);
++    queue.update(
++      proposalId,
++      upvotes,
++      lesser,
++      greater
++    );
++    emit ProposalUpvoted(proposalId, account, weight);
++  }
++
+   /**
+    * @notice Revokes an upvote on a queued proposal.
+    * @param lesser The ID of the proposal that will be just behind the previously upvoted proposal
+diff --git a/packages/protocol/contracts/governance/UsingBondedDeposits.sol b/packages/protocol/contracts/governance/UsingBondedDeposits.sol
+index 831a29a6d0..c9849bd60d 100644
+--- a/packages/protocol/contracts/governance/UsingBondedDeposits.sol
++++ b/packages/protocol/contracts/governance/UsingBondedDeposits.sol
+@@ -58,6 +58,15 @@ contract UsingBondedDeposits is UsingRegistry {
+     return getBondedDeposits().getAccountWeight(account);
+   }
+ 
++  /**
++   * @notice Returns whether a contract has slashing rights.
++   * @param contractAddr The address of the contract.
++   * @return `true` if contract has slashing rights, `false` otherwise.
++   */
++  function isSlasher(address contractAddr) internal view returns (bool) {
++    return getBondedDeposits().isSlasher(contractAddr);
++  }
++
+   /**
+    * @notice Returns the bonded deposit value for particular account and notice period.
+    * @param account The address of the account.
+diff --git a/packages/protocol/contracts/governance/Validators.sol b/packages/protocol/contracts/governance/Validators.sol
+index e2b9552341..5b6ea12fe4 100644
+--- a/packages/protocol/contracts/governance/Validators.sol
++++ b/packages/protocol/contracts/governance/Validators.sol
+@@ -477,6 +477,36 @@ contract Validators is IValidators, Ownable, ReentrancyGuard, Initializable, Usi
+     return true;
+   }
+ 
++  /**
++   * @notice Recasts a vote for a validator group with updated weight.
++   * @param account The validator to update the vote of.
++   * @param oldWeight The validator's outdated weight.
++   * @param lesser The group receiving fewer votes than `group`, or 0 if `group` has the
++   *   fewest votes of any validator group.
++   * @param greater The group receiving more votes than `group`, or 0 if `group` has the
++   *   most votes of any validator group.
++   * @dev Fails if caller is not a slasher.
++   */
++  function balanceVote(address account, uint256 oldWeight, address lesser, address greater) 
++    external 
++  {
++    require(isSlasher(msg.sender));
++    address group = voters[account];
++    if (!votes.contains(group)) {
++      return;
++    }
++
++    uint256 weight = getAccountWeight(account);
++    uint256 upvotes = votes.getValue(group).sub(oldWeight).add(weight);
++    votes.update(
++      group,
++      upvotes,
++      lesser,
++      greater
++    );
++    emit ValidatorGroupVoteCast(account, group, weight);
++  }
++
+   /**
+    * @notice Revokes an outstanding vote for a validator group.
+    * @param lesser The group receiving fewer votes than the group for which the vote was revoked,
+diff --git a/packages/protocol/contracts/governance/interfaces/IBondedDeposits.sol b/packages/protocol/contracts/governance/interfaces/IBondedDeposits.sol
+index 7ca20dfb8d..9cd89bff22 100644
+--- a/packages/protocol/contracts/governance/interfaces/IBondedDeposits.sol
++++ b/packages/protocol/contracts/governance/interfaces/IBondedDeposits.sol
+@@ -23,4 +23,6 @@ interface IBondedDeposits {
+   function getValidatorFromAccount(address) external view returns (address);
+   function getAccountFromVoter(address) external view returns (address);
+   function getAccountFromValidator(address) external view returns (address);
++  function slash(address, uint256, address) external;
++  function isSlasher(address) external view returns (bool);
+ }
+diff --git a/packages/protocol/contracts/governance/interfaces/IGovernance.sol b/packages/protocol/contracts/governance/interfaces/IGovernance.sol
+index fc5c1de23f..be0437d21d 100644
+--- a/packages/protocol/contracts/governance/interfaces/IGovernance.sol
++++ b/packages/protocol/contracts/governance/interfaces/IGovernance.sol
+@@ -43,4 +43,5 @@ interface IGovernance {
+   function isVoting(address) external view returns (bool);
+   function isQueued(uint256) external view returns (bool);
+   function isProposalPassing(uint256) external view returns (bool);
++  function balanceUpvote(address, uint256, uint256, uint256) external;
+ }
+diff --git a/packages/protocol/contracts/governance/interfaces/IValidators.sol b/packages/protocol/contracts/governance/interfaces/IValidators.sol
+index fbe5a3847a..b8cc608966 100644
+--- a/packages/protocol/contracts/governance/interfaces/IValidators.sol
++++ b/packages/protocol/contracts/governance/interfaces/IValidators.sol
+@@ -5,4 +5,5 @@ interface IValidators {
+   function isVoting(address) external view returns (bool);
+   function isValidating(address) external view returns (bool);
+   function getValidators() external view returns (address[] memory);
++  function balanceVote(address, uint256, address, address) external;
+ }
+diff --git a/packages/protocol/package.json b/packages/protocol/package.json
+index c916a221d5..49757318b8 100644
+--- a/packages/protocol/package.json
++++ b/packages/protocol/package.json
+@@ -7,7 +7,7 @@
+     "lint": "./scripts/bash/lint.sh",
+     "lint-checks": "yarn run lint",
+     "compile-typescript": "rm -f migrations/*.js* && tsc -b",
+-    "clean": "rm -rf ../types/typechain && rm -rf build/* && rm -rf migrations/*.js* && rm -rf test/**/*.js* && rm -f lib/*.js*",
++    "clean": "rm -rf ../types/typechain && rm -rf build/**/* && rm -rf migrations/*.js* && rm -rf test/**/*.js* && rm -f lib/*.js*",
+     "pretest": "yarn run contract-types && yarn run compile-typescript",
+     "test": "node runTests.js",
+     "test:local": "yarn run test --local",
+
+From 9828bba182bd80268224f540574165f07c7b3bdb Mon Sep 17 00:00:00 2001
+From: Yorke Rhodes <yorkerhodesiv@gmail.com>
+Date: Thu, 20 Jun 2019 16:40:50 -0700
+Subject: [PATCH 4/5] Add validators balanceVote tests
+
+---
+ .../contracts/governance/Validators.sol       |  4 +-
+ .../governance/test/MockBondedDeposits.sol    | 10 ++++
+ .../protocol/test/governance/validators.ts    | 57 +++++++++++++++++++
+ 3 files changed, 69 insertions(+), 2 deletions(-)
+
+diff --git a/packages/protocol/contracts/governance/Validators.sol b/packages/protocol/contracts/governance/Validators.sol
+index 5b6ea12fe4..b9b801ac16 100644
+--- a/packages/protocol/contracts/governance/Validators.sol
++++ b/packages/protocol/contracts/governance/Validators.sol
+@@ -492,11 +492,11 @@ contract Validators is IValidators, Ownable, ReentrancyGuard, Initializable, Usi
+   {
+     require(isSlasher(msg.sender));
+     address group = voters[account];
+-    if (!votes.contains(group)) {
++    uint256 weight = getAccountWeight(account);
++    if (!votes.contains(group) || oldWeight == weight) {
+       return;
+     }
+ 
+-    uint256 weight = getAccountWeight(account);
+     uint256 upvotes = votes.getValue(group).sub(oldWeight).add(weight);
+     votes.update(
+       group,
+diff --git a/packages/protocol/contracts/governance/test/MockBondedDeposits.sol b/packages/protocol/contracts/governance/test/MockBondedDeposits.sol
+index 5883baddd8..0d343b6966 100644
+--- a/packages/protocol/contracts/governance/test/MockBondedDeposits.sol
++++ b/packages/protocol/contracts/governance/test/MockBondedDeposits.sol
+@@ -14,6 +14,16 @@ contract MockBondedDeposits {
+   mapping(address => address) public voters;
+   // Maps an account address to their validating delegate.
+   mapping(address => address) public validators;
++  // Maps a delegating address to slashing rights.
++  mapping(address => bool) public slashers;
++
++  function isSlasher(address account) external view returns (bool) {
++    return slashers[account];
++  }
++
++  function giveSlashingRights(address account) external {
++    slashers[account] = true;
++  }
+ 
+   function setWeight(address account, uint256 weight) external {
+     weights[account] = weight;
+diff --git a/packages/protocol/test/governance/validators.ts b/packages/protocol/test/governance/validators.ts
+index 138783052f..ab0e5d4239 100644
+--- a/packages/protocol/test/governance/validators.ts
++++ b/packages/protocol/test/governance/validators.ts
+@@ -1187,6 +1187,63 @@ contract('Validators', (accounts: string[]) => {
+     })
+   })
+ 
++  describe('#balanceVote', () => {
++    const weight = new BigNumber(5)
++    const slasher = accounts[0]
++    const voter = accounts[1]
++    const validator = accounts[2]
++    const group = accounts[3]
++    beforeEach(async () => {
++      await registerValidatorGroupWithMembers(group, [validator])
++      await mockBondedDeposits.setWeight(voter, weight)
++    })
++
++    it('should revert when caller does not have slashing rights', async () => {
++      await assertRevert(validators.balanceVote(voter, weight, NULL_ADDRESS, NULL_ADDRESS))
++    })
++
++    it('should have no effect when voter has not voted', async () => {
++      await mockBondedDeposits.giveSlashingRights(slasher)
++      await validators.balanceVote(voter, weight, NULL_ADDRESS, NULL_ADDRESS)
++    })
++
++    it('should have no effect when weight has not changed', async () => {
++      await mockBondedDeposits.giveSlashingRights(slasher)
++      await validators.vote(group, NULL_ADDRESS, NULL_ADDRESS, { from: voter })
++      await validators.balanceVote(voter, weight, NULL_ADDRESS, NULL_ADDRESS)
++    })
++
++    describe('when voter has voted and weight has changed', () => {
++      const weightDelta = 3
++      const newWeight = weight.minus(weightDelta)
++
++      beforeEach(async () => {
++        await mockBondedDeposits.giveSlashingRights(slasher)
++        await validators.vote(group, NULL_ADDRESS, NULL_ADDRESS, { from: voter })
++        await mockBondedDeposits.setWeight(voter, newWeight)
++      })
++
++      it('should change votes to new weight', async () => {
++        await validators.balanceVote(voter, weight, NULL_ADDRESS, NULL_ADDRESS)
++        assert.equal(await validators.getVotesReceived(group), newWeight)
++      })
++
++      it('should emit the ValidatorGroupVoteCast event with new weight', async () => {
++        const resp = await validators.balanceVote(voter, weight, NULL_ADDRESS, NULL_ADDRESS)
++        assert.equal(resp.logs.length, 1)
++        const log = resp.logs[0]
++        assertContainSubset(log, {
++          event: 'ValidatorGroupVoteCast',
++          args: {
++            account: voter,
++            group,
++            weight: newWeight,
++          },
++        })
++      })
++    })
++  })
++
+   describe('#revokeVote', () => {
+     const weight = 5
+     const voter = accounts[0]
+
+From ad43ed898cb59ace19d0608b92687a825d6574e9 Mon Sep 17 00:00:00 2001
+From: Yorke Rhodes <yorkerhodesiv@gmail.com>
+Date: Thu, 20 Jun 2019 16:54:20 -0700
+Subject: [PATCH 5/5] Add governance balanceUpvote tests
+
+---
+ .../contracts/governance/Governance.sol       |  4 +-
+ .../protocol/test/governance/governance.ts    | 64 +++++++++++++++++++
+ 2 files changed, 66 insertions(+), 2 deletions(-)
+
+diff --git a/packages/protocol/contracts/governance/Governance.sol b/packages/protocol/contracts/governance/Governance.sol
+index 1664a69e98..266d0358c1 100644
+--- a/packages/protocol/contracts/governance/Governance.sol
++++ b/packages/protocol/contracts/governance/Governance.sol
+@@ -449,11 +449,11 @@ contract Governance is IGovernance, Ownable, Initializable, UsingBondedDeposits,
+     require(isSlasher(msg.sender));
+     Voter storage voter = voters[account];
+     uint256 proposalId = voter.upvotedProposal;
+-    if (!isQueued(proposalId)) {
++    uint256 weight = getAccountWeight(account);
++    if (!isQueued(proposalId) || weight == oldWeight) {
+       return;
+     }
+ 
+-    uint256 weight = getAccountWeight(account);
+     uint256 upvotes = queue.getValue(proposalId).sub(oldWeight).add(weight);
+     queue.update(
+       proposalId,
+diff --git a/packages/protocol/test/governance/governance.ts b/packages/protocol/test/governance/governance.ts
+index e2dfd607d2..1ca4e92fd1 100644
+--- a/packages/protocol/test/governance/governance.ts
++++ b/packages/protocol/test/governance/governance.ts
+@@ -791,6 +791,70 @@ contract('Governance', (accounts: string[]) => {
+     })
+   })
+ 
++  describe('#balanceUpvote', () => {
++    const weight = new BigNumber(5)
++    const proposalId = new BigNumber(1)
++    const slasher = accounts[0]
++    const voter = accounts[1]
++
++    beforeEach(async () => {
++      await mockBondedDeposits.setWeight(voter, weight)
++      await governance.propose(
++        setRegistryTransaction.value,
++        setRegistryTransaction.destination,
++        setRegistryTransaction.data,
++        // @ts-ignore: TODO(mcortesi) fix typings for TransactionDetails
++        { value: minDeposit }
++      )
++    })
++
++    it('should revert when caller does not have slashing rights', async () => {
++      await assertRevert(governance.balanceVote(voter, weight, NULL_ADDRESS, NULL_ADDRESS))
++    })
++
++    it('should have no effect when voter has not voted', async () => {
++      await mockBondedDeposits.giveSlashingRights(slasher)
++      await governance.balanceVote(voter, weight, NULL_ADDRESS, NULL_ADDRESS)
++    })
++
++    it('should have no effect when weight has not changed', async () => {
++      await mockBondedDeposits.giveSlashingRights(slasher)
++      await governance.upvote(proposalId, NULL_ADDRESS, NULL_ADDRESS, { from: voter })
++      await governance.balanceUpvote(voter, weight, NULL_ADDRESS, NULL_ADDRESS)
++    })
++
++    describe('when voter has voted and weight has changed', () => {
++      const weightDelta = 3
++      const newWeight = weight.minus(weightDelta)
++
++      beforeEach(async () => {
++        await mockBondedDeposits.giveSlashingRights(slasher)
++        await governance.upvote(proposalId, NULL_ADDRESS, NULL_ADDRESS, { from: voter })
++        await mockBondedDeposits.setWeight(voter, newWeight)
++      })
++
++      it('should change upvotes by weight delta', async () => {
++        assert.equal(await governance.getUpvotes(proposalId), weight)
++        await governance.balanceUpvote(voter, weight, NULL_ADDRESS, NULL_ADDRESS)
++        assert.equal(await governance.getUpvotes(proposalId), newWeight)
++      })
++
++      it('should emit the ProposalUpvoted event with new weight', async () => {
++        const resp = await governance.balanceVote(voter, weight, NULL_ADDRESS, NULL_ADDRESS)
++        assert.equal(resp.logs.length, 1)
++        const log = resp.logs[0]
++        assertLogMatches2(log, {
++          event: 'ProposalUpvoted',
++          args: {
++            proposalId,
++            account: voter,
++            upvotes: newWeight,
++          },
++        })
++      })
++    })
++  })
++
+   describe('#revokeUpvote()', () => {
+     const weight = new BigNumber(10)
+     const proposalId = new BigNumber(1)
