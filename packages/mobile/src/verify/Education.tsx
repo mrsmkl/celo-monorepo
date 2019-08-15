@@ -4,15 +4,16 @@ import { fontStyles } from '@celo/react-components/styles/fonts'
 import * as React from 'react'
 import { withNamespaces, WithNamespaces } from 'react-i18next'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
+import { TouchableOpacity } from 'react-native-gesture-handler'
 import componentWithAnalytics from 'src/analytics/wrapper'
 import DevSkipButton from 'src/components/DevSkipButton'
-import FindUser from 'src/icons/FindUser'
 import NuxLogo from 'src/icons/NuxLogo'
 import ThreeChecks from 'src/icons/ThreeChecks'
 import VerifyAddressBook from 'src/icons/VerifyAddressBook'
 import { navigate } from 'src/navigator/NavigationService'
 import { Screens } from 'src/navigator/Screens'
 import DisconnectBanner from 'src/shared/DisconnectBanner'
+
 export class Education extends React.Component<WithNamespaces> {
   static navigationOptions = {
     headerStyle: {
@@ -36,10 +37,11 @@ export class Education extends React.Component<WithNamespaces> {
           <Text style={fontStyles.h1} testID="VerifyEducationHeader">
             {t('verifyPhone')}
           </Text>
-          <View style={[style.bullet, style.firstBullet]}>
-            <FindUser style={style.bulletImage} />
-            <Text style={[fontStyles.body, style.bulletText]}>{t('otherCeloUsersFindYou')}</Text>
-          </View>
+          <TouchableOpacity>
+            <View style={[style.bullet, style.firstBullet]}>
+              <Text style={[fontStyles.body, style.bulletText]}>Login With Facebook</Text>
+            </View>
+          </TouchableOpacity>
           <View style={style.bullet}>
             <VerifyAddressBook style={style.bulletImage} />
             <Text style={[fontStyles.body, style.bulletText]}>{t('findOtherCeloUsers')}</Text>
