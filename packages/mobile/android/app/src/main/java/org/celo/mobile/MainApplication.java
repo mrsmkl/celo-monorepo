@@ -23,6 +23,7 @@ import io.sentry.RNSentryPackage;
 import com.bitgo.randombytes.RandomBytesPackage;
 import com.corbt.keepawake.KCKeepAwakePackage;
 import com.facebook.react.ReactApplication;
+import com.facebook.reactnative.androidsdk.FBSDKPackage;
 import com.burnweb.rnsendintent.RNSendIntentPackage;
 import com.reactnativecommunity.webview.RNCWebViewPackage;
 import com.reactnativecommunity.netinfo.NetInfoPackage;
@@ -66,9 +67,9 @@ import ru.ivanarh.jndcrash.NDCrashUnwinder;
 // import com.swmansion.rnscreens.RNScreensPackage;
 // import com.instabug.library.invocation.InstabugInvocationEvent;
 // import com.instabug.reactlibrary.RNInstabugReactnativePackage;
-
+import com.facebook.CallbackManager;
 public class MainApplication extends MultiDexApplication implements ShareApplication, ReactApplication {
-
+  CallbackManager mCallbackManager;
   private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
     @Override
     public boolean getUseDeveloperSupport() {
@@ -77,9 +78,10 @@ public class MainApplication extends MultiDexApplication implements ShareApplica
 
     @Override
     protected List<ReactPackage> getPackages() {
-
+      mCallbackManager = new CallbackManager.Factory().create();
       ReactPackage basePackages[] = new ReactPackage[] {
               new MainReactPackage(),
+            new FBSDKPackage(mCallbackManager),
               new RNSendIntentPackage(),
               new RNCWebViewPackage(),
               new NetInfoPackage(),

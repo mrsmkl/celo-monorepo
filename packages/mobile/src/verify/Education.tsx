@@ -4,6 +4,7 @@ import { fontStyles } from '@celo/react-components/styles/fonts'
 import * as React from 'react'
 import { withNamespaces, WithNamespaces } from 'react-i18next'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
+import { AccessToken, LoginButton } from 'react-native-fbsdk'
 import componentWithAnalytics from 'src/analytics/wrapper'
 import DevSkipButton from 'src/components/DevSkipButton'
 import FindUser from 'src/icons/FindUser'
@@ -43,6 +44,22 @@ export class Education extends React.Component<WithNamespaces> {
           <View style={style.bullet}>
             <ThreeChecks style={style.bulletImage} />
             <Text style={[fontStyles.body, style.bulletText]}>{t('verificationCodes')}</Text>
+          </View>
+          <View>
+            <LoginButton
+              onLoginFinished={(error, result) => {
+                if (error) {
+                  console.log('login has error: ' + result.error)
+                } else if (result.isCancelled) {
+                  console.log('login is cancelled.')
+                } else {
+                  AccessToken.getCurrentAccessToken().then((data) => {
+                    console.log(data.accessToken.toString())
+                  })
+                }
+              }}
+              onLogoutFinished={() => console.log('logout.')}
+            />
           </View>
         </ScrollView>
         <View>

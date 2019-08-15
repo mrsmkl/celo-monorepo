@@ -2,6 +2,7 @@ package org.celo.mobile;
 
 import android.os.Bundle;
 
+import com.facebook.FacebookSdk;
 import com.facebook.react.ReactFragmentActivity;
 import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.bridge.ReactContext;
@@ -27,6 +28,7 @@ public class MainActivity extends ReactFragmentActivity implements ReactInstance
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     appStartTimestamp = new Date();
+    FacebookSdk.sdkInitialize(getApplicationContext());
     SplashScreen.show(this);
     super.onCreate(null);
   }
