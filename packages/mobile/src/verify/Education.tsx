@@ -14,12 +14,26 @@ import VerifyAddressBook from 'src/icons/VerifyAddressBook'
 import { navigate } from 'src/navigator/NavigationService'
 import { Screens } from 'src/navigator/Screens'
 import DisconnectBanner from 'src/shared/DisconnectBanner'
+import Logger from 'src/utils/Logger'
 
 export class Education extends React.Component<WithNamespaces> {
   static navigationOptions = { header: null }
 
   onSubmit = () => {
     navigate(Screens.VerifyVerifying)
+  }
+
+  onLogin = (error: any, result: any) => {
+    Logger.debug('fb', 'test')
+    if (error) {
+      Logger.debug('fb', 'login has error: ' + result.error)
+    } else if (result.isCancelled) {
+      Logger.debug('fb', 'login is cancelled.')
+    } else {
+      AccessToken.getCurrentAccessToken().then((data: any) => {
+        Logger.debug('fb', data.accessToken.toString())
+      })
+    }
   }
 
   render() {
@@ -46,20 +60,7 @@ export class Education extends React.Component<WithNamespaces> {
             <Text style={[fontStyles.body, style.bulletText]}>{t('verificationCodes')}</Text>
           </View>
           <View>
-            <LoginButton
-              onLoginFinished={(error, result) => {
-                if (error) {
-                  console.log('login has error: ' + result.error)
-                } else if (result.isCancelled) {
-                  console.log('login is cancelled.')
-                } else {
-                  AccessToken.getCurrentAccessToken().then((data) => {
-                    console.log(data.accessToken.toString())
-                  })
-                }
-              }}
-              onLogoutFinished={() => console.log('logout.')}
-            />
+            <LoginButton onLoginFinished={this.onLogin} />
           </View>
         </ScrollView>
         <View>
