@@ -257,7 +257,7 @@ const style = StyleSheet.create({
   },
   pincodeContent: {
     flex: 1,
-    paddingHorizontal: 10,
+    paddingHorizontal: 20,
   },
   explanation: {
     marginVertical: 10,

@@ -26,7 +26,6 @@ export const sendReducer = (
         ...state,
         ...getRehydratePayload(action, 'send'),
         isSending: false,
-        recipientCache: {},
       }
     }
     case Actions.SEND_PAYMENT_OR_INVITE:

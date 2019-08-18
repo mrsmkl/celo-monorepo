@@ -294,3 +294,13 @@ export function areRecipientsEquivalent(recipient1: Recipient, recipient2: Recip
 
   return false
 }
+
+export function getDisplayInitials(recipientKind: RecipientKind) {
+  if (recipientKind && recipientKind === RecipientKind.Address) {
+    return '0x'
+  }
+  if (recipientKind && recipientKind === RecipientKind.MobileNumber) {
+    return '#'
+  }
+  return null
+}

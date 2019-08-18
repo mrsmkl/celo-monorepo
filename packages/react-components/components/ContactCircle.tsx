@@ -31,7 +31,9 @@ export default class ContactCircle extends React.PureComponent<Props> {
     if (resolvedThumbnail) {
       return (
         <Image
-          source={{ uri: resolvedThumbnail }}
+          source={
+            typeof resolvedThumbnail === 'string' ? { uri: resolvedThumbnail } : resolvedThumbnail
+          }
           style={[style.image, { height: size, width: size, borderRadius: size / 2.0 }]}
           resizeMode={'cover'}
         />

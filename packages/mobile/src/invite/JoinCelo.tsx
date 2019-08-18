@@ -251,8 +251,8 @@ const styles = StyleSheet.create({
     marginTop: 0,
   },
   scrollContainer: {
-    paddingHorizontal: 10,
-    paddingBottom: 10,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
   },
   box: {
     alignItems: 'center',

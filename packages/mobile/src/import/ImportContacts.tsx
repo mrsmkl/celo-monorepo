@@ -167,7 +167,7 @@ const style = StyleSheet.create({
     justifyContent: 'space-between',
   },
   scrollContainer: {
-    marginHorizontal: 10,
+    paddingHorizontal: 20,
   },
   contactsLogo: {
     alignSelf: 'center',

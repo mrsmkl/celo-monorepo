@@ -17,12 +17,18 @@ import { Namespaces } from 'src/i18n'
 import { AddressToE164NumberType } from 'src/identity/reducer'
 import { faucetIcon, inviteVerifyFee } from 'src/images/Images'
 import { Invitees } from 'src/invite/actions'
-import { getRecipientFromAddress, NumberToRecipient } from 'src/recipients/recipient'
+import {
+  getDisplayInitials,
+  getRecipientFromAddress,
+  getRecipientThumbnail,
+  NumberToRecipient,
+} from 'src/recipients/recipient'
 import { navigateToPaymentTransferReview } from 'src/transactions/actions'
 import { TransactionStatus, TransactionTypes, TransferStandby } from 'src/transactions/reducer'
 import { getMoneyDisplayValue } from 'src/utils/formatting'
 import Logger from 'src/utils/Logger'
 import { formatFeedTime, getDatetimeDisplayString } from 'src/utils/time'
+const unknownRecipient = require('src/transactions/unknownRecipient.png')
 
 const TAG = 'transactions/TransferFeedItem.tsx'
 
@@ -186,8 +192,17 @@ export class TransferFeedItem extends React.PureComponent<Props> {
       comment = null
     } else {
       const recipient = getRecipientFromAddress(address, addressToE164Number, recipientCache)
+      const thumbnail = recipient ? getRecipientThumbnail(recipient) : unknownRecipient
+      const displayInitials = recipient ? getDisplayInitials(recipient.kind) : undefined
       fullName = recipient ? recipient.displayName : _.capitalize(t(type.toLowerCase()))
-      contactImage = <ContactCircle address={address} size={avatarSize} />
+      contactImage = (
+        <ContactCircle
+          thumbnailPath={thumbnail}
+          address={address}
+          size={avatarSize}
+          displayInitials={displayInitials}
+        />
+      )
     }
 
     return (
