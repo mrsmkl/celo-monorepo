@@ -4,12 +4,12 @@ const FLAGS = {
     SDK: true,
   },
   production: {
-    ECOFUND: false,
-    SDK: false,
+    ECOFUND: true,
+    SDK: true,
   },
   staging: {
-    ECOFUND: false,
-    SDK: false,
+    ECOFUND: true,
+    SDK: true,
   },
 }
 module.exports = FLAGS[process.env.DEPLOY_ENV]
