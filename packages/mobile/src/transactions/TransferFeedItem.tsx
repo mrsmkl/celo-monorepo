@@ -15,12 +15,11 @@ import { features } from 'src/flags'
 import { CURRENCIES, CURRENCY_ENUM, resolveCurrency } from 'src/geth/consts'
 import { Namespaces } from 'src/i18n'
 import { AddressToE164NumberType } from 'src/identity/reducer'
-import { faucetIcon, inviteVerifyFee } from 'src/images/Images'
+import { faucetIcon, inviteVerifyFee, unknownUserIcon } from 'src/images/Images'
 import { Invitees } from 'src/invite/actions'
 import {
   getDisplayInitials,
   getRecipientFromAddress,
-  getRecipientThumbnail,
   NumberToRecipient,
 } from 'src/recipients/recipient'
 import { navigateToPaymentTransferReview } from 'src/transactions/actions'
@@ -28,7 +27,6 @@ import { TransactionStatus, TransactionTypes, TransferStandby } from 'src/transa
 import { getMoneyDisplayValue } from 'src/utils/formatting'
 import Logger from 'src/utils/Logger'
 import { formatFeedTime, getDatetimeDisplayString } from 'src/utils/time'
-const unknownRecipient = require('src/transactions/unknownRecipient.png')
 
 const TAG = 'transactions/TransferFeedItem.tsx'
 
@@ -192,16 +190,15 @@ export class TransferFeedItem extends React.PureComponent<Props> {
       comment = null
     } else {
       const recipient = getRecipientFromAddress(address, addressToE164Number, recipientCache)
-      const thumbnail = recipient ? getRecipientThumbnail(recipient) : unknownRecipient
-      const displayInitials = recipient ? getDisplayInitials(recipient.kind) : undefined
-      fullName = recipient ? recipient.displayName : _.capitalize(t(type.toLowerCase()))
-      contactImage = (
+      fullName = recipient ? recipient.displayName : t('unknown')
+      contactImage = recipient ? (
         <ContactCircle
-          thumbnailPath={thumbnail}
           address={address}
           size={avatarSize}
-          displayInitials={displayInitials}
+          displayInitials={getDisplayInitials(recipient.kind)}
         />
+      ) : (
+        <Image source={unknownUserIcon} style={styles.image} />
       )
     }
 
