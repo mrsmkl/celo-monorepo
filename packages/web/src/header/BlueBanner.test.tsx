@@ -6,6 +6,6 @@ describe(BlueBanner, () => {
   it('has a max char limit of X', () => {
     const test = TestRenderer.create(<BlueBanner />)
 
-    expect(test.getInstance()).toEqual(2)
+    expect(test).toMatchSnapshot()
   })
 })

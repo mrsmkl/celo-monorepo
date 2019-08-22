@@ -1,18 +1,24 @@
 const defaultConfig = require('../../jest.config.js')
 
 module.exports = {
-  ...defaultConfig,
-  globals: {
-    navigator: true,
-    window: true,
-  },
-  preset: './node_modules/react-native-web/jest-preset.js',
-  testEnvironment: 'node',
-  setupFilesAfterEnv: ['<rootDir>/jest_setup'],
-  testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/'],
-  transformIgnorePatterns: ['node_modules/(?!react-native|react-navigation|)'],
+  // ...defaultConfig,
+  moduleFileExtensions: ['ts', 'tsx', 'js'],
   transform: {
-    '\\.(ts|tsx)$': 'ts-jest',
-    '^.+\\.jsx?$': 'ts-jest',
+    '^.+\\.tsx?$': 'ts-jest',
+  },
+  testMatch: ['**/*.(test|spec).(ts|tsx)'],
+  globals: {
+    'ts-jest': {
+      babelConfig: true,
+      tsConfig: 'jest.tsconfig.json',
+    },
+  },
+  coveragePathIgnorePatterns: ['/node_modules/'],
+  coverageReporters: ['json', 'lcov', 'text', 'text-summary'],
+  moduleNameMapper: {
+    'react-native': 'react-native-web',
+    src: '<rootDir>/src',
+    '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
+      '<rootDir>/__mocks__/mocks.js',
   },
 }
