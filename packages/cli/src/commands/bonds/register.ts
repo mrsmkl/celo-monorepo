@@ -1,5 +1,3 @@
-import { BondedDeposits } from '@celo/walletkit'
-
 import { BaseCommand } from '../../base'
 import { displaySendTx } from '../../utils/cli'
 import { Flags } from '../../utils/command'
@@ -18,8 +16,8 @@ export default class Register extends BaseCommand {
 
   async run() {
     const res = this.parse(Register)
-    const bondedDeposits = await BondedDeposits(this.web3, res.flags.from)
-    const tx = bondedDeposits.methods.createAccount()
-    await displaySendTx('register', tx)
+    this.kit.defaultAccount = res.flags.from
+    const bondedDeposits = await this.kit.contracts.getBondedDeposits()
+    await displaySendTx('register', bondedDeposits.createAccount())
   }
 }

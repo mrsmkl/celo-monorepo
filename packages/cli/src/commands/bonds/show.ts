@@ -1,8 +1,7 @@
 import { flags } from '@oclif/command'
-import BN from 'bn.js'
+import BigNumber from 'bignumber.js'
 import chalk from 'chalk'
 import { cli } from 'cli-ux'
-import { BondedDepositAdapter } from '../../adapters/bonded-deposit'
 import { BaseCommand } from '../../base'
 import { BondArgs } from '../../utils/bonds'
 import { Args } from '../../utils/command'
@@ -38,18 +37,18 @@ export default class Show extends BaseCommand {
       return
     }
 
-    const contract = await new BondedDepositAdapter(this.web3)
-    let value = new BN(0)
-    let contributingWeight = new BN(0)
+    const bondedDeposits = await this.kit.contracts.getBondedDeposits()
+    let value = new BigNumber(0)
+    let contributingWeight = new BigNumber(0)
     if (flags.noticePeriod) {
       cli.action.start('Fetching bonded deposit...')
-      value = await contract.getBondedDepositValue(args.account, flags.noticePeriod)
-      contributingWeight = value.mul(this.web3.utils.toBN(flags.noticePeriod))
+      value = await bondedDeposits.getBondedDepositValue(args.account, flags.noticePeriod)
+      contributingWeight = value.multipliedBy(new BigNumber(flags.noticePeriod))
     }
 
     if (flags.availabilityTime) {
       cli.action.start('Fetching notified deposit...')
-      value = await contract.getNotifiedDepositValue(args.account, flags.availabilityTime)
+      value = await bondedDeposits.getNotifiedDepositValue(args.account, flags.availabilityTime)
       contributingWeight = value
     }
 

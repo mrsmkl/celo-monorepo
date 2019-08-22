@@ -1,28 +1,28 @@
 import { zip } from '@celo/utils/lib/src/collections'
-import BN from 'bn.js'
+import BigNumber from 'bignumber.js'
 import Web3 from 'web3'
 import { TransactionObject } from 'web3/eth/types'
 import { Address } from '../base'
 import { BondedDeposits } from '../generated/types/BondedDeposits'
-import { BaseWrapper } from '../wrappers/BaseWrapper'
+import { BaseWrapper, CeloTransactionObject, toBigNumber } from '../wrappers/BaseWrapper'
 
 export interface VotingDetails {
   accountAddress: Address
   voterAddress: Address
-  weight: BN
+  weight: BigNumber
 }
 
 interface Deposit {
-  time: BN
-  value: BN
+  time: BigNumber
+  value: BigNumber
 }
 
 export interface Deposits {
   bonded: Deposit[]
   notified: Deposit[]
   total: {
-    gold: BN
-    weight: BN
+    gold: BigNumber
+    weight: BigNumber
   }
 }
 
@@ -33,10 +33,15 @@ enum Roles {
 }
 
 export class BondedDepositsWrapper extends BaseWrapper<BondedDeposits> {
-  async getAccountWeight(account: Address): Promise<BN> {
-    const accountWeight = await this.contract.methods.getAccountWeight(account).call()
-    return Web3.utils.toBN(accountWeight)
-  }
+  notify = this.proxySend(this.contract.methods.notify)
+  createAccount = this.proxySend(this.contract.methods.createAccount)
+  withdraw = this.proxySend(this.contract.methods.withdraw)
+  redeemRewards = this.proxySend(this.contract.methods.redeemRewards)
+  deposit = this.proxySend(this.contract.methods.deposit)
+  isVoting = this.proxyCall(this.contract.methods.isVoting)
+  maxNoticePeriod = this.proxyCallAndTransform(this.contract.methods.maxNoticePeriod, toBigNumber)
+
+  getAccountWeight = this.proxyCallAndTransform(this.contract.methods.getAccountWeight, toBigNumber)
 
   async getVotingDetails(accountOrVoterAddress: Address): Promise<VotingDetails> {
     const accountAddress = await this.contract.methods
@@ -50,7 +55,7 @@ export class BondedDepositsWrapper extends BaseWrapper<BondedDeposits> {
     }
   }
 
-  async getBondedDepositValue(account: string, noticePeriod: string): Promise<BN> {
+  async getBondedDepositValue(account: string, noticePeriod: string): Promise<BigNumber> {
     const deposit = await this.contract.methods.getBondedDeposit(account, noticePeriod).call()
     return this.getValueFromDeposit(deposit)
   }
@@ -63,7 +68,7 @@ export class BondedDepositsWrapper extends BaseWrapper<BondedDeposits> {
     )
   }
 
-  async getNotifiedDepositValue(account: string, availTime: string): Promise<BN> {
+  async getNotifiedDepositValue(account: string, availTime: string): Promise<BigNumber> {
     const deposit = await this.contract.methods.getNotifiedDeposit(account, availTime).call()
     return this.getValueFromDeposit(deposit)
   }
@@ -81,9 +86,9 @@ export class BondedDepositsWrapper extends BaseWrapper<BondedDeposits> {
     const notified = await this.getNotifiedDeposits(account)
     const weight = await this.getAccountWeight(account)
 
-    let gold = new BN(0)
-    bonded.forEach((bond) => (gold = gold.add(bond.value)))
-    notified.forEach((bond) => (gold = gold.add(bond.value)))
+    let gold = new BigNumber(0)
+    bonded.forEach((bond) => (gold = gold.plus(bond.value)))
+    notified.forEach((bond) => (gold = gold.plus(bond.value)))
 
     return {
       bonded,
@@ -93,14 +98,16 @@ export class BondedDepositsWrapper extends BaseWrapper<BondedDeposits> {
   }
 
   // FIXME this.contract.methods.delegateRewards does not exist
-  async delegateRewardsTx(account: string, delegate: string): Promise<TransactionObject<void>> {
+  async delegateRewardsTx(account: string, delegate: string): Promise<CeloTransactionObject<void>> {
     const sig = await this.getParsedSignatureOfAddress(account, delegate)
 
-    return this.contract.methods.delegateRole(Roles.rewards, delegate, sig.v, sig.r, sig.s)
+    return this.wrapSend(
+      this.contract.methods.delegateRole(Roles.rewards, delegate, sig.v, sig.r, sig.s)
+    )
   }
 
   private getValueFromDeposit(deposit: { 0: string; 1: string }) {
-    return Web3.utils.toBN(deposit[0])
+    return new BigNumber(deposit[0])
   }
 
   private async getParsedSignatureOfAddress(address: string, signer: string) {
@@ -116,14 +123,14 @@ export class BondedDepositsWrapper extends BaseWrapper<BondedDeposits> {
   private async zipAccountTimesAndValuesToDeposits(
     account: string,
     timesFunc: (account: string) => TransactionObject<string[]>,
-    valueFunc: (account: string, time: string) => Promise<BN>
+    valueFunc: (account: string, time: string) => Promise<BigNumber>
   ) {
     const accountTimes = await timesFunc(account).call()
     const accountValues = await Promise.all(accountTimes.map((time) => valueFunc(account, time)))
     return zip(
       // tslint:disable-next-line: no-object-literal-type-assertion
       (time, value) => ({ time, value } as Deposit),
-      accountTimes.map((time) => Web3.utils.toBN(time)),
+      accountTimes.map((time) => new BigNumber(time)),
       accountValues
     )
   }

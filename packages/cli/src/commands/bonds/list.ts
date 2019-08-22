@@ -1,6 +1,5 @@
 import chalk from 'chalk'
 import { cli } from 'cli-ux'
-import { BondedDepositAdapter } from '../../adapters/bonded-deposit'
 import { BaseCommand } from '../../base'
 import { Args } from '../../utils/command'
 
@@ -18,7 +17,8 @@ export default class List extends BaseCommand {
   async run() {
     const { args } = this.parse(List)
     cli.action.start('Fetching deposits...')
-    const deposits = await new BondedDepositAdapter(this.web3).getDeposits(args.account)
+    const bondedDeposits = await this.kit.contracts.getBondedDeposits()
+    const deposits = await bondedDeposits.getDeposits(args.account)
     cli.action.stop()
 
     cli.log(chalk.bold.yellow('Total Gold Bonded \t') + deposits.total.gold)

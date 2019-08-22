@@ -1,5 +1,3 @@
-import { BondedDeposits } from '@celo/walletkit'
-
 import { BaseCommand } from '../../base'
 import { BondArgs } from '../../utils/bonds'
 import { displaySendTx } from '../../utils/cli'
@@ -20,7 +18,8 @@ export default class Withdraw extends BaseCommand {
   async run() {
     // tslint:disable-next-line
     const { flags, args } = this.parse(Withdraw)
-    const bondsContract = await BondedDeposits(this.web3, flags.from)
-    await displaySendTx('withdraw', bondsContract.methods.withdraw(args.availabilityTime))
+    this.kit.defaultAccount = flags.from
+    const bondedDeposits = await this.kit.contracts.getBondedDeposits()
+    await displaySendTx('withdraw', bondedDeposits.withdraw(args.availabilityTime))
   }
 }

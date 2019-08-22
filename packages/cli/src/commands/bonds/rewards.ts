@@ -1,5 +1,4 @@
 import { flags } from '@oclif/command'
-import { BondedDepositAdapter } from '../../adapters/bonded-deposit'
 import { BaseCommand } from '../../base'
 import { displaySendTx } from '../../utils/cli'
 import { Flags } from '../../utils/command'
@@ -37,15 +36,14 @@ export default class Rewards extends BaseCommand {
       return
     }
 
-    const adapter = await new BondedDepositAdapter(this.web3, res.flags.from)
+    const bondedDeposits = await this.kit.contracts.getBondedDeposits()
     if (res.flags.redeem) {
-      const contract = await adapter.contract()
-      const tx = contract.methods.redeemRewards()
+      const tx = bondedDeposits.redeemRewards()
       await displaySendTx('redeemRewards', tx)
     }
 
     if (res.flags.delegate) {
-      const tx = await adapter.delegateRewardsTx(res.flags.from, res.flags.delegate)
+      const tx = await bondedDeposits.delegateRewardsTx(res.flags.from, res.flags.delegate)
       await displaySendTx('delegateRewards', tx)
     }
   }

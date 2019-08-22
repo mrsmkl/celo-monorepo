@@ -1,6 +1,4 @@
-import { BondedDeposits } from '@celo/walletkit'
 import { flags } from '@oclif/command'
-
 import { BaseCommand } from '../../base'
 import { BondArgs } from '../../utils/bonds'
 import { displaySendTx } from '../../utils/cli'
@@ -22,10 +20,12 @@ export default class Notify extends BaseCommand {
 
   async run() {
     const res = this.parse(Notify)
-    const bondedDeposits = await BondedDeposits(this.web3, res.flags.from)
+
+    this.kit.defaultAccount = res.flags.from
+    const bondedDeposits = await this.kit.contracts.getBondedDeposits()
     await displaySendTx(
       'notify',
-      bondedDeposits.methods.notify(res.flags.goldAmount, res.flags.noticePeriod)
+      bondedDeposits.notify(res.flags.goldAmount, res.flags.noticePeriod)
     )
   }
 }
