@@ -58,55 +58,73 @@ export function tupleParser(...parsers: Array<Parser<any, any>>) {
 
 /**
  * Specifies all different possible proxyCall arguments so that
- * it always return a function of type: (...args:A) => Promise<D>
+ * it always return a function of type: (...args:InputArgs) => Promise<Output>
  *
  * cases:
- *  - call methodFn (no pre or post parsing)
- *  - preParse arguments & call methodFn
- *  - preParse arguments, call methodFn & postParse result
- *  - call methodFn & postParse result
+ *  - methodFn
+ *  - parseInputArgs => methodFn
+ *  - parseInputArgs => methodFn => parseOutput
+ *  - methodFn => parseOutput
  */
-type ProxyCallArgs<InputArgs extends any[], B extends any[], C, Output> =
-  | [Method<B, C>, (...arg: InputArgs) => B, (arg: C) => Output]
-  | [Method<InputArgs, C>, undefined, (arg: C) => Output]
-  | [Method<B, Output>, (...arg: InputArgs) => B]
+type ProxyCallArgs<
+  InputArgs extends any[],
+  ParsedInputArgs extends any[],
+  PreParsedOutput,
+  Output
+> =
+  // parseInputArgs => methodFn => parseOutput
+  | [
+      Method<ParsedInputArgs, PreParsedOutput>,
+      (...arg: InputArgs) => ParsedInputArgs,
+      (arg: PreParsedOutput) => Output
+    ]
+  // methodFn => parseOutput
+  | [Method<InputArgs, PreParsedOutput>, undefined, (arg: PreParsedOutput) => Output]
+  // parseInputArgs => methodFn
+  | [Method<ParsedInputArgs, Output>, (...arg: InputArgs) => ParsedInputArgs]
+  // methodFn
   | [Method<InputArgs, Output>]
 
 /**
  * Creates a proxy to call a web3 native contract method.
  *
  * There are 4 cases:
- *  - call methodFn (no pre or post parsing)
- *  - preParse arguments & call methodFn
- *  - preParse arguments, call methodFn & postParse result
- *  - call methodFn & postParse result
+ *  - methodFn
+ *  - parseInputArgs => methodFn
+ *  - parseInputArgs => methodFn => parseOutput
+ *  - methodFn => parseOutput
  *
  * @param methodFn Web3 methods function
- * @param preParse [optional] preParse function, tranforms arguments into `methodFn` expected inputs
- * @param postParse [optional] postParse function, transforms `methodFn` output into proxy return
+ * @param parseInputArgs [optional] parseInputArgs function, tranforms arguments into `methodFn` expected inputs
+ * @param parseOutput [optional] parseOutput function, transforms `methodFn` output into proxy return
  */
-export function proxyCall<InputArgs extends any[], B extends any[], C, Output>(
-  ...callArgs: ProxyCallArgs<InputArgs, B, C, Output>
+export function proxyCall<
+  InputArgs extends any[],
+  ParsedInputArgs extends any[],
+  PreParsedOutput,
+  Output
+>(
+  ...callArgs: ProxyCallArgs<InputArgs, ParsedInputArgs, PreParsedOutput, Output>
 ): (...args: InputArgs) => Promise<Output> {
   if (callArgs.length === 3 && callArgs[1] != null) {
     const methodFn = callArgs[0]
-    const preParse = callArgs[1]
-    const postParse = callArgs[2]
+    const parseInputArgs = callArgs[1]
+    const parseOutput = callArgs[2]
     return (...args: InputArgs) =>
-      methodFn(...preParse(...args))
+      methodFn(...parseInputArgs(...args))
         .call()
-        .then(postParse)
+        .then(parseOutput)
   } else if (callArgs.length === 3) {
     const methodFn = callArgs[0]
-    const postParse = callArgs[2]
+    const parseOutput = callArgs[2]
     return (...args: InputArgs) =>
       methodFn(...args)
         .call()
-        .then(postParse)
+        .then(parseOutput)
   } else if (callArgs.length === 2) {
     const methodFn = callArgs[0]
-    const preParse = callArgs[1]
-    return (...args: InputArgs) => methodFn(...preParse(...args)).call()
+    const parseInputArgs = callArgs[1]
+    return (...args: InputArgs) => methodFn(...parseInputArgs(...args)).call()
   } else {
     const methodFn = callArgs[0]
     return (...args: InputArgs) => methodFn(...args).call()
@@ -115,14 +133,16 @@ export function proxyCall<InputArgs extends any[], B extends any[], C, Output>(
 
 /**
  * Specifies all different possible proxySend arguments so that
- * it always return a function of type: (...args:A) => CeloTransactionObject<C>
+ * it always return a function of type: (...args:InputArgs) => CeloTransactionObject<Output>
  *
  * cases:
- *  - call methodFn (no pre parsing)
- *  - preParse arguments & call methodFn
+ *  - methodFn
+ *  - parseInputArgs => methodFn
  */
-type ProxySendArgs<InputArgs extends any[], B extends any[], Output> =
-  | [Method<B, Output>, (...arg: InputArgs) => B]
+type ProxySendArgs<InputArgs extends any[], ParsedInputArgs extends any[], Output> =
+  // parseInputArgs => methodFn
+  | [Method<ParsedInputArgs, Output>, (...arg: InputArgs) => ParsedInputArgs]
+  // methodFn
   | [Method<InputArgs, Output>]
 
 /**
@@ -135,9 +155,9 @@ type ProxySendArgs<InputArgs extends any[], B extends any[], Output> =
  * @param methodFn Web3 methods function
  * @param preParse [optional] preParse function, tranforms arguments into `methodFn` expected inputs
  */
-export function proxySend<InputArgs extends any[], B extends any[], Output>(
+export function proxySend<InputArgs extends any[], ParsedInputArgs extends any[], Output>(
   kit: ContractKit,
-  ...sendArgs: ProxySendArgs<InputArgs, B, Output>
+  ...sendArgs: ProxySendArgs<InputArgs, ParsedInputArgs, Output>
 ): (...args: InputArgs) => CeloTransactionObject<Output> {
   if (sendArgs.length === 2) {
     const methodFn = sendArgs[0]
