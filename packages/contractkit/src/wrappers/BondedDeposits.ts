@@ -93,9 +93,8 @@ export class BondedDepositsWrapper extends BaseWrapper<BondedDeposits> {
     const notified = await this.getNotifiedDeposits(account)
     const weight = await this.getAccountWeight(account)
 
-    let gold = new BigNumber(0)
-    bonded.forEach((bond) => (gold = gold.plus(bond.value)))
-    notified.forEach((bond) => (gold = gold.plus(bond.value)))
+    const totalBonded = bonded.reduce((acc, bond) => acc.plus(bond.value), new BigNumber(0))
+    const gold = bonded.reduce((acc, bond) => acc.plus(bond.value), totalBonded)
 
     return {
       bonded,
