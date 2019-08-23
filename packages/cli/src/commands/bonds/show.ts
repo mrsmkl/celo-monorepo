@@ -43,7 +43,7 @@ export default class Show extends BaseCommand {
     if (flags.noticePeriod) {
       cli.action.start('Fetching bonded deposit...')
       value = await bondedDeposits.getBondedDepositValue(args.account, flags.noticePeriod)
-      contributingWeight = value.multipliedBy(new BigNumber(flags.noticePeriod))
+      contributingWeight = value.times(new BigNumber(flags.noticePeriod))
     }
 
     if (flags.availabilityTime) {

@@ -56,15 +56,38 @@ export function tupleParser(...parsers: Array<Parser<any, any>>) {
   return (...args: any[]) => zip((parser, input) => parser(input), parsers, args)
 }
 
+/**
+ * Specifies all different possible proxyCall arguments so that
+ * it always return a function of type: (...args:A) => Promise<D>
+ *
+ * cases:
+ *  - call methodFn (no pre or post parsing)
+ *  - preParse arguments & call methodFn
+ *  - preParse arguments, call methodFn & postParse result
+ *  - call methodFn & postParse result
+ */
 type ProxyCallArgs<A extends any[], B extends any[], C, D> =
   | [Method<B, C>, (...arg: A) => B, (arg: C) => D]
   | [Method<A, C>, undefined, (arg: C) => D]
   | [Method<B, D>, (...arg: A) => B]
   | [Method<A, D>]
 
+/**
+ * Creates a proxy to call a web3 native contract method.
+ *
+ * There are 4 cases:
+ *  - call methodFn (no pre or post parsing)
+ *  - preParse arguments & call methodFn
+ *  - preParse arguments, call methodFn & postParse result
+ *  - call methodFn & postParse result
+ *
+ * @param methodFn Web3 methods function
+ * @param preParse [optional] preParse function, tranforms arguments into `methodFn` expected inputs
+ * @param postParse [optional] postParse function, transforms `methodFn` output into proxy return
+ */
 export function proxyCall<A extends any[], B extends any[], C, D>(
   ...callArgs: ProxyCallArgs<A, B, C, D>
-) {
+): (...args: A) => Promise<D> {
   if (callArgs.length === 3 && callArgs[1] != null) {
     const methodFn = callArgs[0]
     const preParse = callArgs[1]
@@ -90,14 +113,32 @@ export function proxyCall<A extends any[], B extends any[], C, D>(
   }
 }
 
+/**
+ * Specifies all different possible proxySend arguments so that
+ * it always return a function of type: (...args:A) => CeloTransactionObject<C>
+ *
+ * cases:
+ *  - call methodFn (no pre parsing)
+ *  - preParse arguments & call methodFn
+ */
 type ProxySendArgs<A extends any[], B extends any[], C> =
   | [Method<B, C>, (...arg: A) => B]
   | [Method<A, C>]
 
+/**
+ * Creates a proxy to send a tx on a web3 native contract method.
+ *
+ * There are 2 cases:
+ *  - call methodFn (no pre or post parsing)
+ *  - preParse arguments & call methodFn
+ *
+ * @param methodFn Web3 methods function
+ * @param preParse [optional] preParse function, tranforms arguments into `methodFn` expected inputs
+ */
 export function proxySend<A extends any[], B extends any[], C>(
   kit: ContractKit,
   ...sendArgs: ProxySendArgs<A, B, C>
-) {
+): (...args: A) => CeloTransactionObject<C> {
   if (sendArgs.length === 2) {
     const methodFn = sendArgs[0]
     const preParse = sendArgs[1]
