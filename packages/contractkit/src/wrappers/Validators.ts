@@ -3,7 +3,7 @@ import { zip } from '@celo/utils/lib/src/collections'
 import BigNumber from 'bignumber.js'
 import { Address, NULL_ADDRESS } from '../base'
 import { Validators } from '../generated/types/Validators'
-import { BaseWrapper, CeloTransactionObject, proxySend, wrapSend } from './BaseWrapper'
+import { BaseWrapper, CeloTransactionObject, proxyCall, proxySend, wrapSend } from './BaseWrapper'
 
 export interface Validator {
   address: Address
@@ -34,6 +34,9 @@ export class ValidatorsWrapper extends BaseWrapper<Validators> {
   removeMember = proxySend(this.kit, this.contract.methods.removeMember)
   registerValidator = proxySend(this.kit, this.contract.methods.registerValidator)
   registerValidatorGroup = proxySend(this.kit, this.contract.methods.registerValidatorGroup)
+  getVoteFrom: (validatorAddress: Address) => Promise<Address | null> = proxyCall(
+    this.contract.methods.voters
+  )
 
   async getRegisteredValidators(): Promise<Validator[]> {
     const vgAddresses = await this.contract.methods.getRegisteredValidators().call()
@@ -73,10 +76,6 @@ export class ValidatorsWrapper extends BaseWrapper<Validators> {
       }
     }
     return r
-  }
-
-  async getVoteFrom(validatorAddress: Address): Promise<Address | null> {
-    return this.contract.methods.voters(validatorAddress).call()
   }
 
   async revokeVote(): Promise<CeloTransactionObject<boolean>> {
