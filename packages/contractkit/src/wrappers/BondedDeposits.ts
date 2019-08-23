@@ -4,7 +4,14 @@ import Web3 from 'web3'
 import { TransactionObject } from 'web3/eth/types'
 import { Address } from '../base'
 import { BondedDeposits } from '../generated/types/BondedDeposits'
-import { BaseWrapper, CeloTransactionObject, toBigNumber } from '../wrappers/BaseWrapper'
+import {
+  BaseWrapper,
+  CeloTransactionObject,
+  proxyCall,
+  proxySend,
+  toBigNumber,
+  wrapSend,
+} from '../wrappers/BaseWrapper'
 
 export interface VotingDetails {
   accountAddress: Address
@@ -33,15 +40,15 @@ enum Roles {
 }
 
 export class BondedDepositsWrapper extends BaseWrapper<BondedDeposits> {
-  notify = this.proxySend(this.contract.methods.notify)
-  createAccount = this.proxySend(this.contract.methods.createAccount)
-  withdraw = this.proxySend(this.contract.methods.withdraw)
-  redeemRewards = this.proxySend(this.contract.methods.redeemRewards)
-  deposit = this.proxySend(this.contract.methods.deposit)
-  isVoting = this.proxyCall(this.contract.methods.isVoting)
-  maxNoticePeriod = this.proxyCallAndTransform(this.contract.methods.maxNoticePeriod, toBigNumber)
+  notify = proxySend(this.kit, this.contract.methods.notify)
+  createAccount = proxySend(this.kit, this.contract.methods.createAccount)
+  withdraw = proxySend(this.kit, this.contract.methods.withdraw)
+  redeemRewards = proxySend(this.kit, this.contract.methods.redeemRewards)
+  deposit = proxySend(this.kit, this.contract.methods.deposit)
+  isVoting = proxyCall(this.contract.methods.isVoting)
+  maxNoticePeriod = proxyCall(this.contract.methods.maxNoticePeriod, undefined, toBigNumber)
 
-  getAccountWeight = this.proxyCallAndTransform(this.contract.methods.getAccountWeight, toBigNumber)
+  getAccountWeight = proxyCall(this.contract.methods.getAccountWeight, undefined, toBigNumber)
 
   async getVotingDetails(accountOrVoterAddress: Address): Promise<VotingDetails> {
     const accountAddress = await this.contract.methods
@@ -101,7 +108,8 @@ export class BondedDepositsWrapper extends BaseWrapper<BondedDeposits> {
   async delegateRewardsTx(account: string, delegate: string): Promise<CeloTransactionObject<void>> {
     const sig = await this.getParsedSignatureOfAddress(account, delegate)
 
-    return this.wrapSend(
+    return wrapSend(
+      this.kit,
       this.contract.methods.delegateRole(Roles.rewards, delegate, sig.v, sig.r, sig.s)
     )
   }
