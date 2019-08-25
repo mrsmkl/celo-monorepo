@@ -130,7 +130,40 @@ export function proxyCall<
     return (...args: InputArgs) => methodFn(...args).call()
   }
 }
+interface ProxyCallArgsNam<
+  InputArgs extends any[],
+  ParsedInputArgs extends any[],
+  Output,
+  ParsedOutput
+> {
+  pre?: (...arg: InputArgs) => ParsedInputArgs
+  method: Method<ParsedInputArgs, Output>
+  post?: (res: Output) => ParsedOutput
+}
 
+export function proxyCall2<
+  InputArgs extends any[],
+  ParsedInputArgs extends any[],
+  Output,
+  ParsedOutput
+>(
+  carg: ProxyCallArgsNam<InputArgs, ParsedInputArgs, Output, ParsedOutput>
+): (...arg: InputArgs) => Promise<ParsedOutput> {
+  return async (...arg: InputArgs) => {
+    const preParse = carg.pre || identity
+    const postParse = carg.post || identity1
+    const parsedInput = preParse(...arg)
+    const result = await carg.method(...parsedInput).call()
+    return postParse(result)
+  }
+}
+
+export function identity<T extends any[], U>(...args: T) {
+  return (args as unknown) as U
+}
+export function identity1<T, U>(arg: T) {
+  return (arg as unknown) as U
+}
 /**
  * Specifies all different possible proxySend arguments so that
  * it always return a function of type: (...args:InputArgs) => CeloTransactionObject<Output>

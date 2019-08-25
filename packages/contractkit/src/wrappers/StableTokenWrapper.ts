@@ -3,6 +3,7 @@ import {
   BaseWrapper,
   parseNumber,
   proxyCall,
+  proxyCall2,
   proxySend,
   toBigNumber,
   toNumber,
@@ -16,6 +17,11 @@ export class StableTokenWrapper extends BaseWrapper<StableToken> {
   decimals = proxyCall(this.contract.methods.decimals, undefined, toNumber)
   totalSupply = proxyCall(this.contract.methods.totalSupply, undefined, toBigNumber)
   balanceOf = proxyCall(this.contract.methods.balanceOf, undefined, toBigNumber)
+
+  balanceOfNam = proxyCall2({
+    method: this.contract.methods.balanceOf,
+    post: toBigNumber,
+  })
   minter = proxyCall(this.contract.methods.minter)
   owner = proxyCall(this.contract.methods.owner)
   getInflationParameters = proxyCall(this.contract.methods.getInflationParameters)
@@ -24,6 +30,12 @@ export class StableTokenWrapper extends BaseWrapper<StableToken> {
     tupleParser(parseNumber),
     toBigNumber
   )
+
+  unitsToValueNam = proxyCall2({
+    pre: tupleParser(parseNumber),
+    method: this.contract.methods.unitsToValue,
+    post: toBigNumber,
+  })
 
   unitsToValue = proxyCall(
     this.contract.methods.unitsToValue,
