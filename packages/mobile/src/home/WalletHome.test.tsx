@@ -7,7 +7,6 @@ import { createMockStore, getMockI18nProps } from 'test/utils'
 const TWO_DAYS_MS = 2 * 24 * 60 * 1000
 
 const storeData = {
-  goldToken: { educationCompleted: true },
   account: {
     backupCompleted: true,
     dismissedEarnRewards: true,

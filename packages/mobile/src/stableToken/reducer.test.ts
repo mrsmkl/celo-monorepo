@@ -19,16 +19,4 @@ describe('stableToken reducer', () => {
       lastFetch: expect.any(Number),
     })
   })
-
-  it('should set education completed', () => {
-    expect(
-      reducer(undefined, {
-        type: Actions.SET_EDUCATION_COMPLETED,
-        educationCompleted: true,
-      })
-    ).toEqual({
-      ...initialState,
-      educationCompleted: true,
-    })
-  })
 })

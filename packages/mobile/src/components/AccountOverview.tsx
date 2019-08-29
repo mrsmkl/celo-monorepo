@@ -3,7 +3,7 @@ import fontStyles, { estimateFontSize } from '@celo/react-components/styles/font
 import variables from '@celo/react-components/styles/variables'
 import * as React from 'react'
 import { withNamespaces, WithNamespaces } from 'react-i18next'
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
 import { connect } from 'react-redux'
 import componentWithAnalytics from 'src/analytics/wrapper'
 import CurrencyDisplay from 'src/components/CurrencyDisplay'
@@ -19,8 +19,6 @@ import { getMoneyDisplayValue } from 'src/utils/formatting'
 
 interface StateProps {
   exchangeRatePair: ExchangeRatePair | null
-  goldEducationCompleted: boolean
-  stableEducationCompleted: boolean
   goldBalance: string | null
   dollarBalance: string | null
 }
@@ -39,8 +37,6 @@ type Props = StateProps & DispatchProps & WithNamespaces & OwnProps
 const mapStateToProps = (state: RootState): StateProps => {
   return {
     exchangeRatePair: state.exchange.exchangeRatePair,
-    goldEducationCompleted: state.goldToken.educationCompleted,
-    stableEducationCompleted: state.stableToken.educationCompleted,
     goldBalance: state.goldToken.balance,
     dollarBalance: state.stableToken.balance,
   }
@@ -83,34 +79,22 @@ export class AccountOverview extends React.Component<Props> {
               <Text style={[style.currencyLabel, fontStyles.bodySmall]}>
                 {t('global:celoDollars') + ' ' + CURRENCIES[Tokens.DOLLAR].code}
               </Text>
-              <TouchableOpacity
-                onPress={this.goToStableTokenEducation}
-                disabled={this.props.stableEducationCompleted}
-                style={[style.education, !this.props.stableEducationCompleted && style.dotOffset]}
-              >
-                <CurrencyDisplay
-                  amount={dollarBalance}
-                  size={this.getFontSize(dollarBalance, !this.props.stableEducationCompleted)}
-                  type={Tokens.DOLLAR}
-                />
-              </TouchableOpacity>
+              <CurrencyDisplay
+                amount={dollarBalance}
+                size={this.getFontSize(dollarBalance, false)}
+                type={Tokens.DOLLAR}
+              />
             </View>
             <View style={style.line} />
             <View style={[style.currencyArea]} testID={`${testID}/goldBalance`}>
               <Text style={[style.currencyLabel, fontStyles.bodySmall]}>
                 {t('global:celoGold') + ' ' + CURRENCIES[Tokens.GOLD].code}
               </Text>
-              <TouchableOpacity
-                onPress={this.goToGoldTokenEducation}
-                disabled={this.props.goldEducationCompleted}
-                style={[style.education, !this.props.goldEducationCompleted && style.dotOffset]}
-              >
-                <CurrencyDisplay
-                  amount={goldBalance}
-                  size={this.getFontSize(goldBalance, !this.props.goldEducationCompleted)}
-                  type={Tokens.GOLD}
-                />
-              </TouchableOpacity>
+              <CurrencyDisplay
+                amount={goldBalance}
+                size={this.getFontSize(goldBalance, false)}
+                type={Tokens.GOLD}
+              />
             </View>
           </View>
         </View>

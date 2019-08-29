@@ -12,11 +12,6 @@ export interface SetBalanceAction {
   balance: string
 }
 
-export interface SetEducationCompletedAction {
-  type: Actions.SET_EDUCATION_COMPLETED
-  educationCompleted: boolean
-}
-
 export interface FetchBalanceAction {
   type: Actions.FETCH_BALANCE
 }
@@ -25,11 +20,7 @@ export type TransferAction = {
   type: Actions.TRANSFER
 } & TokenTransferAction
 
-export type ActionTypes =
-  | SetBalanceAction
-  | SetEducationCompletedAction
-  | FetchBalanceAction
-  | TransferAction
+export type ActionTypes = SetBalanceAction | FetchBalanceAction | TransferAction
 
 export const fetchDollarBalance = (): FetchBalanceAction => ({
   type: Actions.FETCH_BALANCE,
@@ -51,9 +42,4 @@ export const transferStableToken = ({
   amount,
   comment,
   txId,
-})
-
-export const setEducationCompleted = (): SetEducationCompletedAction => ({
-  type: Actions.SET_EDUCATION_COMPLETED,
-  educationCompleted: true,
 })

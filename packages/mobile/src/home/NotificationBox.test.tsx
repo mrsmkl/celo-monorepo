@@ -9,7 +9,6 @@ import { mockPaymentRequests } from 'test/values'
 const TWO_DAYS_MS = 2 * 24 * 60 * 1000
 
 const storeData = {
-  goldToken: { educationCompleted: true },
   account: {
     backupCompleted: true,
     dismissedEarnRewards: true,
@@ -54,7 +53,6 @@ describe('NotificationBox', () => {
   it('Educations not completed yet', () => {
     const store = createMockStore({
       ...storeData,
-      goldToken: { educationCompleted: false },
       account: {
         backupCompleted: false,
         dismissedEarnRewards: false,

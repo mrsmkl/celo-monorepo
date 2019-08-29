@@ -16,7 +16,6 @@ export const getActiveNotificationCount = createSelector(
 export const callToActNotificationSelector = (state: RootState) => {
   return (
     !state.account.backupCompleted ||
-    !state.goldToken.educationCompleted ||
     (!state.account.dismissedEarnRewards && PROMOTE_REWARDS_APP) ||
     !state.account.dismissedInviteFriends
   )

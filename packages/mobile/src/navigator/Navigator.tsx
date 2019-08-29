@@ -1,9 +1,7 @@
 import { createStackNavigator, createSwitchNavigator } from 'react-navigation'
 import Account from 'src/account/Account'
 import Analytics from 'src/account/Analytics'
-import DollarEducation from 'src/account/DollarEducation'
 import EditProfile from 'src/account/EditProfile'
-import GoldEducation from 'src/account/GoldEducation'
 import Invite from 'src/account/Invite'
 import InviteReview from 'src/account/InviteReview'
 import Licenses from 'src/account/Licenses'
@@ -127,12 +125,10 @@ const AppStack = createStackNavigator(
     [Screens.Invite]: { screen: Invite },
     [Screens.InviteReview]: { screen: InviteReview },
     [Screens.Licenses]: { screen: Licenses },
-    [Screens.DollarEducation]: { screen: DollarEducation },
     [Screens.TransactionReview]: { screen: TransactionReviewScreen },
     [Screens.PhotosEducation]: { screen: PhotosEducation },
     [Screens.QRCode]: { screen: QRCode },
     [Screens.QRScanner]: { screen: QRScanner },
-    [Screens.GoldEducation]: { screen: GoldEducation },
     [Screens.Backup]: { screen: Backup },
     [Screens.Pincode]: { screen: Pincode },
     [Screens.PaymentRequestListScreen]: { screen: PaymentRequestListScreen },

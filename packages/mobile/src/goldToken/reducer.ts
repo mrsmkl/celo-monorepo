@@ -3,13 +3,11 @@ import { Actions, ActionTypes } from 'src/goldToken/actions'
 export interface State {
   balance: string | null
   lastFetch: number | null
-  educationCompleted: boolean
 }
 
 export const initialState = {
   balance: null,
   lastFetch: null,
-  educationCompleted: false,
 }
 
 export function reducer(state: State | undefined = initialState, action: ActionTypes): State {
@@ -19,11 +17,6 @@ export function reducer(state: State | undefined = initialState, action: ActionT
         ...state,
         balance: action.balance,
         lastFetch: Date.now(),
-      }
-    case Actions.SET_EDUCATION_COMPLETED:
-      return {
-        ...state,
-        educationCompleted: action.educationCompleted,
       }
     default:
       return state

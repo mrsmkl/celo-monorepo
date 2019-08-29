@@ -11,9 +11,8 @@ import { CustomEventNames } from 'src/analytics/constants'
 import { componentWithAnalytics } from 'src/analytics/wrapper'
 import { PROMOTE_REWARDS_APP } from 'src/config'
 import { EscrowedPayment } from 'src/escrow/actions'
-import { setEducationCompleted as setGoldEducationCompleted } from 'src/goldToken/actions'
 import i18n, { Namespaces } from 'src/i18n'
-import { backupIcon, homeIcon, inviteFriendsIcon, rewardsAppIcon } from 'src/images/Images'
+import { backupIcon, inviteFriendsIcon, rewardsAppIcon } from 'src/images/Images'
 import { navigate } from 'src/navigator/NavigationService'
 import { Screens } from 'src/navigator/Screens'
 import EscrowedPaymentReminderNotification from 'src/notifications/EscrowedPaymentReminderNotification'
@@ -25,7 +24,6 @@ import { navigateToVerifierApp } from 'src/utils/linking'
 
 interface StateProps {
   backupCompleted: boolean
-  goldEducationCompleted: boolean
   dismissedEarnRewards: boolean
   dismissedInviteFriends: boolean
   paymentRequests: PaymentRequest[]
@@ -36,14 +34,12 @@ interface StateProps {
 interface DispatchProps {
   dismissEarnRewards: typeof dismissEarnRewards
   dismissInviteFriends: typeof dismissInviteFriends
-  setGoldEducationCompleted: typeof setGoldEducationCompleted
 }
 
 type Props = DispatchProps & StateProps & WithNamespaces
 
 const mapStateToProps = (state: RootState): StateProps => ({
   backupCompleted: state.account.backupCompleted,
-  goldEducationCompleted: state.goldToken.educationCompleted,
   paymentRequests: getPaymentRequests(state),
   dismissedEarnRewards: state.account.dismissedEarnRewards,
   dismissedInviteFriends: state.account.dismissedInviteFriends,
@@ -54,7 +50,6 @@ const mapStateToProps = (state: RootState): StateProps => ({
 const mapDispatchToProps = {
   dismissEarnRewards,
   dismissInviteFriends,
-  setGoldEducationCompleted,
 }
 
 interface State {
@@ -96,13 +91,7 @@ export class NotificationBox extends React.Component<Props, State> {
   }
 
   generalNotifications = (): Array<React.ReactElement<any>> => {
-    const {
-      t,
-      backupCompleted,
-      goldEducationCompleted,
-      dismissedEarnRewards,
-      dismissedInviteFriends,
-    } = this.props
+    const { t, backupCompleted, dismissedEarnRewards, dismissedInviteFriends } = this.props
     const actions = []
 
     if (!backupCompleted) {
@@ -141,31 +130,6 @@ export class NotificationBox extends React.Component<Props, State> {
             onPress: () => {
               this.props.dismissEarnRewards()
               CeloAnalytics.track(CustomEventNames.celorewards_notification_dismiss)
-            },
-          },
-        ],
-      })
-    }
-
-    if (!goldEducationCompleted) {
-      actions.push({
-        title: t('global:celoGold'),
-        text: i18n.t('exchangeFlow9:whatIsGold'),
-        image: homeIcon,
-        ctaList: [
-          {
-            text: t('exchange'),
-            onPress: () => {
-              this.props.setGoldEducationCompleted()
-              CeloAnalytics.track(CustomEventNames.celogold_notification_confirm)
-              navigate(Screens.ExchangeHomeScreen)
-            },
-          },
-          {
-            text: t('maybeLater'),
-            onPress: () => {
-              this.props.setGoldEducationCompleted()
-              CeloAnalytics.track(CustomEventNames.celogold_notification_dismiss)
             },
           },
         ],

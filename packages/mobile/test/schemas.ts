@@ -25,12 +25,10 @@ const vNeg1Schema = {
   },
   goldToken: {
     balance: null,
-    educationCompleted: false,
     lastFetch: null,
   },
   stableToken: {
     balance: null,
-    educationCompleted: false,
     lastFetch: null,
   },
   home: {
