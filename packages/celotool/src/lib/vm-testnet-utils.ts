@@ -13,11 +13,14 @@ import {
 } from '@celo/celotool/src/lib/generate_utils'
 import {
   applyTerraformModule,
+  deleteTerraformModuleWorkspace,
   destroyTerraformModule,
   getTerraformModuleOutputs,
   getTerraformModuleResourceNames,
   initTerraformModule,
+  newTerraformModuleWorkspaceIfNotExists,
   planTerraformModule,
+  selectTerraformModuleWorkspace,
   taintTerraformModuleResource,
   TerraformVars,
   untaintTerraformModuleResource,
@@ -94,17 +97,32 @@ async function deployModule(
   console.info('Initializing...')
   await initTerraformModule(terraformModule, vars, backendConfigVars)
 
+  await newTerraformModuleWorkspaceIfNotExists(terraformModule, celoEnv)
+  await selectTerraformModuleWorkspace(terraformModule, celoEnv)
+
   console.info('Planning...')
   await planTerraformModule(terraformModule, vars)
 
+  const switchToDefaultWorkspace = () => selectTerraformModuleWorkspace(terraformModule, 'default')
+
+  const onFail = async () => {
+    if (onConfirmFailed) {
+      await onConfirmFailed()
+    }
+    await switchToDefaultWorkspace()
+  }
+
   await confirmAction(
     `Are you sure you want to perform the above plan for Celo env ${celoEnv} in environment ${envType}?`,
-    onConfirmFailed,
+    onFail,
     onConfirmSuccess
   )
 
   console.info('Applying...')
   await applyTerraformModule(terraformModule)
+
+  // switch back to the default workspace
+  await switchToDefaultWorkspace()
 }
 
 export async function destroy(celoEnv: string) {
@@ -135,12 +153,23 @@ async function destroyModule(celoEnv: string, terraformModule: string, vars: Ter
   console.info('Initializing...')
   await initTerraformModule(terraformModule, vars, backendConfigVars)
 
+  await selectTerraformModuleWorkspace(terraformModule, celoEnv)
+
   console.info('Planning...')
   await planTerraformModule(terraformModule, vars, true)
 
-  await confirmAction(`Are you sure you want to destroy ${celoEnv} in environment ${envType}?`)
+  const switchToDefaultWorkspace = () => selectTerraformModuleWorkspace(terraformModule, 'default')
+
+  await confirmAction(
+    `Are you sure you want to destroy ${celoEnv} in environment ${envType}?`,
+    switchToDefaultWorkspace
+  )
 
   await destroyTerraformModule(terraformModule, vars)
+
+  await switchToDefaultWorkspace()
+
+  await deleteTerraformModuleWorkspace(terraformModule, celoEnv)
 }
 
 // force the recreation of various resources upon the next deployment

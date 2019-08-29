@@ -21,7 +21,8 @@ export async function initTerraformModule(
     modulePath,
     modulePath,
     getVarOptions(vars),
-    getVarOptions(backendConfigVars, 'backend-config')
+    getVarOptions(backendConfigVars, 'backend-config'),
+    '-reconfigure'
   )
 }
 
@@ -89,6 +90,53 @@ export async function getTerraformModuleOutputs(
 export async function getTerraformModuleResourceNames(moduleName: string) {
   const [output] = await execTerraformCmd(`terraform state list`, getModulePath(moduleName), false)
   return output.split('\n')
+}
+
+export async function newTerraformModuleWorkspaceIfNotExists(
+  moduleName: string,
+  workspaceName: string
+) {
+  const existingWorkspaces = await listTerraformModuleWorkspaces(moduleName)
+  if (!existingWorkspaces.includes(workspaceName)) {
+    return newTerraformModuleWorkspace(moduleName, workspaceName)
+  }
+}
+
+async function newTerraformModuleWorkspace(moduleName: string, workspaceName: string) {
+  await execTerraformCmd(
+    `terraform workspace new ${workspaceName}`,
+    getModulePath(moduleName),
+    true
+  )
+}
+
+export async function selectTerraformModuleWorkspace(moduleName: string, workspaceName: string) {
+  await execTerraformCmd(
+    `terraform workspace select ${workspaceName}`,
+    getModulePath(moduleName),
+    true
+  )
+}
+
+export async function deleteTerraformModuleWorkspace(moduleName: string, workspaceName: string) {
+  await execTerraformCmd(
+    `terraform workspace delete ${workspaceName}`,
+    getModulePath(moduleName),
+    true
+  )
+}
+
+async function listTerraformModuleWorkspaces(moduleName: string) {
+  const [output] = await execTerraformCmd(
+    `terraform workspace list`,
+    getModulePath(moduleName),
+    false
+  )
+  // parse output into an array of each workspace
+  return output
+    .replace(/ |\*/g, '')
+    .trim()
+    .split('\n')
 }
 
 function getModulePath(moduleName: string) {
