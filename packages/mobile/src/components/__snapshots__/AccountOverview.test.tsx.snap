@@ -50,76 +50,56 @@ exports[`renders correctly when Dollar education NUX flow hasn't been completed 
           global:celoDollars cUSD
         </Text>
         <View
-          accessible={true}
-          isTVSelectable={true}
-          onResponderGrant={[Function]}
-          onResponderMove={[Function]}
-          onResponderRelease={[Function]}
-          onResponderTerminate={[Function]}
-          onResponderTerminationRequest={[Function]}
-          onStartShouldSetResponder={[Function]}
           style={
             Object {
-              "alignItems": "center",
+              "alignItems": "flex-start",
               "flexDirection": "row",
-              "opacity": 1,
-              "overflow": "visible",
-              "paddingLeft": 10,
+              "marginTop": 5,
             }
           }
         >
-          <View
+          <Text
+            numberOfLines={1}
             style={
-              Object {
-                "alignItems": "flex-start",
-                "flexDirection": "row",
-                "marginTop": 5,
-              }
+              Array [
+                Object {
+                  "fontFamily": "Hind-Regular",
+                },
+                Object {
+                  "color": "#42D689",
+                  "fontSize": 21,
+                  "lineHeight": 29,
+                  "transform": Array [
+                    Object {
+                      "translateY": 2,
+                    },
+                  ],
+                },
+              ]
             }
           >
-            <Text
-              numberOfLines={1}
-              style={
-                Array [
-                  Object {
-                    "fontFamily": "Hind-Regular",
-                  },
-                  Object {
-                    "color": "#42D689",
-                    "fontSize": 21,
-                    "lineHeight": 29,
-                    "transform": Array [
-                      Object {
-                        "translateY": 2,
-                      },
-                    ],
-                  },
-                ]
-              }
-            >
-              $
-            </Text>
-            <Text
-              numberOfLines={1}
-              style={
-                Array [
-                  Object {
-                    "paddingHorizontal": 3,
-                  },
-                  Object {
-                    "fontFamily": "Hind-Regular",
-                  },
-                  Object {
-                    "color": "#42D689",
-                    "fontSize": 36,
-                    "lineHeight": 47,
-                  },
-                ]
-              }
-            >
-              55.00
-            </Text>
-          </View>
+            $
+          </Text>
+          <Text
+            numberOfLines={1}
+            style={
+              Array [
+                Object {
+                  "paddingHorizontal": 3,
+                },
+                Object {
+                  "fontFamily": "Hind-Regular",
+                },
+                Object {
+                  "color": "#42D689",
+                  "fontSize": 36,
+                  "lineHeight": 47,
+                },
+              ]
+            }
+          >
+            55.00
+          </Text>
         </View>
       </View>
       <View
@@ -163,75 +143,56 @@ exports[`renders correctly when Dollar education NUX flow hasn't been completed 
           global:celoGold cGLD
         </Text>
         <View
-          accessible={true}
-          isTVSelectable={true}
-          onResponderGrant={[Function]}
-          onResponderMove={[Function]}
-          onResponderRelease={[Function]}
-          onResponderTerminate={[Function]}
-          onResponderTerminationRequest={[Function]}
-          onStartShouldSetResponder={[Function]}
           style={
             Object {
-              "alignItems": "center",
+              "alignItems": "flex-start",
               "flexDirection": "row",
-              "opacity": 1,
-              "overflow": "visible",
+              "marginTop": 5,
             }
           }
         >
-          <View
+          <Text
+            numberOfLines={1}
             style={
-              Object {
-                "alignItems": "flex-start",
-                "flexDirection": "row",
-                "marginTop": 5,
-              }
+              Array [
+                Object {
+                  "fontFamily": "Hind-Regular",
+                },
+                Object {
+                  "color": "#FBCC5C",
+                  "fontSize": 21,
+                  "lineHeight": 29,
+                  "transform": Array [
+                    Object {
+                      "translateY": 2,
+                    },
+                  ],
+                },
+              ]
             }
           >
-            <Text
-              numberOfLines={1}
-              style={
-                Array [
-                  Object {
-                    "fontFamily": "Hind-Regular",
-                  },
-                  Object {
-                    "color": "#FBCC5C",
-                    "fontSize": 21,
-                    "lineHeight": 29,
-                    "transform": Array [
-                      Object {
-                        "translateY": 2,
-                      },
-                    ],
-                  },
-                ]
-              }
-            >
-              
-            </Text>
-            <Text
-              numberOfLines={1}
-              style={
-                Array [
-                  Object {
-                    "paddingHorizontal": 3,
-                  },
-                  Object {
-                    "fontFamily": "Hind-Regular",
-                  },
-                  Object {
-                    "color": "#FBCC5C",
-                    "fontSize": 36,
-                    "lineHeight": 47,
-                  },
-                ]
-              }
-            >
-              55.00
-            </Text>
-          </View>
+            
+          </Text>
+          <Text
+            numberOfLines={1}
+            style={
+              Array [
+                Object {
+                  "paddingHorizontal": 3,
+                },
+                Object {
+                  "fontFamily": "Hind-Regular",
+                },
+                Object {
+                  "color": "#FBCC5C",
+                  "fontSize": 36,
+                  "lineHeight": 47,
+                },
+              ]
+            }
+          >
+            55.00
+          </Text>
         </View>
       </View>
     </View>
@@ -289,75 +250,56 @@ exports[`renders correctly when Gold education NUX flow hasn't been completed 1`
           global:celoDollars cUSD
         </Text>
         <View
-          accessible={true}
-          isTVSelectable={true}
-          onResponderGrant={[Function]}
-          onResponderMove={[Function]}
-          onResponderRelease={[Function]}
-          onResponderTerminate={[Function]}
-          onResponderTerminationRequest={[Function]}
-          onStartShouldSetResponder={[Function]}
           style={
             Object {
-              "alignItems": "center",
+              "alignItems": "flex-start",
               "flexDirection": "row",
-              "opacity": 1,
-              "overflow": "visible",
+              "marginTop": 5,
             }
           }
         >
-          <View
+          <Text
+            numberOfLines={1}
             style={
-              Object {
-                "alignItems": "flex-start",
-                "flexDirection": "row",
-                "marginTop": 5,
-              }
+              Array [
+                Object {
+                  "fontFamily": "Hind-Regular",
+                },
+                Object {
+                  "color": "#42D689",
+                  "fontSize": 21,
+                  "lineHeight": 29,
+                  "transform": Array [
+                    Object {
+                      "translateY": 2,
+                    },
+                  ],
+                },
+              ]
             }
           >
-            <Text
-              numberOfLines={1}
-              style={
-                Array [
-                  Object {
-                    "fontFamily": "Hind-Regular",
-                  },
-                  Object {
-                    "color": "#42D689",
-                    "fontSize": 21,
-                    "lineHeight": 29,
-                    "transform": Array [
-                      Object {
-                        "translateY": 2,
-                      },
-                    ],
-                  },
-                ]
-              }
-            >
-              $
-            </Text>
-            <Text
-              numberOfLines={1}
-              style={
-                Array [
-                  Object {
-                    "paddingHorizontal": 3,
-                  },
-                  Object {
-                    "fontFamily": "Hind-Regular",
-                  },
-                  Object {
-                    "color": "#42D689",
-                    "fontSize": 36,
-                    "lineHeight": 47,
-                  },
-                ]
-              }
-            >
-              55.00
-            </Text>
-          </View>
+            $
+          </Text>
+          <Text
+            numberOfLines={1}
+            style={
+              Array [
+                Object {
+                  "paddingHorizontal": 3,
+                },
+                Object {
+                  "fontFamily": "Hind-Regular",
+                },
+                Object {
+                  "color": "#42D689",
+                  "fontSize": 36,
+                  "lineHeight": 47,
+                },
+              ]
+            }
+          >
+            55.00
+          </Text>
         </View>
       </View>
       <View
@@ -401,76 +343,56 @@ exports[`renders correctly when Gold education NUX flow hasn't been completed 1`
           global:celoGold cGLD
         </Text>
         <View
-          accessible={true}
-          isTVSelectable={true}
-          onResponderGrant={[Function]}
-          onResponderMove={[Function]}
-          onResponderRelease={[Function]}
-          onResponderTerminate={[Function]}
-          onResponderTerminationRequest={[Function]}
-          onStartShouldSetResponder={[Function]}
           style={
             Object {
-              "alignItems": "center",
+              "alignItems": "flex-start",
               "flexDirection": "row",
-              "opacity": 1,
-              "overflow": "visible",
-              "paddingLeft": 10,
+              "marginTop": 5,
             }
           }
         >
-          <View
+          <Text
+            numberOfLines={1}
             style={
-              Object {
-                "alignItems": "flex-start",
-                "flexDirection": "row",
-                "marginTop": 5,
-              }
+              Array [
+                Object {
+                  "fontFamily": "Hind-Regular",
+                },
+                Object {
+                  "color": "#FBCC5C",
+                  "fontSize": 21,
+                  "lineHeight": 29,
+                  "transform": Array [
+                    Object {
+                      "translateY": 2,
+                    },
+                  ],
+                },
+              ]
             }
           >
-            <Text
-              numberOfLines={1}
-              style={
-                Array [
-                  Object {
-                    "fontFamily": "Hind-Regular",
-                  },
-                  Object {
-                    "color": "#FBCC5C",
-                    "fontSize": 21,
-                    "lineHeight": 29,
-                    "transform": Array [
-                      Object {
-                        "translateY": 2,
-                      },
-                    ],
-                  },
-                ]
-              }
-            >
-              
-            </Text>
-            <Text
-              numberOfLines={1}
-              style={
-                Array [
-                  Object {
-                    "paddingHorizontal": 3,
-                  },
-                  Object {
-                    "fontFamily": "Hind-Regular",
-                  },
-                  Object {
-                    "color": "#FBCC5C",
-                    "fontSize": 36,
-                    "lineHeight": 47,
-                  },
-                ]
-              }
-            >
-              55.00
-            </Text>
-          </View>
+            
+          </Text>
+          <Text
+            numberOfLines={1}
+            style={
+              Array [
+                Object {
+                  "paddingHorizontal": 3,
+                },
+                Object {
+                  "fontFamily": "Hind-Regular",
+                },
+                Object {
+                  "color": "#FBCC5C",
+                  "fontSize": 36,
+                  "lineHeight": 47,
+                },
+              ]
+            }
+          >
+            55.00
+          </Text>
         </View>
       </View>
     </View>
@@ -528,75 +450,56 @@ exports[`renders correctly when not ready 1`] = `
           global:celoDollars cUSD
         </Text>
         <View
-          accessible={true}
-          isTVSelectable={true}
-          onResponderGrant={[Function]}
-          onResponderMove={[Function]}
-          onResponderRelease={[Function]}
-          onResponderTerminate={[Function]}
-          onResponderTerminationRequest={[Function]}
-          onStartShouldSetResponder={[Function]}
           style={
             Object {
-              "alignItems": "center",
+              "alignItems": "flex-start",
               "flexDirection": "row",
-              "opacity": 1,
-              "overflow": "visible",
+              "marginTop": 5,
             }
           }
         >
-          <View
+          <Text
+            numberOfLines={1}
             style={
-              Object {
-                "alignItems": "flex-start",
-                "flexDirection": "row",
-                "marginTop": 5,
-              }
+              Array [
+                Object {
+                  "fontFamily": "Hind-Regular",
+                },
+                Object {
+                  "color": "#42D689",
+                  "fontSize": 21,
+                  "lineHeight": 29,
+                  "transform": Array [
+                    Object {
+                      "translateY": 2,
+                    },
+                  ],
+                },
+              ]
             }
           >
-            <Text
-              numberOfLines={1}
-              style={
-                Array [
-                  Object {
-                    "fontFamily": "Hind-Regular",
-                  },
-                  Object {
-                    "color": "#42D689",
-                    "fontSize": 21,
-                    "lineHeight": 29,
-                    "transform": Array [
-                      Object {
-                        "translateY": 2,
-                      },
-                    ],
-                  },
-                ]
-              }
-            >
-              $
-            </Text>
-            <Text
-              numberOfLines={1}
-              style={
-                Array [
-                  Object {
-                    "paddingHorizontal": 3,
-                  },
-                  Object {
-                    "fontFamily": "Hind-Regular",
-                  },
-                  Object {
-                    "color": "#42D689",
-                    "fontSize": 36,
-                    "lineHeight": 47,
-                  },
-                ]
-              }
-            >
-              55.00
-            </Text>
-          </View>
+            $
+          </Text>
+          <Text
+            numberOfLines={1}
+            style={
+              Array [
+                Object {
+                  "paddingHorizontal": 3,
+                },
+                Object {
+                  "fontFamily": "Hind-Regular",
+                },
+                Object {
+                  "color": "#42D689",
+                  "fontSize": 36,
+                  "lineHeight": 47,
+                },
+              ]
+            }
+          >
+            55.00
+          </Text>
         </View>
       </View>
       <View
@@ -640,75 +543,56 @@ exports[`renders correctly when not ready 1`] = `
           global:celoGold cGLD
         </Text>
         <View
-          accessible={true}
-          isTVSelectable={true}
-          onResponderGrant={[Function]}
-          onResponderMove={[Function]}
-          onResponderRelease={[Function]}
-          onResponderTerminate={[Function]}
-          onResponderTerminationRequest={[Function]}
-          onStartShouldSetResponder={[Function]}
           style={
             Object {
-              "alignItems": "center",
+              "alignItems": "flex-start",
               "flexDirection": "row",
-              "opacity": 1,
-              "overflow": "visible",
+              "marginTop": 5,
             }
           }
         >
-          <View
+          <Text
+            numberOfLines={1}
             style={
-              Object {
-                "alignItems": "flex-start",
-                "flexDirection": "row",
-                "marginTop": 5,
-              }
+              Array [
+                Object {
+                  "fontFamily": "Hind-Regular",
+                },
+                Object {
+                  "color": "#FBCC5C",
+                  "fontSize": 21,
+                  "lineHeight": 29,
+                  "transform": Array [
+                    Object {
+                      "translateY": 2,
+                    },
+                  ],
+                },
+              ]
             }
           >
-            <Text
-              numberOfLines={1}
-              style={
-                Array [
-                  Object {
-                    "fontFamily": "Hind-Regular",
-                  },
-                  Object {
-                    "color": "#FBCC5C",
-                    "fontSize": 21,
-                    "lineHeight": 29,
-                    "transform": Array [
-                      Object {
-                        "translateY": 2,
-                      },
-                    ],
-                  },
-                ]
-              }
-            >
-              
-            </Text>
-            <Text
-              numberOfLines={1}
-              style={
-                Array [
-                  Object {
-                    "paddingHorizontal": 3,
-                  },
-                  Object {
-                    "fontFamily": "Hind-Regular",
-                  },
-                  Object {
-                    "color": "#FBCC5C",
-                    "fontSize": 36,
-                    "lineHeight": 47,
-                  },
-                ]
-              }
-            >
-              55.00
-            </Text>
-          </View>
+            
+          </Text>
+          <Text
+            numberOfLines={1}
+            style={
+              Array [
+                Object {
+                  "paddingHorizontal": 3,
+                },
+                Object {
+                  "fontFamily": "Hind-Regular",
+                },
+                Object {
+                  "color": "#FBCC5C",
+                  "fontSize": 36,
+                  "lineHeight": 47,
+                },
+              ]
+            }
+          >
+            55.00
+          </Text>
         </View>
       </View>
     </View>
@@ -766,75 +650,56 @@ exports[`renders correctly when ready 1`] = `
           global:celoDollars cUSD
         </Text>
         <View
-          accessible={true}
-          isTVSelectable={true}
-          onResponderGrant={[Function]}
-          onResponderMove={[Function]}
-          onResponderRelease={[Function]}
-          onResponderTerminate={[Function]}
-          onResponderTerminationRequest={[Function]}
-          onStartShouldSetResponder={[Function]}
           style={
             Object {
-              "alignItems": "center",
+              "alignItems": "flex-start",
               "flexDirection": "row",
-              "opacity": 1,
-              "overflow": "visible",
+              "marginTop": 5,
             }
           }
         >
-          <View
+          <Text
+            numberOfLines={1}
             style={
-              Object {
-                "alignItems": "flex-start",
-                "flexDirection": "row",
-                "marginTop": 5,
-              }
+              Array [
+                Object {
+                  "fontFamily": "Hind-Regular",
+                },
+                Object {
+                  "color": "#42D689",
+                  "fontSize": 21,
+                  "lineHeight": 29,
+                  "transform": Array [
+                    Object {
+                      "translateY": 2,
+                    },
+                  ],
+                },
+              ]
             }
           >
-            <Text
-              numberOfLines={1}
-              style={
-                Array [
-                  Object {
-                    "fontFamily": "Hind-Regular",
-                  },
-                  Object {
-                    "color": "#42D689",
-                    "fontSize": 21,
-                    "lineHeight": 29,
-                    "transform": Array [
-                      Object {
-                        "translateY": 2,
-                      },
-                    ],
-                  },
-                ]
-              }
-            >
-              $
-            </Text>
-            <Text
-              numberOfLines={1}
-              style={
-                Array [
-                  Object {
-                    "paddingHorizontal": 3,
-                  },
-                  Object {
-                    "fontFamily": "Hind-Regular",
-                  },
-                  Object {
-                    "color": "#42D689",
-                    "fontSize": 36,
-                    "lineHeight": 47,
-                  },
-                ]
-              }
-            >
-              55.00
-            </Text>
-          </View>
+            $
+          </Text>
+          <Text
+            numberOfLines={1}
+            style={
+              Array [
+                Object {
+                  "paddingHorizontal": 3,
+                },
+                Object {
+                  "fontFamily": "Hind-Regular",
+                },
+                Object {
+                  "color": "#42D689",
+                  "fontSize": 36,
+                  "lineHeight": 47,
+                },
+              ]
+            }
+          >
+            55.00
+          </Text>
         </View>
       </View>
       <View
@@ -878,75 +743,56 @@ exports[`renders correctly when ready 1`] = `
           global:celoGold cGLD
         </Text>
         <View
-          accessible={true}
-          isTVSelectable={true}
-          onResponderGrant={[Function]}
-          onResponderMove={[Function]}
-          onResponderRelease={[Function]}
-          onResponderTerminate={[Function]}
-          onResponderTerminationRequest={[Function]}
-          onStartShouldSetResponder={[Function]}
           style={
             Object {
-              "alignItems": "center",
+              "alignItems": "flex-start",
               "flexDirection": "row",
-              "opacity": 1,
-              "overflow": "visible",
+              "marginTop": 5,
             }
           }
         >
-          <View
+          <Text
+            numberOfLines={1}
             style={
-              Object {
-                "alignItems": "flex-start",
-                "flexDirection": "row",
-                "marginTop": 5,
-              }
+              Array [
+                Object {
+                  "fontFamily": "Hind-Regular",
+                },
+                Object {
+                  "color": "#FBCC5C",
+                  "fontSize": 21,
+                  "lineHeight": 29,
+                  "transform": Array [
+                    Object {
+                      "translateY": 2,
+                    },
+                  ],
+                },
+              ]
             }
           >
-            <Text
-              numberOfLines={1}
-              style={
-                Array [
-                  Object {
-                    "fontFamily": "Hind-Regular",
-                  },
-                  Object {
-                    "color": "#FBCC5C",
-                    "fontSize": 21,
-                    "lineHeight": 29,
-                    "transform": Array [
-                      Object {
-                        "translateY": 2,
-                      },
-                    ],
-                  },
-                ]
-              }
-            >
-              
-            </Text>
-            <Text
-              numberOfLines={1}
-              style={
-                Array [
-                  Object {
-                    "paddingHorizontal": 3,
-                  },
-                  Object {
-                    "fontFamily": "Hind-Regular",
-                  },
-                  Object {
-                    "color": "#FBCC5C",
-                    "fontSize": 36,
-                    "lineHeight": 47,
-                  },
-                ]
-              }
-            >
-              55.00
-            </Text>
-          </View>
+            
+          </Text>
+          <Text
+            numberOfLines={1}
+            style={
+              Array [
+                Object {
+                  "paddingHorizontal": 3,
+                },
+                Object {
+                  "fontFamily": "Hind-Regular",
+                },
+                Object {
+                  "color": "#FBCC5C",
+                  "fontSize": 36,
+                  "lineHeight": 47,
+                },
+              ]
+            }
+          >
+            55.00
+          </Text>
         </View>
       </View>
     </View>
@@ -1004,75 +850,56 @@ exports[`renders correctly when transaction pending 1`] = `
           global:celoDollars cUSD
         </Text>
         <View
-          accessible={true}
-          isTVSelectable={true}
-          onResponderGrant={[Function]}
-          onResponderMove={[Function]}
-          onResponderRelease={[Function]}
-          onResponderTerminate={[Function]}
-          onResponderTerminationRequest={[Function]}
-          onStartShouldSetResponder={[Function]}
           style={
             Object {
-              "alignItems": "center",
+              "alignItems": "flex-start",
               "flexDirection": "row",
-              "opacity": 1,
-              "overflow": "visible",
+              "marginTop": 5,
             }
           }
         >
-          <View
+          <Text
+            numberOfLines={1}
             style={
-              Object {
-                "alignItems": "flex-start",
-                "flexDirection": "row",
-                "marginTop": 5,
-              }
+              Array [
+                Object {
+                  "fontFamily": "Hind-Regular",
+                },
+                Object {
+                  "color": "#42D689",
+                  "fontSize": 21,
+                  "lineHeight": 29,
+                  "transform": Array [
+                    Object {
+                      "translateY": 2,
+                    },
+                  ],
+                },
+              ]
             }
           >
-            <Text
-              numberOfLines={1}
-              style={
-                Array [
-                  Object {
-                    "fontFamily": "Hind-Regular",
-                  },
-                  Object {
-                    "color": "#42D689",
-                    "fontSize": 21,
-                    "lineHeight": 29,
-                    "transform": Array [
-                      Object {
-                        "translateY": 2,
-                      },
-                    ],
-                  },
-                ]
-              }
-            >
-              $
-            </Text>
-            <Text
-              numberOfLines={1}
-              style={
-                Array [
-                  Object {
-                    "paddingHorizontal": 3,
-                  },
-                  Object {
-                    "fontFamily": "Hind-Regular",
-                  },
-                  Object {
-                    "color": "#42D689",
-                    "fontSize": 36,
-                    "lineHeight": 47,
-                  },
-                ]
-              }
-            >
-              55.00
-            </Text>
-          </View>
+            $
+          </Text>
+          <Text
+            numberOfLines={1}
+            style={
+              Array [
+                Object {
+                  "paddingHorizontal": 3,
+                },
+                Object {
+                  "fontFamily": "Hind-Regular",
+                },
+                Object {
+                  "color": "#42D689",
+                  "fontSize": 36,
+                  "lineHeight": 47,
+                },
+              ]
+            }
+          >
+            55.00
+          </Text>
         </View>
       </View>
       <View
@@ -1116,75 +943,56 @@ exports[`renders correctly when transaction pending 1`] = `
           global:celoGold cGLD
         </Text>
         <View
-          accessible={true}
-          isTVSelectable={true}
-          onResponderGrant={[Function]}
-          onResponderMove={[Function]}
-          onResponderRelease={[Function]}
-          onResponderTerminate={[Function]}
-          onResponderTerminationRequest={[Function]}
-          onStartShouldSetResponder={[Function]}
           style={
             Object {
-              "alignItems": "center",
+              "alignItems": "flex-start",
               "flexDirection": "row",
-              "opacity": 1,
-              "overflow": "visible",
+              "marginTop": 5,
             }
           }
         >
-          <View
+          <Text
+            numberOfLines={1}
             style={
-              Object {
-                "alignItems": "flex-start",
-                "flexDirection": "row",
-                "marginTop": 5,
-              }
+              Array [
+                Object {
+                  "fontFamily": "Hind-Regular",
+                },
+                Object {
+                  "color": "#FBCC5C",
+                  "fontSize": 21,
+                  "lineHeight": 29,
+                  "transform": Array [
+                    Object {
+                      "translateY": 2,
+                    },
+                  ],
+                },
+              ]
             }
           >
-            <Text
-              numberOfLines={1}
-              style={
-                Array [
-                  Object {
-                    "fontFamily": "Hind-Regular",
-                  },
-                  Object {
-                    "color": "#FBCC5C",
-                    "fontSize": 21,
-                    "lineHeight": 29,
-                    "transform": Array [
-                      Object {
-                        "translateY": 2,
-                      },
-                    ],
-                  },
-                ]
-              }
-            >
-              
-            </Text>
-            <Text
-              numberOfLines={1}
-              style={
-                Array [
-                  Object {
-                    "paddingHorizontal": 3,
-                  },
-                  Object {
-                    "fontFamily": "Hind-Regular",
-                  },
-                  Object {
-                    "color": "#FBCC5C",
-                    "fontSize": 36,
-                    "lineHeight": 47,
-                  },
-                ]
-              }
-            >
-              55.00
-            </Text>
-          </View>
+            
+          </Text>
+          <Text
+            numberOfLines={1}
+            style={
+              Array [
+                Object {
+                  "paddingHorizontal": 3,
+                },
+                Object {
+                  "fontFamily": "Hind-Regular",
+                },
+                Object {
+                  "color": "#FBCC5C",
+                  "fontSize": 36,
+                  "lineHeight": 47,
+                },
+              ]
+            }
+          >
+            55.00
+          </Text>
         </View>
       </View>
     </View>
