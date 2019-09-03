@@ -261,6 +261,10 @@ export function* doRedeemInvite(action: RedeemInviteAction) {
         if (accountBalance.isGreaterThan(0)) {
           yield redeemSuccess(name, account)
           return
+        } else {
+          Logger.debug(TAG, '@redeemInviteCode', 'InsufficientBalance')
+          yield put(showError(ErrorMessages.INVITE_FAILED_INSUFFICIENT_BALANCE))
+          return false
         }
       }
 

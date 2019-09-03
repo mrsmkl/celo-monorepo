@@ -40,4 +40,6 @@ export enum ErrorMessages {
   QR_FAILED_INVALID_ADDRESS = 'qrFailedInvalidAddress',
   CORRUPTED_CHAIN_DELETED = 'corruptedChainDeleted',
   CALCULATE_FEE_FAILED = 'calculateFeeFailed',
+  INVITE_FAILED_INSUFFICIENT_BALANCE = 'inviteFailedInsufficientBalance',
+  BACKUP_ZERO_BAL_MESSAGE = 'backupZeroBalMessage',
 }

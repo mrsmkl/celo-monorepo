@@ -1,3 +1,5 @@
+import { getStableTokenContract } from '@celo/walletkit'
+import BigNumber from 'bignumber.js'
 import { mnemonicToSeedHex } from 'react-native-bip39'
 import { call, put, spawn, takeLeading } from 'redux-saga/effects'
 import { setBackupCompleted } from 'src/account'
@@ -8,6 +10,7 @@ import { Actions, ImportBackupPhraseAction } from 'src/import/actions'
 import { redeemComplete } from 'src/invite/actions'
 import { navigateReset } from 'src/navigator/NavigationService'
 import { Screens } from 'src/navigator/Screens'
+import { web3 } from 'src/web3/contracts'
 import { assignAccountFromPrivateKey } from 'src/web3/saga'
 
 export function* importBackupPhraseSaga(action: ImportBackupPhraseAction) {
@@ -19,6 +22,11 @@ export function* importBackupPhraseSaga(action: ImportBackupPhraseAction) {
     yield put(redeemComplete(true))
     yield put(refreshAllBalances())
     navigateReset(Screens.ImportContacts)
+    const StableToken = yield call(getStableTokenContract, web3)
+    const accountBalance = new BigNumber(yield call(StableToken.methods.balanceOf(account).call))
+    if (accountBalance.isZero()) {
+      yield put(showError(ErrorMessages.BACKUP_ZERO_BAL_MESSAGE))
+    }
   } else {
     yield put(showError(ErrorMessages.IMPORT_BACKUP_FAILED))
   }
