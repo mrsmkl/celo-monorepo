@@ -17,7 +17,7 @@ import { Namespaces } from 'src/i18n'
 const numeral = require('numeral')
 
 type Props = {
-  questionNumber: number
+  questionNumber?: number
   testWordIndex: number
   words: string[]
   correctAnswer: string
@@ -62,6 +62,10 @@ class BackupQuestion extends React.PureComponent<Props, State> {
   }
 
   trackAnalytics(name: string, data: object = {}) {
+    if (!this.props.questionNumber) {
+      return
+    }
+
     if (
       this.eventNames.hasOwnProperty(name) &&
       this.eventNames[name].hasOwnProperty(this.props.questionNumber)
@@ -109,9 +113,11 @@ class BackupQuestion extends React.PureComponent<Props, State> {
         </View>
         <ScrollView keyboardShouldPersistTaps="always">
           <View style={styles.questionTextContainer}>
-            <Text style={[fontStyles.body, styles.question]}>
-              {t('question') + ' ' + this.props.questionNumber}
-            </Text>
+            {this.props.questionNumber !== undefined && (
+              <Text style={[fontStyles.body, styles.question]}>
+                {t('question') + ' ' + this.props.questionNumber}
+              </Text>
+            )}
             <Text style={[fontStyles.h1, styles.questionPhrase]}>
               {t('questionPhrase.0') +
                 numeral(this.props.testWordIndex + 1).format('0o') +

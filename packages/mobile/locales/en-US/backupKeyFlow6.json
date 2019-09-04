@@ -1,6 +1,7 @@
 {
   "readOnlyMode": "Read Only Mode Set Backup Key to continue sending and receiving {{CeloDollars}}",
   "getBackupKey": "Get Backup Key",
+  "checkBackupKey": "Check Backup Key",
   "learnBackupKey": "Learn Your Backup Key",
   "editProfile": "Edit Profile",
   "backupKey": "Backup Key",
@@ -79,6 +80,7 @@
     "Important: please keep this private. \n\nI'm sending you the Backup Phrase to my Celo Wallet: ",
   "backupPrompt":
     "For the security of your funds, your account is frozen until you get your Backup Key",
+  "backupCheckPrompt": "For the security of your funds, check that your Backup Key is accessible",
   "copyToClipboard": "Copy To Clipboard",
   "copiedToClipboard": "Copied To Clipboard"
 }

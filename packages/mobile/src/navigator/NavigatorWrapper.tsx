@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native'
 import { createAppContainer, NavigationState } from 'react-navigation'
 import { connect } from 'react-redux'
 import AlertBanner from 'src/alert/AlertBanner'
+import BackupCheckPrompt from 'src/backup/BackupCheckPrompt'
 import { recordStateChange, setTopLevelNavigator } from 'src/navigator/NavigationService'
 import Navigator from 'src/navigator/Navigator'
 import BackupPrompt from 'src/shared/BackupPrompt'
@@ -29,6 +30,7 @@ export class NavigatorWrapper extends React.Component<Props> {
         <AppContainer ref={this.setNavigator} onNavigationStateChange={navigationStateChange} />
         <View style={styles.floating}>
           <BackupPrompt />
+          <BackupCheckPrompt />
           <AlertBanner />
         </View>
       </View>

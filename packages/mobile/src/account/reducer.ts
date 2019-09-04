@@ -17,9 +17,15 @@ export interface State {
   accountCreationTime: number
   backupCompleted: boolean
   backupDelayedTime: number
+  backupCheck: BackupCheck
   paymentRequests: PaymentRequest[]
   dismissedEarnRewards: boolean
   dismissedInviteFriends: boolean
+}
+
+export interface BackupCheck {
+  lastCheck: number
+  checkStep: number
 }
 
 export interface UserContactDetails {
@@ -43,6 +49,10 @@ export const initialState = {
   paymentRequests: [],
   backupCompleted: false,
   backupDelayedTime: 0,
+  backupCheck: {
+    lastCheck: 0,
+    checkStep: 0,
+  },
   dismissedEarnRewards: false,
   dismissedInviteFriends: false,
 }
@@ -89,11 +99,23 @@ export const reducer = (state: State | undefined = initialState, action: ActionT
       return {
         ...state,
         backupCompleted: true,
+        backupCheck: {
+          lastCheck: getRemoteTime(),
+          checkStep: state.backupCheck.checkStep,
+        },
       }
     case Actions.SET_BACKUP_DELAYED_ACTION:
       return {
         ...state,
         backupDelayedTime: getRemoteTime(),
+      }
+    case Actions.SET_BACKUP_CHECKED_ACTION:
+      return {
+        ...state,
+        backupCheck: {
+          lastCheck: getRemoteTime(),
+          checkStep: action.step,
+        },
       }
     case Actions.UPDATE_PAYMENT_REQUESTS:
       return {

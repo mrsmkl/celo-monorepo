@@ -1,6 +1,6 @@
 import { createSelector } from 'reselect'
 import { getPaymentRequests } from 'src/account/selectors'
-import { DAYS_TO_BACKUP, DAYS_TO_DELAY } from 'src/backup/Backup'
+import { CHECK_INTERVALS, DAYS_TO_BACKUP, DAYS_TO_DELAY } from 'src/backup/Backup'
 import { BALANCE_OUT_OF_SYNC_THRESHOLD } from 'src/config'
 import { isGethConnectedSelector } from 'src/geth/reducer'
 import { RootState } from 'src/redux/reducers'
@@ -21,6 +21,26 @@ export const isBackupTooLate = (state: RootState) => {
     state.account.accountCreationTime,
     state.account.backupCompleted,
     state.account.backupDelayedTime
+  )
+}
+
+export const disabledDueToNoCheck = (
+  backupCompleted: boolean,
+  lastBackupCheck: number,
+  checkStep: number
+) => {
+  if (!backupCompleted || checkStep >= CHECK_INTERVALS.length) {
+    return false
+  }
+
+  return timeDeltaInDays(Date.now(), lastBackupCheck) > CHECK_INTERVALS[checkStep]
+}
+
+export const isCheckTooLate = (state: RootState) => {
+  return disabledDueToNoCheck(
+    state.account.backupCompleted,
+    state.account.backupCheck.lastCheck,
+    state.account.backupCheck.checkStep
   )
 }
 

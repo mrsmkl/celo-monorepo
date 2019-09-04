@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { connect } from 'react-redux'
-import { setBackupCompleted, setBackupDelayed } from 'src/account/actions'
+import { setBackupChecked, setBackupCompleted, setBackupDelayed } from 'src/account/actions'
 import componentWithAnalytics from 'src/analytics/wrapper'
 import { enterBackupFlow, exitBackupFlow } from 'src/app/actions'
 import BackupComplete from 'src/backup/BackupComplete'
@@ -10,12 +10,14 @@ import BackupQuestion from 'src/backup/BackupQuestion'
 import { createQuizWordList, selectQuizWordOptions } from 'src/backup/utils'
 import { navigateBack } from 'src/navigator/NavigationService'
 import { RootState } from 'src/redux/reducers'
-import { isBackupTooLate } from 'src/redux/selectors'
+import { isBackupTooLate, isCheckTooLate } from 'src/redux/selectors'
 import { getKey } from 'src/utils/keyStore'
 import Logger from 'src/utils/Logger'
 
 export const DAYS_TO_BACKUP = 1
 export const DAYS_TO_DELAY = 1 / 24 // 1 hour delay
+
+export const CHECK_INTERVALS = [1, 7, 14, 30] // days to check
 
 const OPTIONS_PER_QUESTION = 4
 const INDICES_TO_TEST = [0, 2, 3, 6]
@@ -32,11 +34,14 @@ interface StateProps {
   backupCompleted: boolean
   backupTooLate: boolean
   backupDelayedTime: number
+  checkTooLate: boolean
+  checkStep: number
 }
 
 interface DispatchProps {
   setBackupCompleted: typeof setBackupCompleted
   setBackupDelayed: typeof setBackupDelayed
+  setBackupChecked: typeof setBackupChecked
   enterBackupFlow: typeof enterBackupFlow
   exitBackupFlow: typeof exitBackupFlow
 }
@@ -49,6 +54,8 @@ const mapStateToProps = (state: RootState): StateProps => {
     backupCompleted: state.account.backupCompleted,
     backupTooLate: isBackupTooLate(state),
     backupDelayedTime: state.account.backupDelayedTime,
+    checkTooLate: isCheckTooLate(state),
+    checkStep: state.account.backupCheck.checkStep,
   }
 }
 
@@ -123,9 +130,35 @@ export class Backup extends React.Component<Props, State> {
     navigateBack()
   }
 
+  onCorrectCheck = () => {
+    this.props.setBackupChecked(this.props.checkStep + 1)
+  }
+
   render() {
     const { mnemonic, currentQuestion, wordsForBackupQuiz } = this.state
-    const { backupCompleted, backupDelayedTime, backupTooLate } = this.props
+    const { backupCompleted, backupDelayedTime, backupTooLate, checkTooLate } = this.props
+
+    if (checkTooLate) {
+      const indexToTest = INDICES_TO_TEST[Math.floor(Math.random() * INDICES_TO_TEST.length)]
+      const correctWord = mnemonic.split(' ')[indexToTest]
+      const wordOptions = selectQuizWordOptions(
+        correctWord,
+        wordsForBackupQuiz,
+        OPTIONS_PER_QUESTION
+      )
+
+      return (
+        <BackupQuestion
+          testWordIndex={indexToTest}
+          words={wordOptions}
+          correctAnswer={correctWord}
+          onReturnToPhrase={this.returnToPhrase}
+          onCorrectSubmit={this.onCorrectCheck}
+          onWrongSubmit={this.returnToPhrase}
+          onCancel={this.onCancel}
+        />
+      )
+    }
 
     if (backupCompleted) {
       return (
@@ -188,6 +221,6 @@ export class Backup extends React.Component<Props, State> {
 export default componentWithAnalytics(
   connect<StateProps, DispatchProps, {}, RootState>(
     mapStateToProps,
-    { setBackupCompleted, setBackupDelayed, enterBackupFlow, exitBackupFlow }
+    { setBackupCompleted, setBackupDelayed, setBackupChecked, enterBackupFlow, exitBackupFlow }
   )(Backup)
 )
