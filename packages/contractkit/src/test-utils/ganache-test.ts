@@ -1,10 +1,20 @@
+import { Web3ProviderEngine } from '@0x/subproviders'
 import Web3 from 'web3'
 import { JsonRPCResponse } from 'web3/providers'
 import { injectDebugProvider } from '../providers/debug-provider'
 
 export function jsonRpcCall<O>(web3: Web3, method: string, params: any[]): Promise<O> {
   return new Promise<O>((resolve, reject) => {
-    web3.currentProvider.send(
+    let currentProvider = web3.currentProvider
+    // Web3ProviderEngine does not support synchronous `send` request.
+    // So, get the underlying provider.
+    if (currentProvider instanceof Web3ProviderEngine) {
+      const providerEngine = web3.currentProvider as Web3ProviderEngine
+      // @ts-ignore-next-line - I have to access private `_providers` variable
+      currentProvider = providerEngine._providers.slice(-1)[0]._provider
+    }
+
+    currentProvider.send(
       {
         id: new Date().getTime(),
         jsonrpc: '2.0',

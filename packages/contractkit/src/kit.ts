@@ -3,8 +3,10 @@ import { TransactionObject, Tx } from 'web3/eth/types'
 import { AddressRegistry } from './address-registry'
 import { Address, CeloContract, CeloToken } from './base'
 import { WrapperCache } from './contract-cache'
+import { GasPriceMinimum } from './generated/types/GasPriceMinimum'
 import { sendTransaction, TxOptions } from './utils/send-tx'
 import { toTxResult, TransactionResult } from './utils/tx-result'
+import { addLocalAccount } from './utils/web3-utils'
 import { Web3ContractCache } from './web3-contract-cache'
 
 export function newKit(url: string) {
@@ -49,22 +51,45 @@ export class ContractKit {
     return { ...this._defaultOptions }
   }
 
+  addAccount(privateKey: string) {
+    addLocalAccount(this.web3, privateKey)
+  }
+
   setGasCurrencyAddress(address: Address) {
     this._defaultOptions.gasCurrency = address
   }
 
-  sendTransaction(tx: Tx): TransactionResult {
+  async sendTransaction(tx: Tx): Promise<TransactionResult> {
+    const gasFeeRecipient = await this.web3.eth.getCoinbase()
+    // Fail early if gas fee recipient is not available.
+    // Most likely cause is that the client is connected to a light node and not
+    // a full node.
+    if (gasFeeRecipient === null || gasFeeRecipient.length === 0) {
+      throw new Error(
+        `Gas Fee Recipient ${gasFeeRecipient} is missing for a locally signed transaction.`
+      )
+    }
     const promiEvent = this.web3.eth.sendTransaction({
       from: this._defaultOptions.from,
-      // TODO this won't work for locally signed TX
       gasPrice: '0',
       // @ts-ignore
       gasCurrency: this._defaultOptions.gasCurrency,
+      // @ts-ignore
+      gasFeeRecipient: this.defaultOptions.gasFeeRecipient,
       // TODO needed for locally signed tx, ignored by now (celo-blockchain with set it)
       // gasFeeRecipient: this.defaultOptions.gasFeeRecipient,
       ...tx,
     })
     return toTxResult(promiEvent)
+  }
+
+  async getGasPrice(gasCurrency: string | undefined): Promise<string | undefined> {
+    // Gold Token
+    if (gasCurrency === undefined) {
+      return String(await this.web3.eth.getGasPrice())
+    }
+    const gasPriceMinimum: GasPriceMinimum = await this._web3Contracts.getGasPriceMinimum()
+    return gasPriceMinimum.methods.getGasPriceMinimum(gasCurrency).call()
   }
 
   sendTransactionObject(
