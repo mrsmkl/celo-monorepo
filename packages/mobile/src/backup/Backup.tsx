@@ -7,7 +7,11 @@ import BackupComplete from 'src/backup/BackupComplete'
 import BackupIntroduction from 'src/backup/BackupIntroduction'
 import BackupPhrase from 'src/backup/BackupPhrase'
 import BackupQuestion from 'src/backup/BackupQuestion'
-import { createQuizWordList, selectQuizWordOptions } from 'src/backup/utils'
+import {
+  createInverseQuizWordList,
+  createQuizWordList,
+  selectQuizWordOptions,
+} from 'src/backup/utils'
 import { navigateBack } from 'src/navigator/NavigationService'
 import { RootState } from 'src/redux/reducers'
 import { isBackupTooLate, isCheckTooLate } from 'src/redux/selectors'
@@ -134,27 +138,39 @@ export class Backup extends React.Component<Props, State> {
     this.props.setBackupChecked(this.props.checkStep + 1)
   }
 
+  onWrongCheck = () => {
+    // Let's check again at the next sooner step.  Or should this stay at the current step?
+    this.props.setBackupChecked(Math.max(0, this.props.checkStep - 1))
+  }
+
   render() {
     const { mnemonic, currentQuestion, wordsForBackupQuiz } = this.state
-    const { backupCompleted, backupDelayedTime, backupTooLate, checkTooLate } = this.props
+    const {
+      backupCompleted,
+      backupDelayedTime,
+      backupTooLate,
+      checkTooLate,
+      checkStep,
+      language,
+    } = this.props
 
     if (checkTooLate) {
-      const indexToTest = INDICES_TO_TEST[Math.floor(Math.random() * INDICES_TO_TEST.length)]
-      const correctWord = mnemonic.split(' ')[indexToTest]
-      const wordOptions = selectQuizWordOptions(
-        correctWord,
-        wordsForBackupQuiz,
+      const { correctWord, words } = createInverseQuizWordList(
+        mnemonic,
+        language,
         OPTIONS_PER_QUESTION
       )
 
       return (
         <BackupQuestion
-          testWordIndex={indexToTest}
-          words={wordOptions}
+          inverse={true}
+          isCheck={true}
+          failedNextCheck={CHECK_INTERVALS[checkStep - 1]}
+          words={words}
           correctAnswer={correctWord}
           onReturnToPhrase={this.returnToPhrase}
           onCorrectSubmit={this.onCorrectCheck}
-          onWrongSubmit={this.returnToPhrase}
+          onWrongSubmit={this.onWrongCheck}
           onCancel={this.onCancel}
         />
       )

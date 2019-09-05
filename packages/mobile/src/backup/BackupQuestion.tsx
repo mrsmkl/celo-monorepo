@@ -18,7 +18,10 @@ const numeral = require('numeral')
 
 type Props = {
   questionNumber?: number
-  testWordIndex: number
+  testWordIndex?: number
+  inverse?: boolean
+  isCheck?: boolean
+  failedNextCheck?: number
   words: string[]
   correctAnswer: string
   onReturnToPhrase: () => void
@@ -118,11 +121,20 @@ class BackupQuestion extends React.PureComponent<Props, State> {
                 {t('question') + ' ' + this.props.questionNumber}
               </Text>
             )}
-            <Text style={[fontStyles.h1, styles.questionPhrase]}>
-              {t('questionPhrase.0') +
-                numeral(this.props.testWordIndex + 1).format('0o') +
-                t('questionPhrase.1')}
-            </Text>
+            {this.props.testWordIndex !== undefined && (
+              <Text style={[fontStyles.h1, styles.questionPhrase]}>
+                {t('questionPhrase.0') +
+                  numeral(this.props.testWordIndex + 1).format('0o') +
+                  t('questionPhrase.1')}
+              </Text>
+            )}
+            {this.props.inverse && (
+              <Text style={[fontStyles.h1, styles.questionPhrase]}>
+                {t('inverseQuestion.0')}
+                <Text style={[fontStyles.bold]}>{t('inverseQuestion.1')}</Text>
+                {t('inverseQuestion.2')}
+              </Text>
+            )}
           </View>
           <View style={componentStyles.line} />
           {this.props.words.map((word) => (
@@ -136,8 +148,22 @@ class BackupQuestion extends React.PureComponent<Props, State> {
           <View style={styles.modalContainer}>
             <Modal isVisible={this.state.visibleModal === true}>
               <View style={styles.modalContent}>
-                <Text style={[styles.modalTitleText, fontStyles.medium]}>{t('tryAgain')}</Text>
-                <Text style={styles.modalContentText}>{t('backToKey')}</Text>
+                <Text style={[styles.modalTitleText, fontStyles.medium]}>{t('checkFailed')}</Text>
+                <Text style={styles.modalContentText}>
+                  {t('backToKey')}
+                  {this.props.isCheck &&
+                    this.props.failedNextCheck !== undefined && (
+                      <>
+                        <Text style={styles.modalContentText}>
+                          {t('backupSkipText.0')}
+                          <Text style={fontStyles.bold}>{t('backupSkipText.1')}</Text>
+                        </Text>
+                        <Text style={styles.modalContentText}>
+                          {t('checkAgain', { count: this.props.failedNextCheck })}
+                        </Text>
+                      </>
+                    )}
+                </Text>
                 <View style={styles.modalBottomContainer}>
                   <TouchableOpacity onPress={this.onWrongSubmit}>
                     <Text style={fontStyles.link}>{t('seeBackupKey')}</Text>
@@ -156,7 +182,9 @@ class BackupQuestion extends React.PureComponent<Props, State> {
         />
         <View style={styles.forgotButtonContainer}>
           <Text style={fontStyles.bodySmall}>{t('dontKnow')} </Text>
-          <Link onPress={this.props.onReturnToPhrase}>{t('return')}</Link>
+          <Link onPress={this.props.onReturnToPhrase}>
+            {this.props.isCheck ? t('seeBackupKey') : t('return')}
+          </Link>
         </View>
       </View>
     )

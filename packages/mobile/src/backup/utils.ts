@@ -1,4 +1,4 @@
-import { sampleSize } from 'lodash'
+import * as _ from 'lodash'
 import { generateMnemonic, wordlists } from 'react-native-bip39'
 
 export async function createQuizWordList(mnemonic: string, language: string | null) {
@@ -14,7 +14,7 @@ export async function createQuizWordList(mnemonic: string, language: string | nu
 export function selectQuizWordOptions(correctWord: string, allWords: string[], numOptions: number) {
   const wordOptions = []
   const correctWordPosition = Math.floor(Math.random() * numOptions)
-  const randomWordIndexList = sampleSize([...Array(allWords.length).keys()], numOptions - 1)
+  const randomWordIndexList = _.sampleSize([...Array(allWords.length).keys()], numOptions - 1)
   let randomWordIndex: number = 0
 
   for (let i = 0; i < numOptions; i++) {
@@ -27,6 +27,22 @@ export function selectQuizWordOptions(correctWord: string, allWords: string[], n
     randomWordIndex += 1
   }
   return wordOptions
+}
+
+export function createInverseQuizWordList(
+  mnemonic: string,
+  language: string | null,
+  numOptions: number
+) {
+  const mnemonicWords = mnemonic.split(' ')
+  const wordNotInMnemonic = _.sample(
+    getWordlist(language).filter((word: string) => !mnemonicWords.includes(word))
+  )
+  const randomMnemonicWords = _.sampleSize(mnemonicWords, numOptions - 1)
+  return {
+    correctWord: wordNotInMnemonic,
+    words: _.shuffle([...randomMnemonicWords, wordNotInMnemonic]),
+  }
 }
 
 export function getWordlist(language: string | null) {

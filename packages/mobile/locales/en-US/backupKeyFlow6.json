@@ -2,6 +2,7 @@
   "readOnlyMode": "Read Only Mode Set Backup Key to continue sending and receiving {{CeloDollars}}",
   "getBackupKey": "Get Backup Key",
   "checkBackupKey": "Check Backup Key",
+  "checkFailed": "Check Failed",
   "learnBackupKey": "Learn Your Backup Key",
   "editProfile": "Edit Profile",
   "backupKey": "Backup Key",
@@ -23,7 +24,7 @@
   "areYouSure": "Are you sure?",
   "backupSkipText": {
     "0": "Without a Backup Key, you can lose access to your wallet ",
-    "1": "forever."
+    "1": "forever. "
   },
   "shareBackupKey": "Share Backup Key",
   "backupRecovery": "Share your Backup Key with only one other person who you completely trust.",
@@ -37,6 +38,11 @@
   "learnYourKey": "Write down or memorize your Backup Key.",
   "keyWillBeVerified": "Once you have finished, we will verify that you know the key correctly.",
   "question": "Question",
+  "inverseQuestion": {
+    "0": "What is the word ",
+    "1": "NOT ",
+    "2": "in your Backup Key?"
+  },
   "questionPhrase": {
     "0": "What is the ",
     "1": " word of your Backup Key?"
@@ -70,7 +76,9 @@
   "return": "Return to backup key",
   "tryAgain": "Try Again",
   "backToKey":
-    "We will take you back to the screen with your backup key so that you ensure you wrote it down correctly.",
+    "We will take you back to the screen with your backup key so that you ensure you wrote it down correctly. ",
+  "checkAgain": "We'll check in again in {{count}} day.",
+  "checkAgain_plural": "We'll check in again in {{count}} days.",
   "seeBackupKey": "See Backup Key",
   "backupKeySet": "Backup Key Set",
   "dontLoseIt":
