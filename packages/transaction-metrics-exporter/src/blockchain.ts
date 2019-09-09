@@ -33,13 +33,6 @@ export async function metricExporter(providerUrl: string) {
   const kit = await newListeningKit(providerUrl)
 
   const provider = kit.web3.currentProvider as WebsocketProvider
-
-  // TODO(mcortesi): verify if we need this (I guess we don't)
-  // provider.on('close', ((error: any) => {
-  //   console.error('Connection from web3 provider closed')
-  //   dispose(error)
-  // }) as any)
-
   const subscription = await kit.web3.eth.subscribe('newBlockHeaders')
   subscription.on('data', await newBlockHeaderProcessor(kit))
 
@@ -167,27 +160,3 @@ async function newBlockHeaderProcessor(kit: ContractKit): Promise<(block: BlockH
     }
   }
 }
-
-/*
-//////////////////////////////
-QUESTIONS
-//////////////////////////////
-
-1) Do we need counters for unkonwn tx?
-
-2) Consumer might be delayed, and many concurrent blocks might be processing
-
-3) Do we need methodId mapping?
-
-4) on Close event listener
-
-5) Learn about prometheus, where can i see it?
-
-6) Learn about console.log events
-
-7) We don't listen to all events.
-
-8) Connection to only one txnode, not to the set (statefull connections)
-
-
-*/
