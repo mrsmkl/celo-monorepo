@@ -32,3 +32,8 @@ variable network_name {
   type        = string
   description = "Name of the GCP network"
 }
+
+variable network_id {
+  type        = number
+  description = "The network ID number"
+}

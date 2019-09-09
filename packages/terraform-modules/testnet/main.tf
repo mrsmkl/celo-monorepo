@@ -79,6 +79,7 @@ module "bootnode" {
   geth_bootnode_docker_image_repository = var.geth_bootnode_docker_image_repository
   geth_bootnode_docker_image_tag        = var.geth_bootnode_docker_image_tag
   network_name                          = data.google_compute_network.network.name
+  network_id                            = var.network_id
 }
 
 module "tx_node" {
