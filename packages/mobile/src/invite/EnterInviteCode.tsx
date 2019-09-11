@@ -71,7 +71,11 @@ const mapStateToProps = (state: RootState): StateProps => {
 
 type Props = StateProps & DispatchProps & WithNamespaces
 
-const displayedErrors = [ErrorMessages.INVALID_INVITATION, ErrorMessages.REDEEM_INVITE_FAILED]
+const displayedErrors = [
+  ErrorMessages.INVALID_INVITATION,
+  ErrorMessages.REDEEM_INVITE_FAILED,
+  ErrorMessages.INVITE_FAILED_INSUFFICIENT_BALANCE,
+]
 
 const hasDisplayedError = (error: ErrorMessages | null) => {
   return error && displayedErrors.includes(error)

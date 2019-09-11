@@ -262,13 +262,18 @@ export function* doRedeemInvite(action: RedeemInviteAction) {
           yield redeemSuccess(name, account)
           return
         } else {
-          Logger.debug(TAG, '@redeemInviteCode', 'InsufficientBalance')
+          Logger.debug(
+            TAG,
+            '@redeemInviteCode',
+            'InsufficientBalance in invite code and zero account balance'
+          )
           yield put(showError(ErrorMessages.INVITE_FAILED_INSUFFICIENT_BALANCE))
           return false
         }
       }
-
-      throw Error('Expired or incorrect invite code')
+      Logger.debug(TAG, '@redeemInviteCode', 'InsufficientBalance in invite code')
+      yield put(showError(ErrorMessages.INVITE_FAILED_INSUFFICIENT_BALANCE))
+      return false
     }
 
     // Create new local account

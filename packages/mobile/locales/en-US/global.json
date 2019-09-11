@@ -87,8 +87,7 @@
   "web3FailedToSync": "Failing to sync, check your network connection",
   "errorDuringSync": "Error occurred during sync, please try again later",
   "calculateFeeFailed": "Could not calculate fee",
-  "inviteFailedInsufficientBalance":
-    "The invite code has no balance! Try using a different code or requesting a new one.",
+  "inviteFailedInsufficientBalance": "The invite code has no balance, request a new invite.",
   "backupZeroBalMessage": "The account you are trying to import has no balance!",
   "gold": "Gold"
 }
