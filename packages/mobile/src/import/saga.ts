@@ -10,6 +10,7 @@ import { Actions, ImportBackupPhraseAction } from 'src/import/actions'
 import { redeemComplete } from 'src/invite/actions'
 import { navigateReset } from 'src/navigator/NavigationService'
 import { Screens } from 'src/navigator/Screens'
+import { setKey } from 'src/utils/keyStore'
 import { web3 } from 'src/web3/contracts'
 import { assignAccountFromPrivateKey } from 'src/web3/saga'
 
@@ -18,6 +19,7 @@ export function* importBackupPhraseSaga(action: ImportBackupPhraseAction) {
   const privateKey = mnemonicToSeedHex(phrase)
   const account = yield call(assignAccountFromPrivateKey, privateKey)
   if (account) {
+    yield call(setKey, 'mnemonic', phrase)
     yield put(setBackupCompleted())
     yield put(redeemComplete(true))
     yield put(refreshAllBalances())
