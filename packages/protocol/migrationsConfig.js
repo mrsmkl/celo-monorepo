@@ -69,7 +69,7 @@ const DefaultConfig = {
 }
 
 const linkedLibraries = {
-  LinkedList: ['AddressLinkedList', 'SortedLinkedList', 'LinkedListTest'],
+  LinkedList: ['AddressLinkedList', 'SortedLinkedList' /* , 'LinkedListTest' */],
   SortedLinkedList: [
     'AddressSortedLinkedList',
     'IntegerSortedLinkedList',

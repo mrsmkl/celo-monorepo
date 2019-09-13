@@ -1,8 +1,13 @@
 import { assertRevert } from '@celo/protocol/lib/test-utils'
-// import BigNumber from 'bignumber.js'
+import BigNumber from 'bignumber.js'
 import { LinkedListTestContract, LinkedListTestInstance } from 'types'
 
-const LinkedListTest: LinkedListTestContract = artifacts.require('LinkedListTest')
+interface LinkedListTestContractLink extends LinkedListTestContract {
+  'link'(name: string, a: string | BigNumber): any
+}
+
+const LinkedListTest: LinkedListTestContractLink = artifacts.require('LinkedListTest')
+const LinkedList: Truffle.Contract<Truffle.ContractInstance> = artifacts.require('LinkedList')
 
 // @ts-ignore
 // TODO(mcortesi): Use BN
@@ -10,6 +15,12 @@ LinkedListTest.numberFormat = 'BigNumber'
 
 contract('LinkedListTest', () => {
   let linkedListTest: LinkedListTestInstance
+  let linkedList: Truffle.ContractInstance
+
+  before(async () => {
+    linkedList = await LinkedList.new()
+    await LinkedListTest.link('LinkedList', linkedList.address)
+  })
 
   beforeEach(async () => {
     linkedListTest = await LinkedListTest.new()
