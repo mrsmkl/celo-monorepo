@@ -110,9 +110,8 @@ contract('Attestations', (accounts: string[]) => {
 
   describe('#initialize()', () => {
     it('should have set attestationExpirySeconds', async () => {
-      const actualAttestationExpirySeconds: number = await attestations.attestationExpirySeconds.call(
-        this
-      )
+      // @ts-ignore
+      const actualAttestationExpirySeconds: number = await attestations.attestationExpirySeconds.call()
       assert.equal(actualAttestationExpirySeconds, attestationExpirySeconds)
     })
 
@@ -217,7 +216,8 @@ contract('Attestations', (accounts: string[]) => {
 
     it('should set attestationExpirySeconds', async () => {
       await attestations.setAttestationExpirySeconds(newMaxNumBlocksPerAttestation)
-      const actualAttestationExpirySeconds = await attestations.attestationExpirySeconds.call(this)
+      // @ts-ignore
+      const actualAttestationExpirySeconds = await attestations.attestationExpirySeconds.call()
       assert.equal(actualAttestationExpirySeconds, newMaxNumBlocksPerAttestation)
     })
 
