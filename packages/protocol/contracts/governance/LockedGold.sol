@@ -44,7 +44,7 @@ contract LockedGold is ILockedGold, ReentrancyGuard, Initializable, UsingRegistr
 
   struct Account {
     bool exists;
-    // Each account may authorize additional keys to use for voting or valdiating.
+    // Each account may authorize additional keys to use for voting or validating.
     // These keys may not be keys of other accounts, and may not be authorized by any other
     // account for any purpose.
     Authorizations authorizations;
@@ -57,6 +57,7 @@ contract LockedGold is ILockedGold, ReentrancyGuard, Initializable, UsingRegistr
   uint256 public totalNonvoting;
   uint256 public unlockingPeriod;
 
+  event AccountCreated(address indexed account);
   event UnlockingPeriodSet(uint256 period);
   event VoterAuthorized(address indexed account, address voter);
   event ValidatorAuthorized(address indexed account, address validator);
@@ -78,6 +79,7 @@ contract LockedGold is ILockedGold, ReentrancyGuard, Initializable, UsingRegistr
     require(isNotAccount(msg.sender) && isNotAuthorized(msg.sender));
     Account storage account = accounts[msg.sender];
     account.exists = true;
+    emit AccountCreated(msg.sender);
     return true;
   }
 

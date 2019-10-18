@@ -135,6 +135,30 @@ contract('LockedGold', (accounts: string[]) => {
     })
   })
 
+  describe('#createAccount', () => {
+    it('should create an account', async () => {
+      await lockedGold.createAccount({ from: accounts[1] })
+      assert(await lockedGold.isAccount(accounts[1]))
+    })
+
+    it('should emit the event', async () => {
+      const resp = await lockedGold.createAccount({ from: accounts[1] })
+      assert.equal(resp.logs.length, 1)
+      const log = resp.logs[0]
+      assertLogMatches2(log, {
+        event: 'AccountCreated',
+        args: {
+          account: accounts[1],
+        },
+      })
+    })
+
+    it('should revert if already exists', async () => {
+      await lockedGold.createAccount({ from: accounts[1] })
+      assertRevert(lockedGold.createAccount({ from: accounts[1] }))
+    })
+  })
+
   Object.keys(authorizationTests).forEach((key) => {
     describe('authorization tests:', () => {
       let authorizationTest: any
