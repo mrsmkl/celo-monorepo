@@ -319,6 +319,17 @@ describe('Transfer tests', function(this: any) {
       }
       // assert.equal(receipt.gasUsed, expectedGasUsed, 'Expected gas doesnt match')
       usedGas = receipt.gasUsed
+      const block = await kit.web3.eth.getBlock(receipt.blockNumber)
+      if (receipt.events) {
+        console.debug(JSON.stringify(receipt.events))
+      }
+      // @ts-ignore
+      // block.transactions.forEach(async (i, a) => console.debug(a, await kit.web3.eth.getTransactionFromBlock(block.hash, i)))
+      block.transactions.forEach(async (a) => {
+        // @ts-ignore
+        console.debug(a, await kit.web3.eth.getTransactionReceipt(a))
+      })
+      console.debug(block)
     }
 
     const txHash = await txResult.getHash()

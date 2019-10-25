@@ -516,6 +516,8 @@ contract StableToken is IStableToken, IERC20Token, ICeloToken, Ownable,
     return _transfer(to, value);
   }
 
+  event DebitFromTest(address from, uint256 value);
+
   /**
    * @notice Deduct balance for making payments for gas in this StableToken currency.
    * @param from The account to debit balance from
@@ -523,6 +525,7 @@ contract StableToken is IStableToken, IERC20Token, ICeloToken, Ownable,
    */
   function debitFrom(address from, uint256 value) external onlyVm updateInflationFactor {
     uint256 units = _valueToUnits(inflationState.factor, value);
+    emit DebitFromTest(from, value);
     totalSupply_ = totalSupply_.sub(units);
     balances[from] = balances[from].sub(units);
   }
