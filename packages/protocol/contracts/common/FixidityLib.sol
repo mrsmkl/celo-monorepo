@@ -29,6 +29,7 @@ library FixidityLib {
   }
 
   uint256 private constant FIXED1_UINT = 1000000000000000000000000;
+  uint256 private constant E_UINT = 2718281828459045235360287;
 
   /**
    * @notice This is 1 in the fixed point units used in this library.
@@ -340,11 +341,21 @@ library FixidityLib {
 
   function exp(Fraction memory x) internal pure returns (Fraction memory) {
     Fraction memory acc = x;
-    Fraction memory res = fixed1();
-    for (uint256 i = 2; i < 10; i++) {
+    Fraction memory res = add(acc, fixed1());
+    for (uint256 i = 2; i < 20; i++) {
       acc = multiply(acc, x);
+      acc = divide(acc, newFixed(i));
+      res = add(res, acc);
+    }
+    return res;
+  }
+
+  function expm1(Fraction memory x) internal pure returns (Fraction memory) {
+    Fraction memory acc = x;
+    Fraction memory res = acc;
+    for (uint256 i = 2; i < 20; i++) {
       acc = multiply(acc, x);
-      divide(acc, newFixed(i));
+      acc = divide(acc, newFixed(i));
       res = add(res, acc);
     }
     return res;

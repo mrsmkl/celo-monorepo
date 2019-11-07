@@ -32,7 +32,8 @@ contract SortedOracles is ISortedOracles, Ownable, Initializable {
   mapping(address => uint256) private limitedMedianRateTimestamp;
 
   uint256 public reportExpirySeconds;
-  FixidityLib.Fraction public maxMedianChangeRatePerDay;
+  FixidityLib.Fraction public maxUpMedianChangeRatePerDay;
+  FixidityLib.Fraction public maxDownMedianChangeRatePerDay;
 
   event OracleAdded(
     address indexed token,
@@ -68,7 +69,8 @@ contract SortedOracles is ISortedOracles, Ownable, Initializable {
   );
 
   event MaxMedianChangeRatePerDaySet(
-    uint256 rate
+    uint256 up,
+    uint256 down
   );
 
   modifier onlyOracle(address token) {
@@ -92,12 +94,14 @@ contract SortedOracles is ISortedOracles, Ownable, Initializable {
 
   /**
    * @notice Sets the maximum change rate for median.
-   * @param rate Maximum median change rate as unwrapped Fraction.
+   * @param up Maximum upwards median change rate as unwrapped Fraction.
+   * @param down Maximum downwards median change rate as unwrapped Fraction.
    * @return True upon success.
    */
-  function setMaxMedianChangeRatePerDay(uint256 rate) public onlyOwner returns (bool) {
-    maxMedianChangeRatePerDay = FixidityLib.wrap(rate);
-    emit MaxMedianChangeRatePerDaySet(rate);
+  function setMaxMedianChangeRatePerDay(uint256 up, uint256 down) public onlyOwner returns (bool) {
+    maxUpMedianChangeRatePerDay = FixidityLib.wrap(up);
+    maxDownMedianChangeRatePerDay = FixidityLib.wrap(down);
+    emit MaxMedianChangeRatePerDaySet(up, down);
     return true;
   }
 
@@ -105,8 +109,8 @@ contract SortedOracles is ISortedOracles, Ownable, Initializable {
    * @notice Get maximum median change rate.
    * @return Max median change rate as unwrapped fraction.
    */
-  function getMaxMedianChangeRatePerDay() public view returns (uint256) {
-    return maxMedianChangeRatePerDay.unwrap();
+  function getMaxMedianChangeRatePerDay() public view returns (uint256, uint256) {
+    return (maxUpMedianChangeRatePerDay.unwrap(), maxDownMedianChangeRatePerDay.unwrap());
   }
 
   /**
@@ -214,21 +218,19 @@ contract SortedOracles is ISortedOracles, Ownable, Initializable {
   function recomputeRate(address token) internal {
     uint256 originalMedian = limitedMedianRate[token];
     uint256 newMedian = rates[token].getMedianValue();
-    if (limitedMedianRateTimestamp[token] != 0 && maxMedianChangeRatePerDay.unwrap() != 0) {
+    if (limitedMedianRateTimestamp[token] != 0 && maxUpMedianChangeRatePerDay.unwrap() != 0) {
       uint256 td = now.sub(limitedMedianRateTimestamp[token]);
       if (td > 1 days) td = 1 days;
       FixidityLib.Fraction memory timeFraction = FixidityLib.newFixedFraction(td, 1 days);
-      FixidityLib.Fraction memory maxChangeRate = timeFraction.multiply(maxMedianChangeRatePerDay);
-      uint256 maxChange = FixidityLib.newFixed(originalMedian).multiply(maxChangeRate).fromFixed();
-      if (newMedian > originalMedian) {
-        if (maxChange < newMedian.sub(originalMedian)) {
-          newMedian = originalMedian.add(maxChange);
-        }
+      FixidityLib.Fraction memory maxChangeUp = timeFraction.exp().multiply(maxUpMedianChangeRatePerDay);
+      FixidityLib.Fraction memory maxChangeDown = timeFraction.exp().multiply(maxUpMedianChangeRatePerDay);
+      uint256 max = FixidityLib.newFixed(originalMedian).multiply(maxChangeUp).fromFixed();
+      uint256 min = FixidityLib.newFixed(originalMedian).multiply(maxChangeDown).fromFixed();
+      if (newMedian > max) {
+        newMedian = max;
       }
-      else /* if (newMedian <= originalMedian) */ {
-        if (maxChange < originalMedian.sub(newMedian)) {
-          newMedian = originalMedian.sub(maxChange);
-        }
+      else if (newMedian < min) {
+        newMedian = min;
       }
     }
     limitedMedianRateTimestamp[token] = now;

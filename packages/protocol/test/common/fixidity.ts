@@ -25,6 +25,17 @@ contract('FixidityLib', () => {
     fixidityTest = await FixidityTest.new()
   })
 
+  describe('exp', () => {
+    it('should roughly compute the exponent function', async () => {
+      async function check(a) {
+        let res = await fixidityTest.exp(toFixed(a))
+        console.log('my result', res.toString(10))
+        console.log(Math.exp(a), toFixed(Math.exp(a)).toString(10))
+      }
+      ;[1.8, 1.5, 0.5].forEach(check)
+    })
+  })
+
   describe('newFixed', () => {
     it('should create 0', async () => {
       const result = await fixidityTest.newFixed(0)
@@ -172,7 +183,7 @@ contract('FixidityLib', () => {
       assertGteBN(result, lowerBound)
     })
 
-    it('should retian mulPrecision precision', async () => {
+    it('should retain mulPrecision precision', async () => {
       const a = fixed1.idiv(mulPrecision)
       const b = fixed1.times(mulPrecision)
       const result = await fixidityTest.multiply(a, b)
