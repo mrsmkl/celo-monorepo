@@ -337,4 +337,17 @@ library FixidityLib {
   function isProperFraction(Fraction memory x) internal pure returns (bool) {
     return lte(x, fixed1());
   }
+
+  function exp(Fraction memory x) internal pure returns (Fraction memory) {
+    Fraction memory acc = x;
+    Fraction memory res = fixed1();
+    for (uint256 i = 2; i < 10; i++) {
+      acc = multiply(acc, x);
+      acc = multiply(acc, x);
+      divide(acc, newFixed(i));
+      res = add(res, acc);
+    }
+    return res;
+  }
+
 }

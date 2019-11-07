@@ -30,6 +30,10 @@ contract FixidityTest {
     return FixidityLib.wrap(a).reciprocal().unwrap();
   }
 
+  function exp(uint256 a) external pure returns (uint256) {
+    return FixidityLib.wrap(a).exp().unwrap();
+  }
+
   function divide(uint256 a, uint256 b) external pure returns (uint256) {
     return FixidityLib.wrap(a).divide(FixidityLib.wrap(b)).unwrap();
   }
