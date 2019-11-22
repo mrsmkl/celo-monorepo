@@ -8,6 +8,8 @@ import OpenGraph from 'src/header/OpenGraph'
 import { I18nProps, withNamespaces } from 'src/i18n'
 import ConnectionFooter from 'src/shared/ConnectionFooter'
 import menuItems from 'src/shared/menu-items'
+// import StackSection from './StackSection'
+import DeveloperUpdates from './DeveloperUpdates'
 
 class BuildPage extends React.PureComponent<I18nProps> {
   static getInitialProps() {
@@ -30,48 +32,6 @@ class BuildPage extends React.PureComponent<I18nProps> {
           }
         />
         <Cover />
-        <StackExplorer />
-        <View style={standardStyles.darkBackground}>
-          <Features />
-          <Title nativeID={hashNav.build.stack} invert={true} title={t('celoStack')} />
-          <StackSection
-            label="1"
-            id={hashNav.build.applications}
-            title={t('mobile.title')}
-            text={t('mobile.text')}
-            buttonOne={{ title: t('installWallet'), href: CeloLinks.walletApp }}
-            buttonTwo={{ title: t('seeCode'), href: CeloLinks.monorepo }}
-          >
-            <Li style={textStyles.readingOnDark}>{t('mobile.nonCustodial')}</Li>
-            <Li style={textStyles.readingOnDark}>{t('mobile.mobileUltra')}</Li>
-            <Li style={textStyles.readingOnDark}>{t('mobile.exchange')}</Li>
-            <Li style={textStyles.readingOnDark}>{t('mobile.qr')}</Li>
-          </StackSection>
-          <StackSection
-            label="2"
-            id={hashNav.build.contracts}
-            title={t('protocol.title')}
-            text={t('protocol.text')}
-            buttonOne={{ title: t('readMore'), href: CeloLinks.docsOverview }}
-            buttonTwo={{ title: t('seeCode'), href: CeloLinks.monorepo }}
-          >
-            <Li style={textStyles.readingOnDark}>{t('protocol.algoReserve')}</Li>
-            <Li style={textStyles.readingOnDark}>{t('protocol.cryptoCollat')}</Li>
-            <Li style={textStyles.readingOnDark}>{t('protocol.native')}</Li>
-          </StackSection>
-          <StackSection
-            label="3"
-            id={hashNav.build.blockchain}
-            title={t('proof.title')}
-            text={t('proof.text')}
-            buttonOne={{ title: t('readMore'), href: CeloLinks.docsOverview }}
-            buttonTwo={{ title: t('seeCode'), href: CeloLinks.blockChainRepo }}
-          >
-            <Li style={textStyles.readingOnDark}>{t('proof.permissionless')}</Li>
-            <Li style={textStyles.readingOnDark}>{t('proof.rewardsWeighted')}</Li>
-            <Li style={textStyles.readingOnDark}>{t('proof.onChain')}</Li>
-          </StackSection>
-        </View>
         <DeveloperUpdates />
         <Engage />
         <FullStack />
