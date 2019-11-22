@@ -34,6 +34,7 @@ function wwwRedirect(req, res, nextAction) {
 }
 
 ;(async () => {
+  console.log('entering here')
   await app.prepare()
   const server = express()
 
