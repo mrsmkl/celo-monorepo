@@ -3,33 +3,30 @@ import getConfig from 'next/config'
 import * as React from 'react'
 import { View } from 'react-native'
 import config from 'react-reveal/globals'
-import { canTrack } from 'src/analytics/analytics'
+import scrollIntoView from 'scroll-into-view'
 import Header from 'src/header/Header.3'
 import { ScreenSizeProvider } from 'src/layout/ScreenSize'
 import Footer from 'src/shared/Footer.3'
-import { scrollTo } from 'src/utils/utils'
+import { HEADER_HEIGHT } from 'src/shared/Styles'
 import Sentry, { initSentry } from '../fullstack/sentry'
 import { appWithTranslation } from '../src/i18n'
 
 config({ ssrReveal: true })
 class MyApp extends App {
   componentDidMount() {
-    if (canTrack()) {
-      initSentry()
+    initSentry()
+    if (window.location.hash) {
+      hashScroller(window.location.hash)
     }
 
-    if (window.location.hash) {
-      setTimeout(() => {
-        scrollTo(window.location.hash.slice(1), 'start')
-      }, 200)
-    }
+    window.addEventListener('hashchange', () => hashScroller(window.location.hash))
 
     if (getConfig().publicRuntimeConfig.FLAGS.ENV === 'development') {
       checkH1Count()
     }
   }
 
-  // there are a few pages we dont want the header on for artist reasons
+  // there are a few pages we dont want the header on for artistic reasons
   // currently this is just the animation demo pages
   skipHeader() {
     return this.props.router.asPath.startsWith('/animation')
@@ -71,4 +68,10 @@ function checkH1Count() {
       )
     }
   }, 500)
+}
+
+function hashScroller(id: string) {
+  const element = document.getElementById(id.replace('#', ''))
+
+  scrollIntoView(element, { time: 200, align: { top: 0.2, topOffset: HEADER_HEIGHT } })
 }

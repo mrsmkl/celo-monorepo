@@ -1,16 +1,13 @@
 import * as React from 'react'
 import { View } from 'react-native'
 import Cover from 'src/dev/Cover'
-import DeveloperUpdates from 'src/dev/DeveloperUpdates'
+import Engage from 'src/dev/Engage'
 import Features from 'src/dev/Features'
-import StackExplorer from 'src/dev/FullStack'
-import StackSection from 'src/dev/StackSection'
-import Title from 'src/dev/Title'
-import { Li } from 'src/fonts/Fonts'
+import FullStack from 'src/dev/FullStack'
 import OpenGraph from 'src/header/OpenGraph'
 import { I18nProps, withNamespaces } from 'src/i18n'
-import menuItems, { CeloLinks, hashNav } from 'src/shared/menu-items'
-import { standardStyles, textStyles } from 'src/styles'
+import ConnectionFooter from 'src/shared/ConnectionFooter'
+import menuItems from 'src/shared/menu-items'
 
 class BuildPage extends React.PureComponent<I18nProps> {
   static getInitialProps() {
@@ -18,9 +15,13 @@ class BuildPage extends React.PureComponent<I18nProps> {
   }
 
   render() {
-    const { t } = this.props
     return (
-      <View>
+      <View
+        style={{
+          // @ts-ignore
+          scrollPadding: 20,
+        }}
+      >
         <OpenGraph
           path={menuItems.BUILD.link}
           title={'Build with Celo | Celo Developers'}
@@ -72,6 +73,10 @@ class BuildPage extends React.PureComponent<I18nProps> {
           </StackSection>
         </View>
         <DeveloperUpdates />
+        <Engage />
+        <FullStack />
+        <Features />
+        <ConnectionFooter includeDividerLine={false} />
       </View>
     )
   }
