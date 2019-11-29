@@ -1,9 +1,10 @@
+import dynamic from 'next/dynamic'
 import * as React from 'react'
 import ReCAPTCHA from 'react-google-recaptcha'
-import { StyleSheet, View } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
+import { MobileOS, RequestRecord, RequestType } from 'src/fauceting/FaucetInterfaces'
 import { ButtonWithFeedback, ContextualInfo, HashingStatus } from 'src/fauceting/MicroComponents'
 import {
-  formatNumber,
   getCaptchaKey,
   RequestState,
   requestStatusToState,
@@ -12,13 +13,13 @@ import {
 import { postForm } from 'src/forms/Form'
 import { TextInput } from 'src/forms/FormComponents'
 import { I18nProps, NameSpaces, withNamespaces } from 'src/i18n'
-import { colors, standardStyles } from 'src/styles'
-import { RequestRecord, RequestType, subscribeRequest } from '../../server/FirebaseClient'
-
-function send(beneficiary: string, kind: RequestType, captchaToken: string) {
-  const route = kind === RequestType.Invite ? '/invite' : '/faucet'
-  return postForm(route, { captchaToken, beneficiary })
-}
+import Android from 'src/icons/Android'
+import Apple from 'src/icons/Apple'
+import { colors, fonts, standardStyles, textStyles } from 'src/styles'
+import { Radio } from 'src/table/table'
+import subscribeRequest from '../../server/FirebaseClient'
+// @ts-ignore
+const PhoneInput = dynamic(() => import('src/fauceting/PhoneInput'))
 
 interface State {
   beneficiary: string
@@ -27,6 +28,7 @@ interface State {
   dollarTxHash?: string | null
   goldTxHash?: string | null
   escrowTxHash?: string | null
+  mobileOS: MobileOS | null
 }
 
 interface Props {
@@ -38,20 +40,28 @@ class RequestFunds extends React.PureComponent<Props & I18nProps, State> {
     beneficiary: '',
     requestState: RequestState.Initial,
     captchaOK: false,
+    mobileOS: null,
   }
 
   recaptchaRef = React.createRef<ReCAPTCHA>()
 
-  setBeneficiary = ({ currentTarget }: React.SyntheticEvent<HTMLInputElement>) => {
+  setAddress = ({ currentTarget }: React.SyntheticEvent<HTMLInputElement>) => {
     const { value } = currentTarget
-    const beneficiary = this.props.kind === RequestType.Invite ? formatNumber(value) : value
     this.setState({
-      beneficiary,
+      beneficiary: value,
       requestState:
         this.state.requestState !== RequestState.Working
           ? RequestState.Initial
           : this.state.requestState,
     })
+  }
+
+  selectOS = (os: MobileOS) => {
+    this.setState({ mobileOS: os })
+  }
+
+  setNumber = (number: string) => {
+    this.setState({ beneficiary: number })
   }
 
   onCaptcha = (value: string | null) => {
@@ -84,7 +94,12 @@ class RequestFunds extends React.PureComponent<Props & I18nProps, State> {
 
   startRequest = () => {
     this.setState({ requestState: RequestState.Working })
-    return send(this.state.beneficiary, this.props.kind, this.getCaptchaToken())
+    return send(
+      this.state.beneficiary,
+      this.props.kind,
+      this.getCaptchaToken(),
+      this.state.mobileOS
+    )
   }
 
   subscribe = async (key: string) => {
@@ -116,8 +131,8 @@ class RequestFunds extends React.PureComponent<Props & I18nProps, State> {
     return this.props.kind === RequestType.Faucet
   }
 
-  getPlaceholder = () => {
-    return this.isFaucet() ? this.props.t('testnetAddress') : '+1 555 555 5555'
+  inviteAndBlankOS = () => {
+    return !this.isFaucet() ? !this.state.mobileOS : false
   }
 
   render() {
@@ -125,38 +140,44 @@ class RequestFunds extends React.PureComponent<Props & I18nProps, State> {
     const isInvalid = requestState === RequestState.Invalid
     return (
       <View style={standardStyles.elementalMargin}>
-        <View style={standardStyles.elementalMarginBottom}>
-          <ReCAPTCHA sitekey={getCaptchaKey()} onChange={this.onCaptcha} ref={this.recaptchaRef} />
-        </View>
-        <TextInput
-          type={this.isFaucet() ? 'tel' : 'text'}
-          focusStyle={
-            this.isFaucet() ? standardStyles.inputFocused : standardStyles.inputDarkFocused
-          }
-          name="beneficiary"
-          style={[
-            standardStyles.input,
-            !this.isFaucet() && standardStyles.inputDarkMode,
-            isInvalid && styles.error,
-          ]}
-          placeholder={this.getPlaceholder()}
-          // TODO: is it normal that setBeneficiary is using React.SyntheticEvent<HTMLInputElement>
-          // and not NativeSyntheticEvent<TextInputChangeEventData> ?
-          // @ts-ignore
-          onChange={this.setBeneficiary}
-          value={this.state.beneficiary}
-        />
+        {this.isFaucet() ? (
+          <TextInput
+            type={'text'}
+            focusStyle={standardStyles.inputFocused}
+            name="beneficiary"
+            style={[standardStyles.input, isInvalid && styles.error]}
+            placeholder={this.props.t('testnetAddress')}
+            // TODO: is it normal that setBeneficiary is using React.SyntheticEvent<HTMLInputElement>
+            // and not NativeSyntheticEvent<TextInputChangeEventData> ?
+            // @ts-ignore
+            onChange={this.setAddress}
+            value={this.state.beneficiary}
+          />
+        ) : (
+          <PhoneInput onChangeNumber={this.setNumber} />
+        )}
         <ContextualInfo
           requestState={this.state.requestState}
           t={this.props.t}
           isFaucet={this.isFaucet()}
         />
-        <View style={[this.isFaucet() && standardStyles.row, standardStyles.elementalMarginTop]}>
+        {!this.isFaucet() && (
+          <MobileSelect
+            t={this.props.t}
+            onSelect={this.selectOS}
+            selectedOS={this.state.mobileOS}
+          />
+        )}
+        <View style={[styles.recaptcha, standardStyles.elementalMargin]}>
+          <ReCAPTCHA sitekey={getCaptchaKey()} onChange={this.onCaptcha} ref={this.recaptchaRef} />
+        </View>
+        <View style={[this.isFaucet() && standardStyles.row]}>
           <ButtonWithFeedback
             requestState={requestState}
             isFaucet={this.isFaucet()}
             captchaOK={this.state.captchaOK}
             onSubmit={this.onSubmit}
+            disabled={this.state.beneficiary.length === 0 || this.inviteAndBlankOS()}
             t={this.props.t}
           />
           <View>
@@ -175,11 +196,58 @@ class RequestFunds extends React.PureComponent<Props & I18nProps, State> {
   }
 }
 
-export default withNamespaces(NameSpaces.faucet)(RequestFunds)
+function MobileSelect({ selectedOS, onSelect, t }) {
+  const isandroid = selectedOS === MobileOS.android
+  const isIOS = selectedOS === MobileOS.ios
+  const iOSColor = isIOS ? colors.white : colors.placeholderDarkMode
+  const androidColor = isandroid ? colors.white : colors.placeholderDarkMode
+  return (
+    <>
+      <Text style={[fonts.h5, textStyles.invert, standardStyles.elementalMarginTop]}>
+        {t('chooseMobileOS')}
+      </Text>
+      <View style={standardStyles.row}>
+        <Radio
+          colorWhenSelected={colors.primary}
+          label="Android"
+          labelColor={androidColor}
+          icon={<Android size={18} color={androidColor} />}
+          selected={isandroid}
+          onValueSelected={onSelect}
+          value={MobileOS.android}
+        />
+        <View style={styles.radios}>
+          <Radio
+            colorWhenSelected={colors.primary}
+            label="iOS"
+            labelColor={iOSColor}
+            icon={<Apple size={18} color={iOSColor} />}
+            selected={isIOS}
+            onValueSelected={onSelect}
+            value={MobileOS.ios}
+          />
+        </View>
+      </View>
+    </>
+  )
+}
+
+function send(beneficiary: string, kind: RequestType, captchaToken: string, os?: MobileOS) {
+  const route = kind === RequestType.Invite ? '/invite' : '/faucet'
+  return postForm(route, { captchaToken, beneficiary, mobileOS: os })
+}
 
 const styles = StyleSheet.create({
   error: {
     borderColor: colors.error,
     borderWidth: 1,
   },
+  radios: {
+    marginStart: 20,
+  },
+  recaptcha: {
+    height: 80,
+  },
 })
+
+export default withNamespaces(NameSpaces.faucet)(RequestFunds)

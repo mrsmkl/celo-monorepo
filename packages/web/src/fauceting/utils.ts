@@ -1,5 +1,5 @@
 import getConfig from 'next/config'
-import { RequestStatus, RequestType } from '../../server/FirebaseClient'
+import { RequestStatus, RequestType } from 'src/fauceting/FaucetInterfaces'
 
 export function getCaptchaKey() {
   return getConfig().publicRuntimeConfig.RECAPTCHA
@@ -17,17 +17,6 @@ function validateNumber(number: string) {
   //  TODO use our phone utils from @celo/utils
   const E164RegEx = /^\+[1-9][0-9]{1,14}$/
   return E164RegEx.test(number)
-}
-
-export function formatNumber(number: string) {
-  if (number === '+') {
-    return ''
-  }
-  if (number.startsWith('+')) {
-    return number
-  } else {
-    return `+${number}`
-  }
 }
 
 export const EXAMPLE_ADDRESS = 'a0000aaa00a0000...a00a0a0000a00a00aa'

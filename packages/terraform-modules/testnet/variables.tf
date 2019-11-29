@@ -53,6 +53,16 @@ variable geth_bootnode_docker_image_tag {
   description = "Tag of the bootnode docker image"
 }
 
+variable geth_exporter_docker_image_repository {
+  type        = string
+  description = "Repository of the geth exporter docker image"
+}
+
+variable geth_exporter_docker_image_tag {
+  type        = string
+  description = "Tag of the geth exporter docker image"
+}
+
 variable geth_node_docker_image_repository {
   type        = string
   description = "Repository of the geth docker image"
@@ -66,6 +76,16 @@ variable geth_node_docker_image_tag {
 variable geth_verbosity {
   type        = number
   description = "Verbosity of all geth nodes"
+}
+
+variable in_memory_discovery_table {
+  type        = bool
+  description = "Specifies whether to use an in memory discovery table"
+}
+
+variable istanbul_request_timeout_ms {
+  type        = number
+  description = "The number of ms for the istanbul request timeout"
 }
 
 variable network_id {
@@ -86,9 +106,4 @@ variable tx_node_count {
 variable validator_count {
   type        = number
   description = "Number of validators to create"
-}
-
-variable verification_pool_url {
-  type        = string
-  description = "URL of the verification pool"
 }

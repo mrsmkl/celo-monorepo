@@ -1,0 +1,52 @@
+import BigNumber from 'bignumber.js'
+import { GasPriceMinimum } from '../generated/types/GasPriceMinimum'
+import { BaseWrapper, proxyCall, toBigNumber } from './BaseWrapper'
+
+export interface GasPriceMinimumConfig {
+  gasPriceMinimum: BigNumber
+  targetDensity: BigNumber
+  adjustmentSpeed: BigNumber
+}
+
+/**
+ * Stores the gas price minimum
+ */
+export class GasPriceMinimumWrapper extends BaseWrapper<GasPriceMinimum> {
+  /**
+   * Query current gas price minimum in gGLD.
+   * @returns current gas price minimum in cGLD
+   */
+  gasPriceMinimum = proxyCall(this.contract.methods.gasPriceMinimum, undefined, toBigNumber)
+
+  /**
+   * Query current gas price minimum.
+   * @returns current gas price minimum in the requested currency
+   */
+  getGasPriceMinimum = proxyCall(this.contract.methods.getGasPriceMinimum, undefined, toBigNumber)
+
+  /**
+   * Query target density parameter.
+   * @returns the current block density targeted by the gas price minimum algorithm.
+   */
+  targetDensity = proxyCall(this.contract.methods.targetDensity, undefined, toBigNumber)
+  /**
+   * Query adjustment speed parameter
+   * @returns multiplier that impacts how quickly gas price minimum is adjusted.
+   */
+  adjustmentSpeed = proxyCall(this.contract.methods.adjustmentSpeed, undefined, toBigNumber)
+  /**
+   * Returns current configuration parameters.
+   */
+  async getConfig(): Promise<GasPriceMinimumConfig> {
+    const res = await Promise.all([
+      this.gasPriceMinimum(),
+      this.targetDensity(),
+      this.adjustmentSpeed(),
+    ])
+    return {
+      gasPriceMinimum: res[0],
+      targetDensity: res[1],
+      adjustmentSpeed: res[2],
+    }
+  }
+}

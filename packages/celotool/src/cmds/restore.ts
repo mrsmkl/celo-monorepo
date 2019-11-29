@@ -1,7 +1,7 @@
-import { addCeloEnvMiddleware, CeloEnvArgv } from '@celo/celotool/src/lib/env-utils'
-import { execCmdWithExitOnFailure } from '@celo/celotool/src/lib/utils'
 import { switchToClusterFromEnv } from 'src/lib/cluster'
-import * as yargs from 'yargs'
+import { addCeloEnvMiddleware, CeloEnvArgv } from 'src/lib/env-utils'
+import { execCmdWithExitOnFailure } from 'src/lib/utils'
+import yargs from 'yargs'
 
 export const command = 'restore'
 

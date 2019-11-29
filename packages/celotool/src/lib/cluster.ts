@@ -1,29 +1,23 @@
-import {
-  doCheckOrPromptIfStagingOrProduction,
-  EnvTypes,
-  envVar,
-  fetchEnv,
-} from '@celo/celotool/src/lib/env-utils'
+import sleep from 'sleep-promise'
+import { doCheckOrPromptIfStagingOrProduction, EnvTypes, envVar, fetchEnv } from './env-utils'
 import {
   createAndUploadBackupSecretIfNotExists,
   createServiceAccountIfNotExists,
   getServiceAccountName,
   grantRoles,
   installAndEnableMetricsDeps,
-  installLegoAndNginx,
+  installCertManagerAndNginx,
   redeployTiller,
   uploadStorageClass,
-} from '@celo/celotool/src/lib/helm_deploy'
-import {
-  execCmd,
-  execCmdWithExitOnFailure,
-  outputIncludes,
-  switchToProjectFromEnv,
-} from '@celo/celotool/src/lib/utils'
-import { networkName } from '@celo/celotool/src/lib/vm-testnet-utils'
-import sleep from 'sleep-promise'
+} from './helm_deploy'
+import { execCmd, execCmdWithExitOnFailure, outputIncludes, switchToProjectFromEnv } from './utils'
+import { networkName } from './vm-testnet-utils'
 
-const SYSTEM_HELM_RELEASES = ['nginx-ingress-release', 'kube-lego-release']
+const SYSTEM_HELM_RELEASES = [
+  'nginx-ingress-release',
+  'kube-lego-release',
+  'cert-manager-cluster-issuers',
+]
 const HELM_RELEASE_REGEX = new RegExp(/(.*)-\d+\.\d+\.\d+$/)
 
 export async function switchToClusterFromEnv(checkOrPromptIfStagingOrProduction = true) {
@@ -44,7 +38,7 @@ export async function switchToClusterFromEnv(checkOrPromptIfStagingOrProduction 
   const kubernetesClusterName = fetchEnv(envVar.KUBERNETES_CLUSTER_NAME)
   const kubernetesClusterZone = fetchEnv(envVar.KUBERNETES_CLUSTER_ZONE)
 
-  const expectedCluster = `gke_${projectName}_${kubernetesClusterName}_${kubernetesClusterName}`
+  const expectedCluster = `gke_${projectName}_${kubernetesClusterZone}_${kubernetesClusterName}`
 
   if (currentCluster === null || currentCluster.trim() !== expectedCluster) {
     await execCmdWithExitOnFailure(
@@ -114,7 +108,7 @@ export async function setupCluster(celoEnv: string, createdCluster: boolean) {
   await uploadStorageClass()
   await redeployTiller()
 
-  await installLegoAndNginx()
+  await installCertManagerAndNginx()
 
   if (envType !== EnvTypes.DEVELOPMENT) {
     await installAndEnableMetricsDeps()

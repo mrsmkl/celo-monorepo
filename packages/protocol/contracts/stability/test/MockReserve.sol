@@ -1,20 +1,18 @@
-pragma solidity ^0.5.8;
+pragma solidity ^0.5.3;
 // solhint-disable no-unused-vars
 
 import "../../common/interfaces/IERC20Token.sol";
-
 
 /**
  * @title A mock Reserve for testing.
  */
 contract MockReserve {
-
   mapping(address => bool) public tokens;
 
   IERC20Token public goldToken;
 
   // solhint-disable-next-line no-empty-blocks
-  function () external payable {}
+  function() external payable {}
 
   function setGoldToken(address goldTokenAddress) external {
     goldToken = IERC20Token(goldTokenAddress);

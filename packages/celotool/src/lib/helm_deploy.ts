@@ -1,25 +1,11 @@
-import { getKubernetesClusterRegion, switchToClusterFromEnv } from '@celo/celotool/src/lib/cluster'
-import {
-  EnvTypes,
-  envVar,
-  fetchEnv,
-  fetchEnvOrFallback,
-  isProduction,
-} from '@celo/celotool/src/lib/env-utils'
-import { ensureAuthenticatedGcloudAccount } from '@celo/celotool/src/lib/gcloud_utils'
-import { generateGenesisFromEnv } from '@celo/celotool/src/lib/generate_utils'
-import { OG_ACCOUNTS } from '@celo/celotool/src/lib/genesis_constants'
-import { getStatefulSetReplicas, scaleResource } from '@celo/celotool/src/lib/kubernetes'
-import {
-  execCmd,
-  execCmdWithExitOnFailure,
-  getVerificationPoolRewardsURL,
-  getVerificationPoolSMSURL,
-  outputIncludes,
-  switchToProjectFromEnv,
-} from '@celo/celotool/src/lib/utils'
-import { entries, flatMap, range } from 'lodash'
+import { entries, range } from 'lodash'
 import sleep from 'sleep-promise'
+import { getKubernetesClusterRegion, switchToClusterFromEnv } from './cluster'
+import { EnvTypes, envVar, fetchEnv, fetchEnvOrFallback, isProduction } from './env-utils'
+import { ensureAuthenticatedGcloudAccount } from './gcloud_utils'
+import { generateGenesisFromEnv } from './generate_utils'
+import { getStatefulSetReplicas, scaleResource } from './kubernetes'
+import { execCmd, execCmdWithExitOnFailure, outputIncludes, switchToProjectFromEnv } from './utils'
 
 const CLOUDSQL_SECRET_NAME = 'blockscout-cloudsql-credentials'
 const BACKUP_GCS_SECRET_NAME = 'backup-blockchain-credentials'
@@ -202,16 +188,15 @@ export async function redeployTiller() {
   }
 }
 
-export async function installLegoAndNginx() {
-  const legoReleaseExists = await outputIncludes(
+export async function installCertManagerAndNginx() {
+  // Cert Manager is the newer version of lego
+  const certManagerExists = await outputIncludes(
     `helm list`,
-    `kube-lego-release`,
-    `kube-lego-release exists, skipping install`
+    `cert-manager-cluster-issuers`,
+    `cert-manager-cluster-issuers exists, skipping install`
   )
-  if (!legoReleaseExists) {
-    await execCmdWithExitOnFailure(
-      `helm install --name kube-lego-release stable/kube-lego --set config.LEGO_EMAIL=n@celo.org --set rbac.create=true --set rbac.serviceAccountName=kube-lego --set config.LEGO_URL=https://acme-v01.api.letsencrypt.org/directory`
-    )
+  if (!certManagerExists) {
+    await installCertManager()
   }
   const nginxIngressReleaseExists = await outputIncludes(
     `helm list`,
@@ -221,6 +206,21 @@ export async function installLegoAndNginx() {
   if (!nginxIngressReleaseExists) {
     await execCmdWithExitOnFailure(`helm install --name nginx-ingress-release stable/nginx-ingress`)
   }
+}
+
+export async function installCertManager() {
+  const clusterIssuersHelmChartPath = `../helm-charts/cert-manager-cluster-issuers`
+
+  console.info('Installing cert-manager CustomResourceDefinitions')
+  await execCmdWithExitOnFailure(
+    `kubectl apply --validate=false -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.11/deploy/manifests/00-crds.yaml`
+  )
+  console.info('Updating cert-manager-cluster-issuers dependencies')
+  await execCmdWithExitOnFailure(`helm dependency update ${clusterIssuersHelmChartPath}`)
+  console.info('Installing cert-manager-cluster-issuers')
+  await execCmdWithExitOnFailure(
+    `helm install --name cert-manager-cluster-issuers ${clusterIssuersHelmChartPath}`
+  )
 }
 
 export async function installAndEnableMetricsDeps() {
@@ -270,10 +270,10 @@ export async function grantRoles(
 export async function retrieveCloudSQLConnectionInfo(celoEnv: string, instanceName: string) {
   await validateExistingCloudSQLInstance(instanceName)
   const [blockscoutDBUsername] = await execCmdWithExitOnFailure(
-    `kubectl get secret ${celoEnv}-blockscout --export -o jsonpath='{.data.DB_USERNAME}' -n ${celoEnv} | base64 --decode`
+    `kubectl get secret ${celoEnv}-blockscout --export -o jsonpath='{.data.DATABASE_USER}' -n ${celoEnv} | base64 --decode`
   )
   const [blockscoutDBPassword] = await execCmdWithExitOnFailure(
-    `kubectl get secret ${celoEnv}-blockscout --export -o jsonpath='{.data.DB_PASSWORD}' -n ${celoEnv} | base64 --decode`
+    `kubectl get secret ${celoEnv}-blockscout --export -o jsonpath='{.data.DATABASE_PASSWORD}' -n ${celoEnv} | base64 --decode`
   )
   const [blockscoutDBConnectionName] = await execCmdWithExitOnFailure(
     `gcloud sql instances describe ${instanceName} --format="value(connectionName)"`
@@ -455,6 +455,11 @@ export async function deletePersistentVolumeClaims(celoEnv: string) {
       `kubectl delete pvc --selector='component=validators' --namespace ${celoEnv}`
     )
     console.info(output)
+
+    const [outputTx] = await execCmd(
+      `kubectl delete pvc --selector='component=tx_nodes' --namespace ${celoEnv}`
+    )
+    console.info(outputTx)
   } catch (error) {
     console.error(error)
     if (!error.toString().includes('not found')) {
@@ -515,23 +520,13 @@ async function helmParameters(celoEnv: string) {
       ]
     : []
 
-  const gethAccountParameters = flatMap(OG_ACCOUNTS, (account) => [
-    `--set geth.account.${account.name}.name=${account.name}`,
-    `--set geth.account.${account.name}.privateKey=${account.privateKey}`,
-    `--set geth.account.${account.name}.address=${account.address}`,
-  ])
-
   return [
     `--set domain.name=${fetchEnv('CLUSTER_DOMAIN_NAME')}`,
-    `--set geth.miner.verificationpool=${fetchEnvOrFallback(
-      'VERIFICATION_POOL_URL',
-      getVerificationPoolSMSURL(celoEnv)
-    )}`,
     `--set geth.verbosity=${fetchEnvOrFallback('GETH_VERBOSITY', '4')}`,
     `--set geth.node.cpu_request=${fetchEnv('GETH_NODE_CPU_REQUEST')}`,
     `--set geth.node.memory_request=${fetchEnv('GETH_NODE_MEMORY_REQUEST')}`,
     `--set geth.genesisFile=${Buffer.from(generateGenesisFromEnv()).toString('base64')}`,
-    `--set geth.genesis.networkId=${fetchEnv('NETWORK_ID')}`,
+    `--set geth.genesis.networkId=${fetchEnv(envVar.NETWORK_ID)}`,
     `--set geth.image.repository=${fetchEnv('GETH_NODE_DOCKER_IMAGE_REPOSITORY')}`,
     `--set geth.image.tag=${fetchEnv('GETH_NODE_DOCKER_IMAGE_TAG')}`,
     `--set geth.backup.enabled=${fetchEnv(envVar.GETH_NODES_BACKUP_CRONJOB_ENABLED)}`,
@@ -541,10 +536,6 @@ async function helmParameters(celoEnv: string) {
     `--set cluster.name=${fetchEnv('KUBERNETES_CLUSTER_NAME')}`,
     `--set bucket=${bucketName}`,
     `--set project.name=${fetchEnv('TESTNET_PROJECT_NAME')}`,
-    `--set verification.rewardsUrl=${fetchEnvOrFallback(
-      'VERIFICATION_REWARDS_URL',
-      getVerificationPoolRewardsURL(celoEnv)
-    )}`,
     `--set celotool.image.repository=${fetchEnv('CELOTOOL_DOCKER_IMAGE_REPOSITORY')}`,
     `--set celotool.image.tag=${fetchEnv('CELOTOOL_DOCKER_IMAGE_TAG')}`,
     `--set promtosd.scrape_interval=${fetchEnv('PROMTOSD_SCRAPE_INTERVAL')}`,
@@ -552,18 +543,24 @@ async function helmParameters(celoEnv: string) {
     `--set geth.consensus_type=${fetchEnv('CONSENSUS_TYPE')}`,
     `--set geth.blocktime=${fetchEnv('BLOCK_TIME')}`,
     `--set geth.validators="${fetchEnv('VALIDATORS')}"`,
+    `--set geth.istanbulrequesttimeout=${fetchEnvOrFallback(
+      'ISTANBUL_REQUEST_TIMEOUT_MS',
+      '3000'
+    )}`,
     `--set geth.faultyValidators="${fetchEnvOrFallback('FAULTY_VALIDATORS', '0')}"`,
     `--set geth.faultyValidatorType="${fetchEnvOrFallback('FAULTY_VALIDATOR_TYPE', '0')}"`,
     `--set geth.tx_nodes="${fetchEnv('TX_NODES')}"`,
-    `--set geth.admin_rpc_enabled=${fetchEnvOrFallback('ADMIN_RPC_ENABLED', 'false')}`,
+    `--set geth.ssd_disks="${fetchEnvOrFallback(envVar.GETH_NODES_SSD_DISKS, 'true')}"`,
     `--set mnemonic="${fetchEnv('MNEMONIC')}"`,
     `--set contracts.cron_jobs.enabled=${fetchEnv('CONTRACT_CRONJOBS_ENABLED')}`,
     `--set geth.account.secret="${fetchEnv('GETH_ACCOUNT_SECRET')}"`,
-    `--set ethstats.webSocketSecret="${fetchEnv('ETHSTATS_WEBSOCKETSECRET')}"`,
     `--set geth.ping_ip_from_packet=${fetchEnvOrFallback('PING_IP_FROM_PACKET', 'false')}`,
+    `--set geth.in_memory_discovery_table=${fetchEnvOrFallback(
+      'IN_MEMORY_DISCOVERY_TABLE',
+      'false'
+    )}`,
     ...productionTagOverrides,
     ...(await helmIPParameters(celoEnv)),
-    ...gethAccountParameters,
   ]
 }
 

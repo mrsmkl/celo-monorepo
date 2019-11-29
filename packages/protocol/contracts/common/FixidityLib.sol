@@ -1,6 +1,5 @@
 pragma solidity ^0.5.0;
 
-
 /**
  * @title FixidityLib
  * @author Gadi Guy, Alberto Cuesta Canada
@@ -16,7 +15,6 @@ pragma solidity ^0.5.0;
  * overflow.
  */
 library FixidityLib {
-
   struct Fraction {
     uint256 value;
   }
@@ -114,27 +112,13 @@ library FixidityLib {
   }
 
   /**
-   * @notice Maximum value that can be safely used as a divisor.
-   * @dev Test maxFixedDivisor() equals fixed1()*fixed1()
-   * Test divide(maxFixedDivisor(),maxFixedDivisor()) equals 10*fixed1()
-   * Test divide(maxFixedDivisor(),maxFixedDivisor()+1) throws
-   */
-  function maxFixedDivisor() internal pure returns (uint256) {
-    return 1000000000000000000000000000000000000000000000000;
-  }
-
-  /**
    * @notice Converts a uint256 to fixed point Fraction
    * @dev Test newFixed(0) returns 0
    * Test newFixed(1) returns fixed1()
    * Test newFixed(maxNewFixed()) returns maxNewFixed() * fixed1()
    * Test newFixed(maxNewFixed()+1) fails
    */
-  function newFixed(uint256 x)
-    internal
-    pure
-    returns (Fraction memory)
-  {
+  function newFixed(uint256 x) internal pure returns (Fraction memory) {
     require(x <= maxNewFixed());
     return Fraction(x * FIXED1_UINT);
   }
@@ -143,11 +127,7 @@ library FixidityLib {
    * @notice Converts a uint256 in the fixed point representation of this
    * library to a non decimal. All decimal digits will be truncated.
    */
-  function fromFixed(Fraction memory x)
-    internal
-    pure
-    returns (uint256)
-  {
+  function fromFixed(Fraction memory x) internal pure returns (uint256) {
     return x.value / FIXED1_UINT;
   }
 
@@ -163,10 +143,7 @@ library FixidityLib {
    * Test newFixedFraction(maxFixedDividend(),1) returns maxFixedDividend()*fixed1()
    * Test newFixedFraction(1,fixed1()) returns 1
    */
-  function newFixedFraction(
-    uint256 numerator,
-    uint256 denominator
-  )
+  function newFixedFraction(uint256 numerator, uint256 denominator)
     internal
     pure
     returns (Fraction memory)
@@ -288,24 +265,22 @@ library FixidityLib {
    */
   function reciprocal(Fraction memory x) internal pure returns (Fraction memory) {
     require(x.value != 0);
-    return Fraction((FIXED1_UINT*FIXED1_UINT) / x.value); // Can't overflow
+    return Fraction((FIXED1_UINT * FIXED1_UINT) / x.value); // Can't overflow
   }
 
   /**
    * @notice x/y. If the dividend is higher than maxFixedDividend() it
    * might overflow. You can use multiply(x,reciprocal(y)) instead.
-   * There is a loss of precision on division for the lower mulPrecision() decimals.
    * @dev
    * Test divide(fixed1(),0) fails
    * Test divide(maxFixedDividend(),1) = maxFixedDividend()*(10^digits())
    * Test divide(maxFixedDividend()+1,1) throws
-   * Test divide(maxFixedDivisor(),maxFixedDivisor()) returns fixed1()
-   * Test divide(maxFixedDivisor(),maxFixedDivisor()+1) fails
    */
   function divide(Fraction memory x, Fraction memory y) internal pure returns (Fraction memory) {
-    if (y.value == FIXED1_UINT) return x;
-    require(y.value <= maxFixedDivisor());
-    return multiply(x, reciprocal(y)); // check for 0 done in reciprocal
+    require(y.value != 0);
+    uint256 X = x.value * FIXED1_UINT;
+    require(X / FIXED1_UINT == x.value);
+    return Fraction(X / y.value);
   }
 
   /**
@@ -334,5 +309,19 @@ library FixidityLib {
    */
   function lte(Fraction memory x, Fraction memory y) internal pure returns (bool) {
     return x.value <= y.value;
+  }
+
+  /**
+   * @notice x == y
+   */
+  function equals(Fraction memory x, Fraction memory y) internal pure returns (bool) {
+    return x.value == y.value;
+  }
+
+  /**
+   * @notice x <= 1
+   */
+  function isProperFraction(Fraction memory x) internal pure returns (bool) {
+    return lte(x, fixed1());
   }
 }

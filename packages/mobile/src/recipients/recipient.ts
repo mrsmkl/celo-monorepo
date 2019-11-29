@@ -4,7 +4,7 @@ import { MinimalContact } from 'react-native-contacts'
 import {
   getAddressFromPhoneNumber,
   getVerificationStatusFromPhoneNumber,
-  VerificationStatus,
+  RecipientVerificationStatus,
 } from 'src/identity/contactMapping'
 import { AddressToE164NumberType, E164NumberToAddressType } from 'src/identity/reducer'
 import Logger from 'src/utils/Logger'
@@ -39,8 +39,8 @@ export interface RecipientWithMobileNumber extends IRecipient {
 
 export interface RecipientWithContact extends IRecipient {
   kind: RecipientKind.Contact
-  phoneNumberLabel: string
   contactId: string
+  phoneNumberLabel?: string
   thumbnailPath?: string
 }
 
@@ -174,9 +174,9 @@ export function getRecipientFromAddress(
 export function getRecipientVerificationStatus(
   recipient: Recipient,
   e164NumberToAddress: E164NumberToAddressType
-): VerificationStatus {
+): RecipientVerificationStatus {
   if (recipient.kind === RecipientKind.QrCode || recipient.kind === RecipientKind.Address) {
-    return VerificationStatus.VERIFIED
+    return RecipientVerificationStatus.VERIFIED
   }
 
   if (!recipient.e164PhoneNumber) {
@@ -186,8 +186,8 @@ export function getRecipientVerificationStatus(
   return getVerificationStatusFromPhoneNumber(recipient.e164PhoneNumber, e164NumberToAddress)
 }
 
-export function getRecipientThumbnail(recipient: Recipient) {
-  return recipient.kind === RecipientKind.Contact ? recipient.thumbnailPath : undefined
+export function getRecipientThumbnail(recipient?: Recipient) {
+  return recipient && recipient.kind === RecipientKind.Contact ? recipient.thumbnailPath : undefined
 }
 
 type PreparedRecipient = Recipient & {

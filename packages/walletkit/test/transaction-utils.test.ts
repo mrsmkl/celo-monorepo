@@ -1,4 +1,5 @@
 import { BigNumber } from 'bignumber.js'
+import { getGoldTokenAddress } from '../src/erc20-utils'
 import { Logger, LogLevel } from '../src/logger'
 import { recoverTransaction } from '../src/signing-utils'
 import { getRawTransaction } from '../src/transaction-utils'
@@ -24,6 +25,8 @@ describe('Transaction Utils V2', () => {
       const to = accountAddress
       const amountInWei = new BigNumber(1e18)
       const gasFees = new BigNumber(1000 * 1000)
+      const gatewayFee = new BigNumber(25000)
+      const feeCurrency = await getGoldTokenAddress(web3)
       const nonce = await web3.eth.getTransactionCount(from)
 
       const rawTransaction: string = await getRawTransaction(
@@ -33,7 +36,10 @@ describe('Transaction Utils V2', () => {
         nonce,
         amountInWei,
         gasFees,
-        new BigNumber(gasPrice)
+        new BigNumber(gasPrice),
+        await web3.eth.getCoinbase(),
+        gatewayFee,
+        feeCurrency
       )
       const recoveredSigner = recoverTransaction(rawTransaction)
       expect(recoveredSigner).toEqual(from)

@@ -5,99 +5,149 @@ import * as React from 'react'
 import { withNamespaces, WithNamespaces } from 'react-i18next'
 import { StyleSheet, Text, View } from 'react-native'
 import CurrencyDisplay from 'src/components/CurrencyDisplay'
+import LineItemRow from 'src/components/LineItemRow'
 import ExchangeRate from 'src/exchange/ExchangeRate'
+import FeeExchangeIcon from 'src/exchange/FeeExchangeIcon'
 import { CURRENCY_ENUM } from 'src/geth/consts'
 import { Namespaces } from 'src/i18n'
+import {
+  useDollarsToLocalAmount,
+  useLocalCurrencyCode,
+  useLocalCurrencySymbol,
+} from 'src/localCurrency/hooks'
+import FeeIcon from 'src/send/FeeIcon'
 import RoundedArrow from 'src/shared/RoundedArrow'
+import { getMoneyDisplayValue } from 'src/utils/formatting'
 
 export interface ExchangeConfirmationCardProps {
-  token: CURRENCY_ENUM
-  newDollarBalance: string
-  newGoldBalance: string
-  leftCurrencyAmount: BigNumber
-  rightCurrencyAmount: BigNumber
-  exchangeRate: string | null
-  fee: string
+  makerToken: CURRENCY_ENUM
+  makerAmount: BigNumber
+  takerAmount: BigNumber
+  fee?: string
+  exchangeRate?: BigNumber
+  newDollarBalance?: BigNumber
+  newGoldBalance?: BigNumber
 }
 
 type Props = ExchangeConfirmationCardProps & WithNamespaces
 
-class ExchangeConfirmationCard extends React.PureComponent<Props> {
-  takerToken() {
-    return this.props.token === CURRENCY_ENUM.DOLLAR ? CURRENCY_ENUM.GOLD : CURRENCY_ENUM.DOLLAR
-  }
-
-  renderNewBalances = (newDollarBalance: string, newGoldBalance: string) => {
-    const { t } = this.props
-
-    return (
-      <View style={styles.newBalanceContainer}>
-        <View style={styles.line} />
-
-        <View style={styles.titleContainer}>
-          <Text style={[fontStyles.pCurrency, styles.title]}>{t('newBalance')}</Text>
-        </View>
-        <View style={styles.tabular}>
-          <Text style={fontStyles.bodySecondary}>{t('global:celoDollars')}</Text>
-          <Text numberOfLines={1} style={[fontStyles.currency, styles.dollar]}>
-            ${newDollarBalance}
-          </Text>
-        </View>
-
-        <View style={styles.tabular}>
-          <Text style={fontStyles.bodySecondary}>{t('global:celoGold')}</Text>
-          <Text numberOfLines={1} style={[fontStyles.currency, styles.gold]}>
-            {newGoldBalance}
-          </Text>
-        </View>
-      </View>
-    )
-  }
-
-  exchangeRateToDisplay() {
-    const { leftCurrencyAmount, rightCurrencyAmount, exchangeRate } = this.props
-
-    if (exchangeRate && exchangeRate.length > 0) {
-      return new BigNumber(exchangeRate)
-    }
-
-    return rightCurrencyAmount.dividedBy(leftCurrencyAmount)
-  }
-
-  render() {
-    const { newDollarBalance, newGoldBalance, leftCurrencyAmount, rightCurrencyAmount } = this.props
-
-    const shouldRenderBalance = newDollarBalance.length > 0 && newGoldBalance.length > 0
-    return (
-      <View style={styles.container}>
-        <View style={styles.exchange}>
-          <CurrencyDisplay
-            amount={leftCurrencyAmount.toString()}
-            size={36}
-            type={this.props.token}
-          />
-          <View style={styles.arrow}>
-            <RoundedArrow />
-          </View>
-
-          <CurrencyDisplay
-            amount={rightCurrencyAmount.toString()}
-            size={36}
-            type={this.takerToken()}
-          />
-        </View>
-
-        <View style={styles.title}>
-          <ExchangeRate rate={this.exchangeRateToDisplay()} makerToken={this.props.token} />
-        </View>
-
-        {shouldRenderBalance && this.renderNewBalances(newDollarBalance, newGoldBalance)}
-      </View>
-    )
-  }
+const getTakerToken = (props: Props) => {
+  return props.makerToken === CURRENCY_ENUM.DOLLAR ? CURRENCY_ENUM.GOLD : CURRENCY_ENUM.DOLLAR
 }
 
-export default withNamespaces(Namespaces.exchangeFlow9)(ExchangeConfirmationCard)
+const getExchangeRate = (props: Props) => {
+  const { makerAmount, takerAmount, exchangeRate } = props
+
+  if (exchangeRate) {
+    return exchangeRate
+  }
+
+  // For feed drilldown, the exchange rate has not been provided
+  return makerAmount.dividedBy(takerAmount)
+}
+
+const renderNewBalances = (
+  props: Props,
+  newDollarBalance: BigNumber,
+  newGoldBalance: BigNumber
+) => {
+  const { t } = props
+
+  return (
+    <View style={styles.newBalanceContainer}>
+      <View style={styles.line} />
+
+      <View style={styles.titleContainer}>
+        <Text style={[fontStyles.pCurrency, styles.title]}>{t('newBalance')}</Text>
+      </View>
+      <View style={styles.tabular}>
+        <Text style={fontStyles.bodySecondary}>{t('global:celoDollars')}</Text>
+        <Text numberOfLines={1} style={[fontStyles.body, styles.dollar]}>
+          {getMoneyDisplayValue(newDollarBalance, CURRENCY_ENUM.DOLLAR, true)}
+        </Text>
+      </View>
+
+      <View style={styles.tabular}>
+        <Text style={fontStyles.bodySecondary}>{t('global:celoGold')}</Text>
+        <Text numberOfLines={1} style={[fontStyles.body, styles.gold]}>
+          {getMoneyDisplayValue(newGoldBalance, CURRENCY_ENUM.GOLD, true)}
+        </Text>
+      </View>
+    </View>
+  )
+}
+
+export function ExchangeConfirmationCard(props: Props) {
+  const {
+    t,
+    newDollarBalance,
+    newGoldBalance,
+    makerAmount,
+    takerAmount,
+    makerToken: token,
+    fee,
+  } = props
+
+  const localCurrencyCode = useLocalCurrencyCode()
+  const localCurrencySymbol = useLocalCurrencySymbol()
+  const localMakerAmount = useDollarsToLocalAmount(props.makerAmount)
+  const localTakerAmount = useDollarsToLocalAmount(props.takerAmount)
+
+  const takerToken = getTakerToken(props)
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.exchange}>
+        <CurrencyDisplay
+          amount={
+            props.makerToken === CURRENCY_ENUM.DOLLAR && localCurrencyCode
+              ? new BigNumber(localMakerAmount || 0)
+              : makerAmount
+          }
+          size={36}
+          type={props.makerToken}
+          currencySymbol={localCurrencySymbol}
+        />
+        <View style={styles.arrow}>
+          <RoundedArrow />
+        </View>
+        <CurrencyDisplay
+          amount={
+            takerToken === CURRENCY_ENUM.DOLLAR && localCurrencyCode
+              ? new BigNumber(localTakerAmount || 0)
+              : takerAmount
+          }
+          size={36}
+          type={takerToken}
+          currencySymbol={localCurrencySymbol}
+        />
+      </View>
+
+      <View style={styles.title}>
+        <ExchangeRate rate={getExchangeRate(props)} makerToken={token} />
+      </View>
+
+      <View style={styles.feeContainer}>
+        <LineItemRow
+          currencySymbol={takerToken}
+          amount={fee}
+          title={t('securityFee')}
+          titleIcon={<FeeIcon />}
+        />
+        <LineItemRow
+          currencySymbol={takerToken}
+          amount={'0.01'}
+          title={t('exchangeFee')}
+          titleIcon={<FeeExchangeIcon />}
+        />
+      </View>
+
+      {newDollarBalance &&
+        newGoldBalance &&
+        renderNewBalances(props, newDollarBalance, newGoldBalance)}
+    </View>
+  )
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -106,6 +156,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.darkLightest,
     justifyContent: 'center',
+  },
+  feeContainer: {
+    marginBottom: 10,
+    paddingHorizontal: 50,
   },
   arrow: {
     marginHorizontal: 10,
@@ -131,9 +185,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  fee: {
-    color: colors.dark,
-  },
   titleContainer: {
     paddingTop: 30,
     paddingBottom: 20,
@@ -154,3 +205,5 @@ const styles = StyleSheet.create({
     color: colors.celoGreen,
   },
 })
+
+export default withNamespaces(Namespaces.exchangeFlow9)(ExchangeConfirmationCard)

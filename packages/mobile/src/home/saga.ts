@@ -12,6 +12,8 @@ import {
 import { fetchSentEscrowPayments } from 'src/escrow/actions'
 import { fetchGoldBalance } from 'src/goldToken/actions'
 import { Actions, refreshAllBalances, setLoading } from 'src/home/actions'
+import { fetchCurrentRate } from 'src/localCurrency/actions'
+import { shouldFetchCurrentRate } from 'src/localCurrency/selectors'
 import { withTimeout } from 'src/redux/sagas-helpers'
 import { shouldUpdateBalance } from 'src/redux/selectors'
 import { fetchDollarBalance } from 'src/stableToken/actions'
@@ -48,16 +50,19 @@ export function* refreshBalancesWithLoadingSaga() {
   )
 }
 
-function* autoRefreshSaga() {
+export function* autoRefreshSaga() {
   while (true) {
-    yield delay(10 * 1000) // sleep 10 seconds
     if (yield select(shouldUpdateBalance)) {
-      put(refreshAllBalances())
+      yield put(refreshAllBalances())
     }
+    if (yield select(shouldFetchCurrentRate)) {
+      yield put(fetchCurrentRate())
+    }
+    yield delay(10 * 1000) // sleep 10 seconds
   }
 }
 
-function* autoRefreshWatcher() {
+export function* autoRefreshWatcher() {
   while (yield take(Actions.START_BALANCE_AUTOREFRESH)) {
     // starts the task in the background
     const autoRefresh = yield fork(autoRefreshSaga)
@@ -66,7 +71,7 @@ function* autoRefreshWatcher() {
   }
 }
 
-function* watchRefreshBalances() {
+export function* watchRefreshBalances() {
   yield takeLeading(
     Actions.REFRESH_BALANCES,
     withLoading(withTimeout(REFRESH_TIMEOUT, refreshBalances))
@@ -81,5 +86,3 @@ export function* homeSaga() {
   // keep us stuck on sync screen
   // yield spawn(refreshBalancesWithLoadingSaga)
 }
-
-export const _watchRefreshBalances = watchRefreshBalances

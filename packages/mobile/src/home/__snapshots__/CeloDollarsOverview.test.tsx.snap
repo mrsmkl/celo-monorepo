@@ -11,35 +11,63 @@ exports[`CeloDollarsOverview renders correctly 1`] = `
 >
   <Text
     style={
-      Array [
-        Object {
-          "fontFamily": "Hind-SemiBold",
-        },
-        Object {
-          "color": "#2E3338",
-          "fontSize": 18,
-        },
-      ]
+      Object {
+        "color": "#2E3338",
+        "fontSize": 44,
+        "height": 48,
+        "lineHeight": 62,
+      }
     }
   >
-    global:celoDollars
+    <Text
+      style={
+        Object {
+          "fontFamily": "Hind-SemiBold",
+        }
+      }
+    >
+      $
+    </Text>
+    <Text
+      style={
+        Object {
+          "fontFamily": "Hind-SemiBold",
+        }
+      }
+    >
+      0.00
+    </Text>
+    <Text
+      style={
+        Object {
+          "fontSize": 22,
+        }
+      }
+    >
+       
+      
+    </Text>
   </Text>
   <Text
     style={
       Array [
         Object {
-          "fontFamily": "Hind-SemiBold",
+          "fontFamily": "Hind-Light",
         },
         Object {
-          "color": "#2E3338",
-          "fontSize": 44,
-          "height": 48,
-          "lineHeight": 62,
+          "color": "#B0B5B9",
+          "fontSize": 18,
         },
       ]
     }
   >
-    0.00
+    <Text>
+      0.00
+       
+    </Text>
+    <Text>
+      global:celoDollars
+    </Text>
   </Text>
 </View>
 `;

@@ -122,13 +122,6 @@ export const fontStyles = StyleSheet.create({
     fontFamily: HindSilguri.Regular,
     color: colors.darkSecondary,
   },
-  currency: {
-    fontSize: 16,
-    lineHeight: 20,
-    fontFamily: HindSilguri.Regular,
-    letterSpacing: -0.75,
-    color: colors.darkSecondary,
-  },
   activityCurrency: {
     fontSize: 16,
     lineHeight: 20,
@@ -162,22 +155,6 @@ export const fontStyles = StyleSheet.create({
     fontFamily: HindSilguri.Light,
     color: colors.dark,
     textAlignVertical: 'center',
-  },
-  link: {
-    color: colors.celoGreen,
-    fontSize: 14,
-    lineHeight: 18,
-    fontFamily: HindSilguri.Medium,
-  },
-  linkSmall: {
-    fontSize: 13,
-    lineHeight: 17,
-    fontFamily: HindSilguri.SemiBold,
-    color: colors.darkSecondary,
-  },
-  linkInline: {
-    color: colors.celoGreen,
-    fontFamily: HindSilguri.SemiBold,
   },
   headerTitle: {
     fontSize: 14,
@@ -223,7 +200,6 @@ export const fontStyles = StyleSheet.create({
   },
   comment: {
     fontSize: 15,
-    lineHeight: 20,
     fontFamily: HindSilguri.Regular,
     color: colors.darkSecondary,
   },

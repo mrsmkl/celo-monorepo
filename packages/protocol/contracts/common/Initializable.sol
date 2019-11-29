@@ -1,5 +1,4 @@
-pragma solidity ^0.5.8;
-
+pragma solidity ^0.5.3;
 
 contract Initializable {
   bool public initialized;

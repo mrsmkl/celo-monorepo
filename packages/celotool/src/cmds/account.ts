@@ -1,5 +1,5 @@
-import { addCeloEnvMiddleware, CeloEnvArgv } from '@celo/celotool/src/lib/env-utils'
-import * as yargs from 'yargs'
+import { addCeloEnvMiddleware, CeloEnvArgv } from 'src/lib/env-utils'
+import yargs from 'yargs'
 
 export const command = 'account <accountCommand>'
 

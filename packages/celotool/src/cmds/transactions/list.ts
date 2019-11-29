@@ -1,4 +1,3 @@
-import { TransactionsArgv } from '@celo/celotool/src/cmds/transactions'
 import {
   constructFunctionABICache,
   FunctionABICache,
@@ -13,7 +12,8 @@ import { getWeb3Client } from 'src/lib/blockchain'
 import { switchToClusterFromEnv } from 'src/lib/cluster'
 import { getBlockscoutUrl } from 'src/lib/endpoints'
 import Web3 from 'web3'
-import * as yargs from 'yargs'
+import yargs from 'yargs'
+import { TransactionsArgv } from '../transactions'
 
 export const command = 'list <address>'
 

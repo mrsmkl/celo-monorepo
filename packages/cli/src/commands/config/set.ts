@@ -10,9 +10,11 @@ export default class Set extends BaseCommand {
     node: flags.string({
       required: true,
       description: 'Node URL',
-      default: 'ws://localhost:8546',
+      default: 'http://localhost:8545',
     }),
   }
+
+  requireSynced = false
 
   async run() {
     const res = this.parse(Set)

@@ -1,6 +1,6 @@
-import { addCeloEnvMiddleware, CeloEnvArgv } from '@celo/celotool/src/lib/env-utils'
 import { CONTRACTS_TO_COPY, copyContractArtifacts, downloadArtifacts } from 'src/lib/artifacts'
-import * as yargs from 'yargs'
+import { addCeloEnvMiddleware, CeloEnvArgv } from 'src/lib/env-utils'
+import yargs from 'yargs'
 
 export const command = 'copy-contract-artifacts'
 

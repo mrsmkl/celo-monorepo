@@ -1,20 +1,23 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`transfer feed item renders correctly for faucet 1`] = `
+exports[`transfer feed item renders correctly for <0.000001 network fee 1`] = `
 <View
   accessible={true}
+  focusable={true}
   isTVSelectable={true}
+  nativeBackgroundAndroid={
+    Object {
+      "attribute": "selectableItemBackground",
+      "type": "ThemeAttrAndroid",
+    }
+  }
+  onClick={[Function]}
   onResponderGrant={[Function]}
   onResponderMove={[Function]}
   onResponderRelease={[Function]}
   onResponderTerminate={[Function]}
   onResponderTerminationRequest={[Function]}
   onStartShouldSetResponder={[Function]}
-  style={
-    Object {
-      "opacity": 1,
-    }
-  }
 >
   <View
     style={
@@ -37,7 +40,7 @@ exports[`transfer feed item renders correctly for faucet 1`] = `
       <Image
         source={
           Object {
-            "testUri": "../../../src/images/coins-logo.png",
+            "testUri": "../../../packages/mobile/src/images/coins-logo.png",
           }
         }
         style={
@@ -62,31 +65,26 @@ exports[`transfer feed item renders correctly for faucet 1`] = `
         style={
           Object {
             "flexDirection": "row",
-            "marginTop": 3,
+            "marginTop": -1,
           }
         }
       >
         <Text
           style={
-            Array [
-              Object {
-                "fontFamily": "Hind-SemiBold",
-              },
-              Object {
-                "color": "#2E3338",
-                "fontSize": 15,
-                "lineHeight": 20,
-              },
-            ]
+            Object {
+              "color": "#2E3338",
+              "fontFamily": "Hind-SemiBold",
+              "fontSize": 15,
+            }
           }
         >
-          feedItemFaucetTitle
+          feedItemNetworkFeeTitle
         </Text>
         <Text
           style={
             Array [
               Object {
-                "color": "#2E3338",
+                "color": "#42D689",
                 "fontFamily": "Hind-SemiBold",
                 "fontSize": 15,
                 "lineHeight": 20,
@@ -99,20 +97,150 @@ exports[`transfer feed item renders correctly for faucet 1`] = `
           }
         >
           
-          100.00
+          $
+          &lt;0.001
         </Text>
       </View>
       <Text
         style={
+          Object {
+            "color": "#81868B",
+            "fontFamily": "Hind-Regular",
+            "fontSize": 15,
+            "marginTop": -2,
+          }
+        }
+      >
+        feedItemNetworkFeeInfo
+      </Text>
+      <View
+        style={
           Array [
             Object {
-              "color": "#81868B",
-              "fontFamily": "Hind-Regular",
-              "fontSize": 15,
-              "lineHeight": 20,
+              "alignItems": "center",
+              "flex": 1,
+              "flexDirection": "row",
             },
-            Object {},
+            Object {
+              "marginTop": 8,
+            },
           ]
+        }
+      />
+    </View>
+  </View>
+</View>
+`;
+
+exports[`transfer feed item renders correctly for faucet 1`] = `
+<View
+  accessible={true}
+  focusable={true}
+  isTVSelectable={true}
+  nativeBackgroundAndroid={
+    Object {
+      "attribute": "selectableItemBackground",
+      "type": "ThemeAttrAndroid",
+    }
+  }
+  onClick={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+>
+  <View
+    style={
+      Object {
+        "flex": 1,
+        "flexDirection": "row",
+        "justifyContent": "space-between",
+        "padding": 16,
+      }
+    }
+  >
+    <View
+      style={
+        Object {
+          "alignItems": "center",
+          "flexDirection": "column",
+        }
+      }
+    >
+      <Image
+        source={
+          Object {
+            "testUri": "../../../packages/mobile/src/images/coins-logo.png",
+          }
+        }
+        style={
+          Object {
+            "alignItems": "center",
+            "height": 40,
+            "justifyContent": "center",
+            "width": 40,
+          }
+        }
+      />
+    </View>
+    <View
+      style={
+        Object {
+          "flex": 1,
+          "marginLeft": 16,
+        }
+      }
+    >
+      <View
+        style={
+          Object {
+            "flexDirection": "row",
+            "marginTop": -1,
+          }
+        }
+      >
+        <Text
+          style={
+            Object {
+              "color": "#2E3338",
+              "fontFamily": "Hind-SemiBold",
+              "fontSize": 15,
+            }
+          }
+        >
+          feedItemFaucetTitle
+        </Text>
+        <Text
+          style={
+            Array [
+              Object {
+                "color": "#42D689",
+                "fontFamily": "Hind-SemiBold",
+                "fontSize": 15,
+                "lineHeight": 20,
+              },
+              Object {
+                "marginLeft": "auto",
+                "paddingLeft": 10,
+              },
+            ]
+          }
+        >
+          
+          $
+          133.00
+        </Text>
+      </View>
+      <Text
+        style={
+          Object {
+            "color": "#81868B",
+            "fontFamily": "Hind-Regular",
+            "fontSize": 15,
+            "marginTop": -2,
+          }
         }
       >
         feedItemFaucetInfo
@@ -139,318 +267,21 @@ exports[`transfer feed item renders correctly for faucet 1`] = `
 exports[`transfer feed item renders correctly for known received 1`] = `
 <View
   accessible={true}
+  focusable={true}
   isTVSelectable={true}
+  nativeBackgroundAndroid={
+    Object {
+      "attribute": "selectableItemBackground",
+      "type": "ThemeAttrAndroid",
+    }
+  }
+  onClick={[Function]}
   onResponderGrant={[Function]}
   onResponderMove={[Function]}
   onResponderRelease={[Function]}
   onResponderTerminate={[Function]}
   onResponderTerminationRequest={[Function]}
   onStartShouldSetResponder={[Function]}
-  style={
-    Object {
-      "opacity": 1,
-    }
-  }
->
-  <View
-    style={
-      Object {
-        "flex": 1,
-        "flexDirection": "row",
-        "justifyContent": "space-between",
-        "padding": 16,
-      }
-    }
-  >
-    <View
-      style={
-        Object {
-          "alignItems": "center",
-          "flexDirection": "column",
-        }
-      }
-    >
-      <View
-        style={
-          Array [
-            Object {
-              "alignItems": "center",
-              "flexDirection": "row",
-              "justifyContent": "center",
-            },
-            undefined,
-          ]
-        }
-      >
-        <View
-          style={
-            Array [
-              Object {
-                "alignItems": "center",
-                "justifyContent": "center",
-              },
-              Object {
-                "backgroundColor": "#7AD6FE",
-                "borderRadius": 20,
-                "height": 40,
-                "width": 40,
-              },
-            ]
-          }
-        >
-          <Text
-            style={
-              Array [
-                Object {
-                  "color": "#FFFFFF",
-                  "fontFamily": "Hind-Medium",
-                  "fontSize": 16,
-                },
-                Object {
-                  "fontSize": 20,
-                },
-              ]
-            }
-          >
-            #
-          </Text>
-        </View>
-      </View>
-    </View>
-    <View
-      style={
-        Object {
-          "flex": 1,
-          "marginLeft": 16,
-        }
-      }
-    >
-      <View
-        style={
-          Object {
-            "flexDirection": "row",
-            "marginTop": 3,
-          }
-        }
-      >
-        <Text
-          style={
-            Array [
-              Object {
-                "fontFamily": "Hind-SemiBold",
-              },
-              Object {
-                "color": "#2E3338",
-                "fontSize": 15,
-                "lineHeight": 20,
-              },
-            ]
-          }
-        >
-          John Doe
-        </Text>
-        <Text
-          style={
-            Array [
-              Object {
-                "color": "#2E3338",
-                "fontFamily": "Hind-SemiBold",
-                "fontSize": 15,
-                "lineHeight": 20,
-              },
-              Object {
-                "marginLeft": "auto",
-                "paddingLeft": 10,
-              },
-            ]
-          }
-        >
-          
-          100.00
-        </Text>
-      </View>
-      <View
-        style={
-          Array [
-            Object {
-              "alignItems": "center",
-              "flex": 1,
-              "flexDirection": "row",
-            },
-            false,
-          ]
-        }
-      />
-    </View>
-  </View>
-</View>
-`;
-
-exports[`transfer feed item renders correctly for known sent 1`] = `
-<View
-  accessible={true}
-  isTVSelectable={true}
-  onResponderGrant={[Function]}
-  onResponderMove={[Function]}
-  onResponderRelease={[Function]}
-  onResponderTerminate={[Function]}
-  onResponderTerminationRequest={[Function]}
-  onStartShouldSetResponder={[Function]}
-  style={
-    Object {
-      "opacity": 1,
-    }
-  }
->
-  <View
-    style={
-      Object {
-        "flex": 1,
-        "flexDirection": "row",
-        "justifyContent": "space-between",
-        "padding": 16,
-      }
-    }
-  >
-    <View
-      style={
-        Object {
-          "alignItems": "center",
-          "flexDirection": "column",
-        }
-      }
-    >
-      <View
-        style={
-          Array [
-            Object {
-              "alignItems": "center",
-              "flexDirection": "row",
-              "justifyContent": "center",
-            },
-            undefined,
-          ]
-        }
-      >
-        <View
-          style={
-            Array [
-              Object {
-                "alignItems": "center",
-                "justifyContent": "center",
-              },
-              Object {
-                "backgroundColor": "#7AD6FE",
-                "borderRadius": 20,
-                "height": 40,
-                "width": 40,
-              },
-            ]
-          }
-        >
-          <Text
-            style={
-              Array [
-                Object {
-                  "color": "#FFFFFF",
-                  "fontFamily": "Hind-Medium",
-                  "fontSize": 16,
-                },
-                Object {
-                  "fontSize": 20,
-                },
-              ]
-            }
-          >
-            #
-          </Text>
-        </View>
-      </View>
-    </View>
-    <View
-      style={
-        Object {
-          "flex": 1,
-          "marginLeft": 16,
-        }
-      }
-    >
-      <View
-        style={
-          Object {
-            "flexDirection": "row",
-            "marginTop": 3,
-          }
-        }
-      >
-        <Text
-          style={
-            Array [
-              Object {
-                "fontFamily": "Hind-SemiBold",
-              },
-              Object {
-                "color": "#2E3338",
-                "fontSize": 15,
-                "lineHeight": 20,
-              },
-            ]
-          }
-        >
-          John Doe
-        </Text>
-        <Text
-          style={
-            Array [
-              Object {
-                "color": "#81868B",
-                "fontFamily": "Hind-Regular",
-                "fontSize": 15,
-                "lineHeight": 20,
-              },
-              Object {
-                "marginLeft": "auto",
-                "paddingLeft": 10,
-              },
-            ]
-          }
-        >
-          -
-          100.00
-        </Text>
-      </View>
-      <View
-        style={
-          Array [
-            Object {
-              "alignItems": "center",
-              "flex": 1,
-              "flexDirection": "row",
-            },
-            false,
-          ]
-        }
-      />
-    </View>
-  </View>
-</View>
-`;
-
-exports[`transfer feed item renders correctly for received 1`] = `
-<View
-  accessible={true}
-  isTVSelectable={true}
-  onResponderGrant={[Function]}
-  onResponderMove={[Function]}
-  onResponderRelease={[Function]}
-  onResponderTerminate={[Function]}
-  onResponderTerminationRequest={[Function]}
-  onStartShouldSetResponder={[Function]}
-  style={
-    Object {
-      "opacity": 1,
-    }
-  }
 >
   <View
     style={
@@ -501,7 +332,7 @@ exports[`transfer feed item renders correctly for received 1`] = `
           <Image
             source={
               Object {
-                "testUri": "../../../src/images/unknown-user-icon.png",
+                "testUri": "../../../packages/mobile/src/images/unknown-user-icon.png",
               }
             }
             style={
@@ -528,31 +359,26 @@ exports[`transfer feed item renders correctly for received 1`] = `
         style={
           Object {
             "flexDirection": "row",
-            "marginTop": 3,
+            "marginTop": -1,
           }
         }
       >
         <Text
           style={
-            Array [
-              Object {
-                "fontFamily": "Hind-SemiBold",
-              },
-              Object {
-                "color": "#2E3338",
-                "fontSize": 15,
-                "lineHeight": 20,
-              },
-            ]
+            Object {
+              "color": "#2E3338",
+              "fontFamily": "Hind-SemiBold",
+              "fontSize": 15,
+            }
           }
         >
-          feedItemReceivedTitle
+          John Doe
         </Text>
         <Text
           style={
             Array [
               Object {
-                "color": "#2E3338",
+                "color": "#42D689",
                 "fontFamily": "Hind-SemiBold",
                 "fontSize": 15,
                 "lineHeight": 20,
@@ -565,7 +391,8 @@ exports[`transfer feed item renders correctly for received 1`] = `
           }
         >
           
-          100.00
+          $
+          133.00
         </Text>
       </View>
       <View
@@ -585,21 +412,172 @@ exports[`transfer feed item renders correctly for received 1`] = `
 </View>
 `;
 
-exports[`transfer feed item renders correctly for received invite 1`] = `
+exports[`transfer feed item renders correctly for known sent 1`] = `
 <View
   accessible={true}
+  focusable={true}
   isTVSelectable={true}
+  nativeBackgroundAndroid={
+    Object {
+      "attribute": "selectableItemBackground",
+      "type": "ThemeAttrAndroid",
+    }
+  }
+  onClick={[Function]}
   onResponderGrant={[Function]}
   onResponderMove={[Function]}
   onResponderRelease={[Function]}
   onResponderTerminate={[Function]}
   onResponderTerminationRequest={[Function]}
   onStartShouldSetResponder={[Function]}
-  style={
+>
+  <View
+    style={
+      Object {
+        "flex": 1,
+        "flexDirection": "row",
+        "justifyContent": "space-between",
+        "padding": 16,
+      }
+    }
+  >
+    <View
+      style={
+        Object {
+          "alignItems": "center",
+          "flexDirection": "column",
+        }
+      }
+    >
+      <View
+        style={
+          Array [
+            Object {
+              "alignItems": "center",
+              "flexDirection": "row",
+              "justifyContent": "center",
+            },
+            undefined,
+          ]
+        }
+      >
+        <View
+          style={
+            Array [
+              Object {
+                "alignItems": "center",
+                "justifyContent": "center",
+              },
+              Object {
+                "backgroundColor": "#7AD6FE",
+                "borderRadius": 20,
+                "height": 40,
+                "width": 40,
+              },
+            ]
+          }
+        >
+          <Image
+            source={
+              Object {
+                "testUri": "../../../packages/mobile/src/images/unknown-user-icon.png",
+              }
+            }
+            style={
+              Object {
+                "alignItems": "center",
+                "height": 40,
+                "justifyContent": "center",
+                "width": 40,
+              }
+            }
+          />
+        </View>
+      </View>
+    </View>
+    <View
+      style={
+        Object {
+          "flex": 1,
+          "marginLeft": 16,
+        }
+      }
+    >
+      <View
+        style={
+          Object {
+            "flexDirection": "row",
+            "marginTop": -1,
+          }
+        }
+      >
+        <Text
+          style={
+            Object {
+              "color": "#2E3338",
+              "fontFamily": "Hind-SemiBold",
+              "fontSize": 15,
+            }
+          }
+        >
+          John Doe
+        </Text>
+        <Text
+          style={
+            Array [
+              Object {
+                "color": "#81868B",
+                "fontFamily": "Hind-Regular",
+                "fontSize": 15,
+                "lineHeight": 20,
+              },
+              Object {
+                "marginLeft": "auto",
+                "paddingLeft": 10,
+              },
+            ]
+          }
+        >
+          -
+          $
+          133.00
+        </Text>
+      </View>
+      <View
+        style={
+          Array [
+            Object {
+              "alignItems": "center",
+              "flex": 1,
+              "flexDirection": "row",
+            },
+            false,
+          ]
+        }
+      />
+    </View>
+  </View>
+</View>
+`;
+
+exports[`transfer feed item renders correctly for network fee 1`] = `
+<View
+  accessible={true}
+  focusable={true}
+  isTVSelectable={true}
+  nativeBackgroundAndroid={
     Object {
-      "opacity": 1,
+      "attribute": "selectableItemBackground",
+      "type": "ThemeAttrAndroid",
     }
   }
+  onClick={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
 >
   <View
     style={
@@ -622,7 +600,7 @@ exports[`transfer feed item renders correctly for received invite 1`] = `
       <Image
         source={
           Object {
-            "testUri": "../../../src/images/coins-logo.png",
+            "testUri": "../../../packages/mobile/src/images/coins-logo.png",
           }
         }
         style={
@@ -647,31 +625,26 @@ exports[`transfer feed item renders correctly for received invite 1`] = `
         style={
           Object {
             "flexDirection": "row",
-            "marginTop": 3,
+            "marginTop": -1,
           }
         }
       >
         <Text
           style={
-            Array [
-              Object {
-                "fontFamily": "Hind-SemiBold",
-              },
-              Object {
-                "color": "#2E3338",
-                "fontSize": 15,
-                "lineHeight": 20,
-              },
-            ]
+            Object {
+              "color": "#2E3338",
+              "fontFamily": "Hind-SemiBold",
+              "fontSize": 15,
+            }
           }
         >
-          feedItemInviteReceivedTitle
+          feedItemNetworkFeeTitle
         </Text>
         <Text
           style={
             Array [
               Object {
-                "color": "#2E3338",
+                "color": "#42D689",
                 "fontFamily": "Hind-SemiBold",
                 "fontSize": 15,
                 "lineHeight": 20,
@@ -684,20 +657,298 @@ exports[`transfer feed item renders correctly for received invite 1`] = `
           }
         >
           
-          1.00
+          $
+          0.002
         </Text>
       </View>
       <Text
         style={
+          Object {
+            "color": "#81868B",
+            "fontFamily": "Hind-Regular",
+            "fontSize": 15,
+            "marginTop": -2,
+          }
+        }
+      >
+        feedItemNetworkFeeInfo
+      </Text>
+      <View
+        style={
           Array [
             Object {
-              "color": "#81868B",
-              "fontFamily": "Hind-Regular",
-              "fontSize": 15,
-              "lineHeight": 20,
+              "alignItems": "center",
+              "flex": 1,
+              "flexDirection": "row",
             },
-            Object {},
+            Object {
+              "marginTop": 8,
+            },
           ]
+        }
+      />
+    </View>
+  </View>
+</View>
+`;
+
+exports[`transfer feed item renders correctly for received 1`] = `
+<View
+  accessible={true}
+  focusable={true}
+  isTVSelectable={true}
+  nativeBackgroundAndroid={
+    Object {
+      "attribute": "selectableItemBackground",
+      "type": "ThemeAttrAndroid",
+    }
+  }
+  onClick={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+>
+  <View
+    style={
+      Object {
+        "flex": 1,
+        "flexDirection": "row",
+        "justifyContent": "space-between",
+        "padding": 16,
+      }
+    }
+  >
+    <View
+      style={
+        Object {
+          "alignItems": "center",
+          "flexDirection": "column",
+        }
+      }
+    >
+      <View
+        style={
+          Array [
+            Object {
+              "alignItems": "center",
+              "flexDirection": "row",
+              "justifyContent": "center",
+            },
+            undefined,
+          ]
+        }
+      >
+        <View
+          style={
+            Array [
+              Object {
+                "alignItems": "center",
+                "justifyContent": "center",
+              },
+              Object {
+                "backgroundColor": "#7AD6FE",
+                "borderRadius": 20,
+                "height": 40,
+                "width": 40,
+              },
+            ]
+          }
+        >
+          <Image
+            source={
+              Object {
+                "testUri": "../../../packages/mobile/src/images/unknown-user-icon.png",
+              }
+            }
+            style={
+              Object {
+                "alignItems": "center",
+                "height": 40,
+                "justifyContent": "center",
+                "width": 40,
+              }
+            }
+          />
+        </View>
+      </View>
+    </View>
+    <View
+      style={
+        Object {
+          "flex": 1,
+          "marginLeft": 16,
+        }
+      }
+    >
+      <View
+        style={
+          Object {
+            "flexDirection": "row",
+            "marginTop": -1,
+          }
+        }
+      >
+        <Text
+          style={
+            Object {
+              "color": "#2E3338",
+              "fontFamily": "Hind-SemiBold",
+              "fontSize": 15,
+            }
+          }
+        >
+          feedItemReceivedTitle
+        </Text>
+        <Text
+          style={
+            Array [
+              Object {
+                "color": "#42D689",
+                "fontFamily": "Hind-SemiBold",
+                "fontSize": 15,
+                "lineHeight": 20,
+              },
+              Object {
+                "marginLeft": "auto",
+                "paddingLeft": 10,
+              },
+            ]
+          }
+        >
+          
+          $
+          133.00
+        </Text>
+      </View>
+      <View
+        style={
+          Array [
+            Object {
+              "alignItems": "center",
+              "flex": 1,
+              "flexDirection": "row",
+            },
+            false,
+          ]
+        }
+      />
+    </View>
+  </View>
+</View>
+`;
+
+exports[`transfer feed item renders correctly for received invite 1`] = `
+<View
+  accessible={true}
+  focusable={true}
+  isTVSelectable={true}
+  nativeBackgroundAndroid={
+    Object {
+      "attribute": "selectableItemBackground",
+      "type": "ThemeAttrAndroid",
+    }
+  }
+  onClick={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+>
+  <View
+    style={
+      Object {
+        "flex": 1,
+        "flexDirection": "row",
+        "justifyContent": "space-between",
+        "padding": 16,
+      }
+    }
+  >
+    <View
+      style={
+        Object {
+          "alignItems": "center",
+          "flexDirection": "column",
+        }
+      }
+    >
+      <Image
+        source={
+          Object {
+            "testUri": "../../../packages/mobile/src/images/coins-logo.png",
+          }
+        }
+        style={
+          Object {
+            "alignItems": "center",
+            "height": 40,
+            "justifyContent": "center",
+            "width": 40,
+          }
+        }
+      />
+    </View>
+    <View
+      style={
+        Object {
+          "flex": 1,
+          "marginLeft": 16,
+        }
+      }
+    >
+      <View
+        style={
+          Object {
+            "flexDirection": "row",
+            "marginTop": -1,
+          }
+        }
+      >
+        <Text
+          style={
+            Object {
+              "color": "#2E3338",
+              "fontFamily": "Hind-SemiBold",
+              "fontSize": 15,
+            }
+          }
+        >
+          feedItemInviteReceivedTitle
+        </Text>
+        <Text
+          style={
+            Array [
+              Object {
+                "color": "#42D689",
+                "fontFamily": "Hind-SemiBold",
+                "fontSize": 15,
+                "lineHeight": 20,
+              },
+              Object {
+                "marginLeft": "auto",
+                "paddingLeft": 10,
+              },
+            ]
+          }
+        >
+          
+          $
+          1.33
+        </Text>
+      </View>
+      <Text
+        style={
+          Object {
+            "color": "#81868B",
+            "fontFamily": "Hind-Regular",
+            "fontSize": 15,
+            "marginTop": -2,
+          }
         }
       >
         feedItemInviteReceivedInfo
@@ -724,18 +975,21 @@ exports[`transfer feed item renders correctly for received invite 1`] = `
 exports[`transfer feed item renders correctly for received with encrypted comment 1`] = `
 <View
   accessible={true}
+  focusable={true}
   isTVSelectable={true}
+  nativeBackgroundAndroid={
+    Object {
+      "attribute": "selectableItemBackground",
+      "type": "ThemeAttrAndroid",
+    }
+  }
+  onClick={[Function]}
   onResponderGrant={[Function]}
   onResponderMove={[Function]}
   onResponderRelease={[Function]}
   onResponderTerminate={[Function]}
   onResponderTerminationRequest={[Function]}
   onStartShouldSetResponder={[Function]}
-  style={
-    Object {
-      "opacity": 1,
-    }
-  }
 >
   <View
     style={
@@ -786,7 +1040,7 @@ exports[`transfer feed item renders correctly for received with encrypted commen
           <Image
             source={
               Object {
-                "testUri": "../../../src/images/unknown-user-icon.png",
+                "testUri": "../../../packages/mobile/src/images/unknown-user-icon.png",
               }
             }
             style={
@@ -813,22 +1067,17 @@ exports[`transfer feed item renders correctly for received with encrypted commen
         style={
           Object {
             "flexDirection": "row",
-            "marginTop": 3,
+            "marginTop": -1,
           }
         }
       >
         <Text
           style={
-            Array [
-              Object {
-                "fontFamily": "Hind-SemiBold",
-              },
-              Object {
-                "color": "#2E3338",
-                "fontSize": 15,
-                "lineHeight": 20,
-              },
-            ]
+            Object {
+              "color": "#2E3338",
+              "fontFamily": "Hind-SemiBold",
+              "fontSize": 15,
+            }
           }
         >
           feedItemReceivedTitle
@@ -837,7 +1086,7 @@ exports[`transfer feed item renders correctly for received with encrypted commen
           style={
             Array [
               Object {
-                "color": "#2E3338",
+                "color": "#42D689",
                 "fontFamily": "Hind-SemiBold",
                 "fontSize": 15,
                 "lineHeight": 20,
@@ -850,20 +1099,18 @@ exports[`transfer feed item renders correctly for received with encrypted commen
           }
         >
           
-          100.00
+          $
+          133.00
         </Text>
       </View>
       <Text
         style={
-          Array [
-            Object {
-              "color": "#81868B",
-              "fontFamily": "Hind-Regular",
-              "fontSize": 15,
-              "lineHeight": 20,
-            },
-            Object {},
-          ]
+          Object {
+            "color": "#81868B",
+            "fontFamily": "Hind-Regular",
+            "fontSize": 15,
+            "marginTop": -2,
+          }
         }
       >
         Rent request for June, it is already late!!!
@@ -890,18 +1137,21 @@ exports[`transfer feed item renders correctly for received with encrypted commen
 exports[`transfer feed item renders correctly for sent 1`] = `
 <View
   accessible={true}
+  focusable={true}
   isTVSelectable={true}
+  nativeBackgroundAndroid={
+    Object {
+      "attribute": "selectableItemBackground",
+      "type": "ThemeAttrAndroid",
+    }
+  }
+  onClick={[Function]}
   onResponderGrant={[Function]}
   onResponderMove={[Function]}
   onResponderRelease={[Function]}
   onResponderTerminate={[Function]}
   onResponderTerminationRequest={[Function]}
   onStartShouldSetResponder={[Function]}
-  style={
-    Object {
-      "opacity": 1,
-    }
-  }
 >
   <View
     style={
@@ -952,7 +1202,7 @@ exports[`transfer feed item renders correctly for sent 1`] = `
           <Image
             source={
               Object {
-                "testUri": "../../../src/images/unknown-user-icon.png",
+                "testUri": "../../../packages/mobile/src/images/unknown-user-icon.png",
               }
             }
             style={
@@ -979,22 +1229,17 @@ exports[`transfer feed item renders correctly for sent 1`] = `
         style={
           Object {
             "flexDirection": "row",
-            "marginTop": 3,
+            "marginTop": -1,
           }
         }
       >
         <Text
           style={
-            Array [
-              Object {
-                "fontFamily": "Hind-SemiBold",
-              },
-              Object {
-                "color": "#2E3338",
-                "fontSize": 15,
-                "lineHeight": 20,
-              },
-            ]
+            Object {
+              "color": "#2E3338",
+              "fontFamily": "Hind-SemiBold",
+              "fontSize": 15,
+            }
           }
         >
           feedItemSentTitle
@@ -1016,7 +1261,8 @@ exports[`transfer feed item renders correctly for sent 1`] = `
           }
         >
           -
-          100.00
+          $
+          133.00
         </Text>
       </View>
       <View
@@ -1039,18 +1285,21 @@ exports[`transfer feed item renders correctly for sent 1`] = `
 exports[`transfer feed item renders correctly for sent invite 1`] = `
 <View
   accessible={true}
+  focusable={true}
   isTVSelectable={true}
+  nativeBackgroundAndroid={
+    Object {
+      "attribute": "selectableItemBackground",
+      "type": "ThemeAttrAndroid",
+    }
+  }
+  onClick={[Function]}
   onResponderGrant={[Function]}
   onResponderMove={[Function]}
   onResponderRelease={[Function]}
   onResponderTerminate={[Function]}
   onResponderTerminationRequest={[Function]}
   onStartShouldSetResponder={[Function]}
-  style={
-    Object {
-      "opacity": 1,
-    }
-  }
 >
   <View
     style={
@@ -1073,7 +1322,7 @@ exports[`transfer feed item renders correctly for sent invite 1`] = `
       <Image
         source={
           Object {
-            "testUri": "../../../src/images/coins-logo.png",
+            "testUri": "../../../packages/mobile/src/images/coins-logo.png",
           }
         }
         style={
@@ -1098,22 +1347,17 @@ exports[`transfer feed item renders correctly for sent invite 1`] = `
         style={
           Object {
             "flexDirection": "row",
-            "marginTop": 3,
+            "marginTop": -1,
           }
         }
       >
         <Text
           style={
-            Array [
-              Object {
-                "fontFamily": "Hind-SemiBold",
-              },
-              Object {
-                "color": "#2E3338",
-                "fontSize": 15,
-                "lineHeight": 20,
-              },
-            ]
+            Object {
+              "color": "#2E3338",
+              "fontFamily": "Hind-SemiBold",
+              "fontSize": 15,
+            }
           }
         >
           feedItemInviteSentTitle
@@ -1135,20 +1379,18 @@ exports[`transfer feed item renders correctly for sent invite 1`] = `
           }
         >
           -
-          1.00
+          $
+          1.33
         </Text>
       </View>
       <Text
         style={
-          Array [
-            Object {
-              "color": "#81868B",
-              "fontFamily": "Hind-Regular",
-              "fontSize": 15,
-              "lineHeight": 20,
-            },
-            Object {},
-          ]
+          Object {
+            "color": "#81868B",
+            "fontFamily": "Hind-Regular",
+            "fontSize": 15,
+            "marginTop": -2,
+          }
         }
       >
         feedItemInviteSentInfo
@@ -1175,18 +1417,21 @@ exports[`transfer feed item renders correctly for sent invite 1`] = `
 exports[`transfer feed item renders correctly for sent transaction 1`] = `
 <View
   accessible={true}
+  focusable={true}
   isTVSelectable={true}
+  nativeBackgroundAndroid={
+    Object {
+      "attribute": "selectableItemBackground",
+      "type": "ThemeAttrAndroid",
+    }
+  }
+  onClick={[Function]}
   onResponderGrant={[Function]}
   onResponderMove={[Function]}
   onResponderRelease={[Function]}
   onResponderTerminate={[Function]}
   onResponderTerminationRequest={[Function]}
   onStartShouldSetResponder={[Function]}
-  style={
-    Object {
-      "opacity": 1,
-    }
-  }
 >
   <View
     style={
@@ -1237,7 +1482,7 @@ exports[`transfer feed item renders correctly for sent transaction 1`] = `
           <Image
             source={
               Object {
-                "testUri": "../../../src/images/unknown-user-icon.png",
+                "testUri": "../../../packages/mobile/src/images/unknown-user-icon.png",
               }
             }
             style={
@@ -1264,22 +1509,17 @@ exports[`transfer feed item renders correctly for sent transaction 1`] = `
         style={
           Object {
             "flexDirection": "row",
-            "marginTop": 3,
+            "marginTop": -1,
           }
         }
       >
         <Text
           style={
-            Array [
-              Object {
-                "fontFamily": "Hind-SemiBold",
-              },
-              Object {
-                "color": "#2E3338",
-                "fontSize": 15,
-                "lineHeight": 20,
-              },
-            ]
+            Object {
+              "color": "#2E3338",
+              "fontFamily": "Hind-SemiBold",
+              "fontSize": 15,
+            }
           }
         >
           feedItemSentTitle
@@ -1301,20 +1541,18 @@ exports[`transfer feed item renders correctly for sent transaction 1`] = `
           }
         >
           -
-          1.00
+          $
+          1.33
         </Text>
       </View>
       <Text
         style={
-          Array [
-            Object {
-              "color": "#81868B",
-              "fontFamily": "Hind-Regular",
-              "fontSize": 15,
-              "lineHeight": 20,
-            },
-            Object {},
-          ]
+          Object {
+            "color": "#81868B",
+            "fontFamily": "Hind-Regular",
+            "fontSize": 15,
+            "marginTop": -2,
+          }
         }
       >
         Rent request for June, it is already late!!!
@@ -1341,18 +1579,21 @@ exports[`transfer feed item renders correctly for sent transaction 1`] = `
 exports[`transfer feed item renders correctly for sent with encrypted comment 1`] = `
 <View
   accessible={true}
+  focusable={true}
   isTVSelectable={true}
+  nativeBackgroundAndroid={
+    Object {
+      "attribute": "selectableItemBackground",
+      "type": "ThemeAttrAndroid",
+    }
+  }
+  onClick={[Function]}
   onResponderGrant={[Function]}
   onResponderMove={[Function]}
   onResponderRelease={[Function]}
   onResponderTerminate={[Function]}
   onResponderTerminationRequest={[Function]}
   onStartShouldSetResponder={[Function]}
-  style={
-    Object {
-      "opacity": 1,
-    }
-  }
 >
   <View
     style={
@@ -1403,7 +1644,7 @@ exports[`transfer feed item renders correctly for sent with encrypted comment 1`
           <Image
             source={
               Object {
-                "testUri": "../../../src/images/unknown-user-icon.png",
+                "testUri": "../../../packages/mobile/src/images/unknown-user-icon.png",
               }
             }
             style={
@@ -1430,22 +1671,17 @@ exports[`transfer feed item renders correctly for sent with encrypted comment 1`
         style={
           Object {
             "flexDirection": "row",
-            "marginTop": 3,
+            "marginTop": -1,
           }
         }
       >
         <Text
           style={
-            Array [
-              Object {
-                "fontFamily": "Hind-SemiBold",
-              },
-              Object {
-                "color": "#2E3338",
-                "fontSize": 15,
-                "lineHeight": 20,
-              },
-            ]
+            Object {
+              "color": "#2E3338",
+              "fontFamily": "Hind-SemiBold",
+              "fontSize": 15,
+            }
           }
         >
           feedItemSentTitle
@@ -1467,20 +1703,18 @@ exports[`transfer feed item renders correctly for sent with encrypted comment 1`
           }
         >
           -
-          1.00
+          $
+          1.33
         </Text>
       </View>
       <Text
         style={
-          Array [
-            Object {
-              "color": "#81868B",
-              "fontFamily": "Hind-Regular",
-              "fontSize": 15,
-              "lineHeight": 20,
-            },
-            Object {},
-          ]
+          Object {
+            "color": "#81868B",
+            "fontFamily": "Hind-Regular",
+            "fontSize": 15,
+            "marginTop": -2,
+          }
         }
       >
         Rent request for June, it is already late!!!
@@ -1507,18 +1741,21 @@ exports[`transfer feed item renders correctly for sent with encrypted comment 1`
 exports[`transfer feed item renders correctly for verification fee 1`] = `
 <View
   accessible={true}
+  focusable={true}
   isTVSelectable={true}
+  nativeBackgroundAndroid={
+    Object {
+      "attribute": "selectableItemBackground",
+      "type": "ThemeAttrAndroid",
+    }
+  }
+  onClick={[Function]}
   onResponderGrant={[Function]}
   onResponderMove={[Function]}
   onResponderRelease={[Function]}
   onResponderTerminate={[Function]}
   onResponderTerminationRequest={[Function]}
   onStartShouldSetResponder={[Function]}
-  style={
-    Object {
-      "opacity": 1,
-    }
-  }
 >
   <View
     style={
@@ -1541,7 +1778,7 @@ exports[`transfer feed item renders correctly for verification fee 1`] = `
       <Image
         source={
           Object {
-            "testUri": "../../../src/images/coins-logo.png",
+            "testUri": "../../../packages/mobile/src/images/coins-logo.png",
           }
         }
         style={
@@ -1566,22 +1803,17 @@ exports[`transfer feed item renders correctly for verification fee 1`] = `
         style={
           Object {
             "flexDirection": "row",
-            "marginTop": 3,
+            "marginTop": -1,
           }
         }
       >
         <Text
           style={
-            Array [
-              Object {
-                "fontFamily": "Hind-SemiBold",
-              },
-              Object {
-                "color": "#2E3338",
-                "fontSize": 15,
-                "lineHeight": 20,
-              },
-            ]
+            Object {
+              "color": "#2E3338",
+              "fontFamily": "Hind-SemiBold",
+              "fontSize": 15,
+            }
           }
         >
           feedItemVerificationFeeTitle
@@ -1603,20 +1835,18 @@ exports[`transfer feed item renders correctly for verification fee 1`] = `
           }
         >
           -
-          0.33
+          $
+          0.43
         </Text>
       </View>
       <Text
         style={
-          Array [
-            Object {
-              "color": "#81868B",
-              "fontFamily": "Hind-Regular",
-              "fontSize": 15,
-              "lineHeight": 20,
-            },
-            Object {},
-          ]
+          Object {
+            "color": "#81868B",
+            "fontFamily": "Hind-Regular",
+            "fontSize": 15,
+            "marginTop": -2,
+          }
         }
       >
         feedItemVerificationFeeInfo
@@ -1643,18 +1873,21 @@ exports[`transfer feed item renders correctly for verification fee 1`] = `
 exports[`transfer feed item renders correctly for verification reward 1`] = `
 <View
   accessible={true}
+  focusable={true}
   isTVSelectable={true}
+  nativeBackgroundAndroid={
+    Object {
+      "attribute": "selectableItemBackground",
+      "type": "ThemeAttrAndroid",
+    }
+  }
+  onClick={[Function]}
   onResponderGrant={[Function]}
   onResponderMove={[Function]}
   onResponderRelease={[Function]}
   onResponderTerminate={[Function]}
   onResponderTerminationRequest={[Function]}
   onStartShouldSetResponder={[Function]}
-  style={
-    Object {
-      "opacity": 1,
-    }
-  }
 >
   <View
     style={
@@ -1721,22 +1954,17 @@ exports[`transfer feed item renders correctly for verification reward 1`] = `
         style={
           Object {
             "flexDirection": "row",
-            "marginTop": 3,
+            "marginTop": -1,
           }
         }
       >
         <Text
           style={
-            Array [
-              Object {
-                "fontFamily": "Hind-SemiBold",
-              },
-              Object {
-                "color": "#2E3338",
-                "fontSize": 15,
-                "lineHeight": 20,
-              },
-            ]
+            Object {
+              "color": "#2E3338",
+              "fontFamily": "Hind-SemiBold",
+              "fontSize": 15,
+            }
           }
         >
           feedItemVerificationRewardTitle
@@ -1745,7 +1973,7 @@ exports[`transfer feed item renders correctly for verification reward 1`] = `
           style={
             Array [
               Object {
-                "color": "#2E3338",
+                "color": "#42D689",
                 "fontFamily": "Hind-SemiBold",
                 "fontSize": 15,
                 "lineHeight": 20,
@@ -1758,20 +1986,18 @@ exports[`transfer feed item renders correctly for verification reward 1`] = `
           }
         >
           
-          1.00
+          $
+          1.33
         </Text>
       </View>
       <Text
         style={
-          Array [
-            Object {
-              "color": "#81868B",
-              "fontFamily": "Hind-Regular",
-              "fontSize": 15,
-              "lineHeight": 20,
-            },
-            Object {},
-          ]
+          Object {
+            "color": "#81868B",
+            "fontFamily": "Hind-Regular",
+            "fontSize": 15,
+            "marginTop": -2,
+          }
         }
       >
         feedItemVerificationRewardInfo

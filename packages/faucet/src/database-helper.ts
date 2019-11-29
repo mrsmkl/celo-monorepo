@@ -1,8 +1,10 @@
+/* tslint:disable max-classes-per-file */
 import { database } from 'firebase-admin'
 import { DataSnapshot } from 'firebase-functions/lib/providers/database'
 import Web3 from 'web3'
 import { CeloAdapter } from './celo-adapter'
 import { NetworkConfig } from './config'
+import { ExecutionResult, logExecutionResult } from './metrics'
 import { generateInviteCode, getPhoneHash, isE164Number, wait } from './utils'
 
 export type Address = string
@@ -24,11 +26,19 @@ export enum RequestType {
   Invite = 'Invite',
 }
 
+enum MobileOS {
+  android = 'android',
+  ios = 'ios',
+}
+
 export interface RequestRecord {
   beneficiary: Address
   status: RequestStatus
-  txHash?: string
   type: RequestType
+  mobileOS?: MobileOS // only on invite
+  dollarTxHash?: string
+  goldTxHash?: string
+  escrowTxHash?: string // only on Invites
 }
 
 export async function processRequest(snap: DataSnapshot, pool: AccountPool, config: NetworkConfig) {
@@ -49,11 +59,27 @@ export async function processRequest(snap: DataSnapshot, pool: AccountPool, conf
     } else if (request.type === RequestType.Invite) {
       requestHandler = buildHandleInvite(request, snap, config)
     } else {
-      throw new Error(`Unkown request type: ${request.type}`)
+      logExecutionResult(snap.key, ExecutionResult.InvalidRequestErr)
+      return ExecutionResult.InvalidRequestErr
     }
-    const success = await pool.doWithAccount(requestHandler)
-    await snap.ref.update({ status: success ? RequestStatus.Done : RequestStatus.Failed })
+
+    const actionResult = await pool.doWithAccount(requestHandler)
+    if (actionResult === ActionResult.Ok) {
+      await snap.ref.update({ status: RequestStatus.Done })
+      logExecutionResult(snap.key, ExecutionResult.Ok)
+      return ExecutionResult.Ok
+    } else {
+      await snap.ref.update({ status: RequestStatus.Failed })
+      const result =
+        actionResult === ActionResult.NoFreeAccount
+          ? ExecutionResult.NoFreeAccountErr
+          : ExecutionResult.ActionTimedOutErr
+      logExecutionResult(snap.key, result)
+      return result
+    }
   } catch (err) {
+    logExecutionResult(snap.key, ExecutionResult.OtherErr)
+    console.error(`req(${snap.key}): ERROR proccessRequest`, err)
     await snap.ref.update({ status: RequestStatus.Failed })
     throw err
   }
@@ -74,11 +100,7 @@ function buildHandleFaucet(request: RequestRecord, snap: DataSnapshot, config: N
     await snap.ref.update({ goldTxHash })
     await goldTx.waitReceipt()
 
-    const dollarTx = await celo.transferDollars(request.beneficiary, config.faucetDollarAmount)
-    const dollarTxHash = await dollarTx.getHash()
-    console.info(`req(${snap.key}): Dollar Transaction Sent. txhash:${dollarTxHash}`)
-    await snap.ref.update({ dollarTxHash })
-    await dollarTx.waitReceipt()
+    await sendDollars(celo, request.beneficiary, config.faucetDollarAmount, snap)
   }
 }
 
@@ -98,17 +120,14 @@ function buildHandleInvite(request: RequestRecord, snap: DataSnapshot, config: N
       config.goldTokenAddress
     )
     const { address: tempAddress, inviteCode } = generateInviteCode()
+
     const goldTx = await celo.transferGold(tempAddress, config.inviteGoldAmount)
     const goldTxHash = await goldTx.getHash()
     console.info(`req(${snap.key}): Gold Transaction Sent. txhash:${goldTxHash}`)
     await snap.ref.update({ goldTxHash })
     await goldTx.waitReceipt()
 
-    const dollarTx = await celo.transferDollars(tempAddress, config.inviteDollarAmount)
-    const dollarTxHash = await dollarTx.getHash()
-    console.info(`req(${snap.key}): Dollar Transaction Sent. txhash:${dollarTxHash}`)
-    await snap.ref.update({ dollarTxHash })
-    await dollarTx.waitReceipt()
+    const dollarTxHash = await sendDollars(celo, tempAddress, config.inviteDollarAmount, snap)
 
     const phoneHash = getPhoneHash(request.beneficiary)
     const escrowTx = await celo.escrowDollars(
@@ -123,15 +142,39 @@ function buildHandleInvite(request: RequestRecord, snap: DataSnapshot, config: N
     await snap.ref.update({ escrowTxHash })
     await escrowTx.waitReceipt()
 
-    if (config.twilioClient) {
-      const messageText = `Hello! Thank you for joining the Celo network. Your invite code is: ${inviteCode} Download the app at https://play.google.com/store/apps/details?id=org.celo.mobile.alfajores`
-      await config.twilioClient.messages.create({
-        body: messageText,
-        from: config.twilioPhoneNumber,
-        to: request.beneficiary,
-      })
-    }
+    await config.twilioClient.messages.create({
+      body: messageText(inviteCode, request),
+      from: config.twilioPhoneNumber,
+      to: request.beneficiary,
+    })
   }
+}
+
+async function sendDollars(
+  celo: CeloAdapter,
+  address: Address,
+  amount: string,
+  snap: DataSnapshot
+) {
+  const dollarTx = await celo.transferDollars(address, amount)
+  const dollarTxHash = await dollarTx.getHash()
+  console.info(`req(${snap.key}): Dollar Transaction Sent. txhash:${dollarTxHash}`)
+  await snap.ref.update({ dollarTxHash })
+  await dollarTx.waitReceipt()
+  return dollarTxHash
+}
+
+function messageText(inviteCode: string, request: RequestRecord) {
+  return `Hello! Thank you for joining the Celo network. Your invite code is: ${inviteCode} Download the app at ${downloadLink(
+    request.mobileOS as MobileOS
+  )}`
+}
+
+const IOS_URL = 'https://apps.apple.com/us/app/celo-alfajores-wallet/id1482389446'
+const ANDROID_URL = 'https://play.google.com/store/apps/details?id=org.celo.mobile.alfajores'
+
+function downloadLink(mobileOS: MobileOS) {
+  return mobileOS === MobileOS.ios ? IOS_URL : ANDROID_URL
 }
 
 function withTimeout<A>(
@@ -173,6 +216,12 @@ export interface PoolOptions {
 }
 
 const SECOND = 1000
+
+enum ActionResult {
+  Ok,
+  NoFreeAccount,
+  ActionTimeout,
+}
 export class AccountPool {
   constructor(
     private db: database.Database,
@@ -200,17 +249,23 @@ export class AccountPool {
     return this.accountsRef.once('value').then((snap) => snap.val())
   }
 
-  async doWithAccount(action: (account: AccountRecord) => Promise<any>) {
+  async doWithAccount(action: (account: AccountRecord) => Promise<any>): Promise<ActionResult> {
     const accountSnap = await this.tryLockAccountWithRetries()
-    if (accountSnap) {
-      try {
-        await withTimeout(this.options.actionTimeoutMS, () => action(accountSnap.val()))
-      } finally {
-        await accountSnap.child('locked').ref.set(false)
-      }
-      return true
-    } else {
-      return false
+    if (!accountSnap) {
+      return ActionResult.NoFreeAccount
+    }
+
+    try {
+      return withTimeout(
+        this.options.actionTimeoutMS,
+        async () => {
+          await action(accountSnap.val())
+          return ActionResult.Ok
+        },
+        () => ActionResult.ActionTimeout
+      )
+    } finally {
+      await accountSnap.child('locked').ref.set(false)
     }
   }
 
@@ -256,7 +311,7 @@ export class AccountPool {
 
     for (const key of accountKeys) {
       const lockPath = accountsSnap.child(key + '/locked')
-      if (!lockPath.val() && this.trySetLockField(lockPath.ref)) {
+      if (!lockPath.val() && (await this.trySetLockField(lockPath.ref))) {
         return accountsSnap.child(key)
       }
     }

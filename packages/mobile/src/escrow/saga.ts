@@ -2,14 +2,13 @@ import { getEscrowContract, getStableTokenContract } from '@celo/walletkit'
 import { Escrow } from '@celo/walletkit/lib/types/Escrow'
 import { StableToken } from '@celo/walletkit/types/StableToken'
 import BigNumber from 'bignumber.js'
-import { all, call, put, select, spawn, takeLeading } from 'redux-saga/effects'
+import { all, call, put, select, spawn, take, takeLeading } from 'redux-saga/effects'
 import { showError } from 'src/alert/actions'
 import { ErrorMessages } from 'src/app/ErrorMessages'
 import { ESCROW_PAYMENT_EXPIRY_SECONDS } from 'src/config'
 import {
   Actions,
   EscrowedPayment,
-  EscrowFetchSentPaymentsAction,
   EscrowReclaimPaymentAction,
   EscrowTransferPaymentAction,
   fetchSentEscrowPayments,
@@ -17,12 +16,11 @@ import {
   reclaimEscrowPaymentSuccess,
   storeSentEscrowPayments,
 } from 'src/escrow/actions'
-import { sentEscrowedPaymentsSelector } from 'src/escrow/reducer'
 import { calculateFee } from 'src/fees/saga'
 import { CURRENCY_ENUM, SHORT_CURRENCIES } from 'src/geth/consts'
 import i18n from 'src/i18n'
-import { Actions as IdentityActions, EndVerificationAction } from 'src/identity/actions'
-import { NUM_ATTESTATIONS_REQUIRED } from 'src/identity/verification'
+import { Actions as IdentityActions, SetVerificationStatusAction } from 'src/identity/actions'
+import { NUM_ATTESTATIONS_REQUIRED, VerificationStatus } from 'src/identity/verification'
 import { Invitees } from 'src/invite/actions'
 import { inviteesSelector } from 'src/invite/reducer'
 import { TEMP_PW } from 'src/invite/saga'
@@ -36,8 +34,9 @@ import { TransactionStatus, TransactionTypes } from 'src/transactions/reducer'
 import { sendAndMonitorTransaction } from 'src/transactions/saga'
 import { sendTransaction } from 'src/transactions/send'
 import Logger from 'src/utils/Logger'
-import { web3 } from 'src/web3/contracts'
+import { addLocalAccount, web3 } from 'src/web3/contracts'
 import { getConnectedAccount, getConnectedUnlockedAccount } from 'src/web3/saga'
+import { zeroSyncSelector } from 'src/web3/selectors'
 
 const TAG = 'escrow/saga'
 
@@ -96,25 +95,26 @@ function* registerStandbyTransaction(id: string, value: string, address: string)
   )
 }
 
-function* withdrawFromEscrow(action: EndVerificationAction) {
-  if (!action.success) {
-    Logger.debug(TAG + '@withdrawFromEscrow', 'Skipping withdrawal because verification failed')
-    return
-  }
-
+function* withdrawFromEscrow() {
   try {
     Logger.debug(TAG + '@withdrawFromEscrow', 'Withdrawing escrowed payment')
 
     const escrow: Escrow = yield call(getEscrowContract, web3)
     const account: string = yield call(getConnectedUnlockedAccount)
-    const inviteCode: string = yield select((state: RootState) => state.invite.redeemedInviteCode)
+    const tmpWalletPrivateKey: string = yield select(
+      (state: RootState) => state.invite.redeemedInviteCode
+    )
 
-    if (!isValidPrivateKey(inviteCode)) {
+    if (!isValidPrivateKey(tmpWalletPrivateKey)) {
       Logger.warn(TAG + '@withdrawFromEscrow', 'Invalid private key, skipping escrow withdrawal')
       return
     }
 
-    const tempWalletAddress = web3.eth.accounts.privateKeyToAccount(inviteCode).address
+    const tempWalletAddress = web3.eth.accounts.privateKeyToAccount(tmpWalletPrivateKey).address
+    const zeroSyncMode = yield select(zeroSyncSelector)
+    if (zeroSyncMode) {
+      addLocalAccount(web3, tmpWalletPrivateKey)
+    }
     Logger.debug(TAG + '@withdrawFromEscrow', 'Added temp account to wallet: ' + tempWalletAddress)
 
     // Check if there is a payment associated with this invite code
@@ -125,13 +125,22 @@ function* withdrawFromEscrow(action: EndVerificationAction) {
       return
     }
 
-    // Unlock temporary account
-    yield call(web3.eth.personal.unlockAccount, tempWalletAddress, TEMP_PW, 600)
+    if (zeroSyncMode) {
+      Logger.info(
+        TAG + '@withdrawFromEscrow',
+        'Geth free mode is on, no need to unlock the temporary account'
+      )
+    } else {
+      // Unlock temporary account
+      yield call(web3.eth.personal.unlockAccount, tempWalletAddress, TEMP_PW, 600)
+    }
 
     const msgHash = web3.utils.soliditySha3({ type: 'address', value: account })
 
+    Logger.debug(TAG + '@withdrawFromEscrow', `Signing message hash ${msgHash}`)
     // using the temporary wallet account to sign a message. The message is the current account.
-    let signature = yield web3.eth.sign(msgHash, tempWalletAddress)
+    let signature: string = (yield web3.eth.accounts.sign(msgHash, tmpWalletPrivateKey)).signature
+    Logger.debug(TAG + '@withdrawFromEscrow', `Signed message hash signature is ${signature}`)
     signature = signature.slice(2)
     const r = `0x${signature.slice(0, 64)}`
     const s = `0x${signature.slice(64, 128)}`
@@ -164,7 +173,7 @@ export async function getReclaimEscrowGas(account: string, paymentID: string) {
   const tx = await createReclaimTransaction(paymentID)
   const txParams = {
     from: account,
-    gasCurrency: (await getStableTokenContract(web3))._address,
+    feeCurrency: (await getStableTokenContract(web3))._address,
   }
   const gas = new BigNumber(await tx.estimateGas(txParams))
   Logger.debug(`${TAG}/getReclaimEscrowGas`, `Estimated gas of ${gas.toString()}}`)
@@ -186,7 +195,7 @@ function* reclaimFromEscrow({ paymentID }: EscrowReclaimPaymentAction) {
     yield call(sendTransaction, reclaimTx, account, TAG, 'escrow reclaim')
 
     yield put(fetchDollarBalance())
-    yield put(fetchSentEscrowPayments(true))
+    yield put(fetchSentEscrowPayments())
 
     yield call(navigate, Screens.WalletHome)
     yield put(reclaimEscrowPaymentSuccess())
@@ -198,7 +207,7 @@ function* reclaimFromEscrow({ paymentID }: EscrowReclaimPaymentAction) {
       yield put(showError(ErrorMessages.RECLAIMING_ESCROWED_PAYMENT_FAILED))
     }
     yield put(reclaimEscrowPaymentFailure(e))
-    yield put(fetchSentEscrowPayments(true))
+    yield put(fetchSentEscrowPayments())
   }
 }
 
@@ -214,14 +223,12 @@ async function getEscrowedPayment(escrow: Escrow, paymentID: string) {
   }
 }
 
-function* doFetchSentPayments({ forceRefresh }: EscrowFetchSentPaymentsAction) {
+function* doFetchSentPayments() {
   Logger.debug(TAG + '@doFetchSentPayments', 'Fetching valid sent escrowed payments')
 
   try {
     const escrow: Escrow = yield call(getEscrowContract, web3)
     const account: string = yield call(getConnectedAccount)
-    const existingPayments: EscrowedPayment[] = yield select(sentEscrowedPaymentsSelector)
-    const existingPaymentsIds = new Set(existingPayments.map((p) => p.paymentID))
 
     const sentPaymentIDs: string[] = yield call(escrow.methods.getSentPaymentIds(account).call) // Note: payment ids are currently temp wallet addresses
     if (!sentPaymentIDs || !sentPaymentIDs.length) {
@@ -229,21 +236,12 @@ function* doFetchSentPayments({ forceRefresh }: EscrowFetchSentPaymentsAction) {
       yield put(storeSentEscrowPayments([]))
       return
     }
-
-    const paymentIdsToFetch = forceRefresh
-      ? sentPaymentIDs
-      : sentPaymentIDs.filter((id) => !existingPaymentsIds.has(id.toLowerCase()))
-    if (!paymentIdsToFetch.length) {
-      Logger.debug(TAG + '@doFetchSentPayments', 'No new payments found')
-      return
-    }
-
     Logger.debug(
       TAG + '@doFetchSentPayments',
-      `Fetching data for ${paymentIdsToFetch.length} payments`
+      `Fetching data for ${sentPaymentIDs.length} payments`
     )
     const sentPaymentsRaw = yield all(
-      paymentIdsToFetch.map((paymentID) => call(getEscrowedPayment, escrow, paymentID))
+      sentPaymentIDs.map((paymentID) => call(getEscrowedPayment, escrow, paymentID))
     )
 
     const tempAddresstoRecipientPhoneNumber: Invitees = yield select(inviteesSelector)
@@ -269,9 +267,7 @@ function* doFetchSentPayments({ forceRefresh }: EscrowFetchSentPaymentsAction) {
       sentPayments.push(escrowPaymentWithRecipient)
     }
 
-    yield put(
-      storeSentEscrowPayments(forceRefresh ? sentPayments : [...existingPayments, ...sentPayments])
-    )
+    yield put(storeSentEscrowPayments(sentPayments))
   } catch (e) {
     Logger.error(TAG + '@doFetchSentPayments', 'Error fetching sent escrowed payments', e)
   }
@@ -298,7 +294,12 @@ export function* watchFetchSentPayments() {
 }
 
 export function* watchVerificationEnd() {
-  yield takeLeading(IdentityActions.END_VERIFICATION, withdrawFromEscrow)
+  while (true) {
+    const update: SetVerificationStatusAction = yield take(IdentityActions.SET_VERIFICATION_STATUS)
+    if (update.status === VerificationStatus.Done) {
+      yield call(withdrawFromEscrow)
+    }
+  }
 }
 
 export function* escrowSaga() {

@@ -3,7 +3,7 @@ import * as React from 'react'
 import { WithNamespaces, withNamespaces } from 'react-i18next'
 import { ScrollView, StyleSheet, View } from 'react-native'
 import { connect } from 'react-redux'
-import { getUserContactDetails, UserContactDetails } from 'src/account/reducer'
+import { UserContactDetails, userContactDetailsSelector } from 'src/account/reducer'
 import SettingsItem from 'src/account/SettingsItem'
 import CeloAnalytics from 'src/analytics/CeloAnalytics'
 import { CustomEventNames } from 'src/analytics/constants'
@@ -26,7 +26,7 @@ type Props = OwnProps & StateProps & WithNamespaces
 const mapStateToProps = (state: RootState) => {
   return {
     name: state.account.name,
-    userContact: getUserContactDetails(state),
+    userContact: userContactDetailsSelector(state),
   }
 }
 
@@ -65,9 +65,6 @@ export class Profile extends React.Component<Props> {
 }
 
 const style = StyleSheet.create({
-  accountHeader: {
-    paddingTop: 20,
-  },
   accountProfile: {
     paddingLeft: 10,
     paddingTop: 30,
@@ -75,26 +72,6 @@ const style = StyleSheet.create({
     paddingBottom: 15,
     flexDirection: 'column',
     alignItems: 'center',
-  },
-  accountFooter: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: 50,
-    margin: 10,
-  },
-  accountFooterText: {
-    paddingBottom: 10,
-  },
-  editProfileButton: {
-    height: 28,
-    width: 110,
-  },
-  image: {
-    height: 55,
-    width: 55,
-    borderRadius: 50,
   },
   underlinedBox: {
     borderTopWidth: 1,

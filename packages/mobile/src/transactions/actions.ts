@@ -3,7 +3,7 @@ import i18n from 'src/i18n'
 import { navigate } from 'src/navigator/NavigationService'
 import { Screens } from 'src/navigator/Screens'
 import { ConfirmationInput as SendConfirmationCardProps } from 'src/send/SendConfirmation'
-import { OwnProps as TransferConfirmationCardProps } from 'src/send/TransferConfirmationCard'
+import { TransferConfirmationCardProps } from 'src/send/TransferConfirmationCard'
 import { StandbyTransaction, TransactionTypes } from 'src/transactions/reducer'
 import { web3 } from 'src/web3/contracts'
 
@@ -103,6 +103,9 @@ export const navigateToPaymentTransferReview = (
     case TransactionTypes.INVITE_RECEIVED:
       headerText = i18n.t('inviteFlow11:inviteReceived')
       break
+    case TransactionTypes.NETWORK_FEE:
+      headerText = i18n.t('walletFlow5:networkFee')
+      break
   }
 
   navigate(Screens.TransactionReview, {
@@ -121,7 +124,7 @@ export const navigateToExchangeReview = (
 ) => {
   navigate(Screens.TransactionReview, {
     reviewProps: {
-      type: TransactionTypes.EXCHANGED,
+      type: TransactionTypes.EXCHANGE,
       timestamp,
       header: i18n.t('exchangeFlow9:exchange'),
     },

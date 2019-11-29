@@ -5,6 +5,7 @@ import BigNumber from 'bignumber.js'
 import * as React from 'react'
 import { withNamespaces, WithNamespaces } from 'react-i18next'
 import { StyleSheet, View } from 'react-native'
+import SafeAreaView from 'react-native-safe-area-view'
 import { connect } from 'react-redux'
 import CeloAnalytics from 'src/analytics/CeloAnalytics'
 import { CustomEventNames } from 'src/analytics/constants'
@@ -49,7 +50,7 @@ export class ExchangeHomeScreen extends React.Component<Props> {
     const { t, exchangeRate } = this.props
 
     return (
-      <View style={styles.background}>
+      <SafeAreaView style={styles.background}>
         <ScrollContainer
           heading={t('exchange')}
           testID="ExchangeScrollView"
@@ -68,12 +69,12 @@ export class ExchangeHomeScreen extends React.Component<Props> {
               />
             </View>
           </View>
-          <SectionHeadNew text={t('activity')} />
+          <SectionHeadNew text={t('goldActivity')} />
           <View style={styles.activity}>
             <Activity />
           </View>
         </ScrollContainer>
-      </View>
+      </SafeAreaView>
     )
   }
 }

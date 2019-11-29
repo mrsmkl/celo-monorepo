@@ -8,20 +8,51 @@ BigNumber.config({ EXPONENTIAL_AT: 1e9 })
 
 const DefaultConfig = {
   attestations: {
-    attestationExpirySeconds: 60 * 60, // 1 hour,
+    attestationExpiryBlocks: (60 * 60) / 5, // 1 hour,
     attestationRequestFeeInDollars: 0.05,
+    selectIssuersWaitBlocks: 4,
   },
-  lockedGold: {
-    maxNoticePeriod: 60 * 60 * 24 * 365 * 3, // 3 years
+  blockchainParameters: {
+    gasForNonGoldCurrencies: 166000,
+    minimumClientVersion: {
+      major: 1,
+      minor: 8,
+      patch: 23,
+    },
+    blockGasLimit: 20000000,
   },
-  oracles: {
-    reportExpiry: 60 * 60, // 1 hour
+  election: {
+    minElectableValidators: '22',
+    maxElectableValidators: '100',
+    maxVotesPerAccount: 3,
+    electabilityThreshold: 1 / 100,
+  },
+  epochRewards: {
+    targetVotingYieldParameters: {
+      initial: 6 / 100,
+      max: 20 / 100,
+      adjustmentFactor: 1 / 365,
+    },
+    rewardsMultiplierParameters: {
+      max: 2,
+      adjustmentFactors: {
+        underspend: 1 / 2,
+        overspend: 5,
+      },
+    },
+    targetVotingGoldFraction: 2 / 3,
+    maxValidatorEpochPayment: '205479452054794520547', // (75,000 / 365) * 10 ^ 18
   },
   exchange: {
     spread: 5 / 1000,
-    reserveFraction: 1,
-    updateFrequency: 3600,
+    reserveFraction: 1 / 100,
+    updateFrequency: 5 * 60, // 5 minutes
     minimumReports: 1,
+  },
+  gasPriceMinimum: {
+    initialMinimum: 10000,
+    targetDensity: 1 / 2,
+    adjustmentSpeed: 1 / 2,
   },
   governance: {
     approvalStageDuration: 15 * 60, // 15 minutes
@@ -31,66 +62,97 @@ const DefaultConfig = {
     minDeposit: 1, // 1 cGLD
     queueExpiry: 7 * 24 * 60 * 60, // 1 week
     referendumStageDuration: 15 * 60, // 15 minutes
+    participationBaseline: 8 / 10,
+    participationBaselineFloor: 5 / 100,
+    participationBaselineUpdateFactor: 1 / 5,
+    participationBaselineQuorumFactor: 1,
   },
-  gasPriceMinimum: {
-    initialMinimum: 10000,
-    targetDensity: 1 / 2,
-    adjustmentSpeed: 1 / 2,
-    infrastructureFraction: 1 / 2,
+  lockedGold: {
+    unlockingPeriod: 60 * 60 * 24 * 3, // 3 days
+  },
+  oracles: {
+    reportExpiry: 10 * 60, // 10 minutes
+  },
+  random: {
+    randomnessBlockRetentionWindow: (60 * 60) / 5, // 1 hour to match attestationExpiryBlocks
   },
   registry: {
     predeployedProxyAddress: '0x000000000000000000000000000000000000ce10',
   },
   reserve: {
-    goldBalance: 100000,
-    tobinTaxStalenessThreshold: 3600, // 1 hour
+    goldBalance: 100000000,
+    tobinTaxStalenessThreshold: 60 * 60, // 1 hour
   },
   stableToken: {
     decimals: 18,
     goldPrice: 10,
-    minerDollarBalance: 60000,
     tokenName: 'Celo Dollar',
     tokenSymbol: 'cUSD',
-    // 52nd root of 1.005, equivalent to 0.5% annual inflation
-    inflationRate: 1.00009591886,
-    inflationPeriod: 7 * 24 * 60 * 60, // 1 week
+    inflationRate: 1,
+    inflationPeriod: 1.5 * 365 * 24 * 60 * 60, // 1.5 years
+    initialBalances: {
+      addresses: [],
+      values: [],
+    },
+    oracles: [],
   },
   validators: {
-    minElectableValidators: '10',
-    maxElectableValidators: '100',
-    minLockedGoldValue: '1000000000000000000', // 1 gold
-    minLockedGoldNoticePeriod: 60 * 24 * 60 * 60, // 60 days
+    groupLockedGoldRequirements: {
+      value: '10000000000000000000000', // 10k gold per validator
+      duration: 60 * 24 * 60 * 60, // 60 days
+    },
+    validatorLockedGoldRequirements: {
+      value: '10000000000000000000000', // 10k gold
+      duration: 60 * 24 * 60 * 60, // 60 days
+    },
+    validatorScoreParameters: {
+      exponent: 10,
+      adjustmentSpeed: 0.1,
+    },
+    membershipHistoryLength: 60,
+    maxGroupSize: '5',
 
+    // We register a number of C-Labs groups to contain an initial set of validators to run the network.
     validatorKeys: [],
-    // We register a single validator group during the migration.
+    attestationKeys: [],
     groupName: 'C-Labs',
-    groupUrl: 'https://www.celo.org',
+    commission: 0.1,
   },
 }
 
 const linkedLibraries = {
-  LinkedList: ['AddressLinkedList', 'SortedLinkedList'],
+  FixidityLib: [
+    'LockedGold',
+    'Exchange',
+    'GasPriceMinimum',
+    'Governance',
+    'GovernanceTest',
+    'Proposals',
+    'SortedOracles',
+    'StableToken',
+    'Validators',
+  ],
+  Proposals: ['Governance', 'GovernanceTest', 'ProposalsTest'],
+  LinkedList: ['AddressLinkedList', 'SortedLinkedList', 'LinkedListTest'],
   SortedLinkedList: [
     'AddressSortedLinkedList',
     'IntegerSortedLinkedList',
     'SortedLinkedListWithMedian',
   ],
   SortedLinkedListWithMedian: ['AddressSortedLinkedListWithMedian'],
-  AddressLinkedList: ['Validators'],
-  AddressSortedLinkedList: ['Validators'],
-  IntegerSortedLinkedList: ['Governance', 'IntegerSortedLinkedListTest'],
+  AddressLinkedList: ['Validators', 'ValidatorsTest'],
+  AddressSortedLinkedList: ['Election', 'ElectionTest'],
+  IntegerSortedLinkedList: ['Governance', 'GovernanceTest', 'IntegerSortedLinkedListTest'],
   AddressSortedLinkedListWithMedian: ['SortedOracles', 'AddressSortedLinkedListWithMedianTest'],
-  Signatures: ['LockedGold', 'Escrow'],
+  Signatures: ['Accounts', 'TestAttestations', 'Attestations', 'LockedGold', 'Escrow'],
 }
 
 const argv = minimist(process.argv.slice(2), {
-  string: ['migration_override', 'keys', 'build_directory'],
+  string: ['migration_override', 'build_directory'],
   default: {
-    keys: '',
     build_directory: path.join(__dirname, 'build'),
   },
 })
-const validatorKeys = argv.keys ? argv.keys.split(',') : []
 
 const migrationOverride = argv.migration_override ? JSON.parse(argv.migration_override) : {}
 const config = {}
@@ -98,8 +160,6 @@ const config = {}
 for (const key of Object.keys(DefaultConfig)) {
   config[key] = { ...DefaultConfig[key], ...migrationOverride[key] }
 }
-
-config.validators.validatorKeys = validatorKeys
 
 module.exports = {
   build_directory: argv.build_directory,

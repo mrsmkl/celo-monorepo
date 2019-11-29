@@ -1,19 +1,22 @@
 import colors from '@celo/react-components/styles/colors'
 import fontStyles from '@celo/react-components/styles/fonts'
+import BigNumber from 'bignumber.js'
 import * as React from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import { CURRENCIES, CURRENCY_ENUM } from 'src/geth/consts'
+import { LocalCurrencySymbol } from 'src/localCurrency/consts'
 import { getMoneyDisplayValue } from 'src/utils/formatting'
 
 interface Props {
-  // TODO: Should be Bignumber
-  amount: string | null | number
+  amount: BigNumber
   size: number
   type: CURRENCY_ENUM
+  currencySymbol?: LocalCurrencySymbol | null
 }
 
 const symbolRatio = 0.6
 
+// TODO(Rossy) This is mostly duped by MoneyAmount, converge the two
 export default class CurrencyDisplay extends React.PureComponent<Props> {
   color() {
     return this.props.type === CURRENCY_ENUM.DOLLAR ? colors.celoGreen : colors.celoGold
@@ -28,22 +31,19 @@ export default class CurrencyDisplay extends React.PureComponent<Props> {
       transform: [{ translateY: Math.round(size * 0.1) }],
     }
   }
-  amount() {
-    return this.props.amount == null ? '0.00' : getMoneyDisplayValue(this.props.amount || 0)
-  }
 
   render() {
-    const { size, type } = this.props
+    const { size, type, amount, currencySymbol: symbol } = this.props
     const fontSize = size
     const dollarStyle = { fontSize, lineHeight: Math.round(fontSize * 1.3), color: this.color() }
-    const currencySymbol = CURRENCIES[type].symbol
+    const currencySymbol = type === CURRENCY_ENUM.GOLD ? CURRENCIES[type].symbol : symbol
     return (
       <View style={styles.container}>
         <Text numberOfLines={1} style={[fontStyles.regular, this.symbolStyle(fontSize)]}>
           {currencySymbol}
         </Text>
         <Text numberOfLines={1} style={[styles.currency, fontStyles.regular, dollarStyle]}>
-          {this.amount()}
+          {getMoneyDisplayValue(amount)}
         </Text>
       </View>
     )

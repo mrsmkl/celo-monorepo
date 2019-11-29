@@ -1,5 +1,6 @@
-pragma solidity ^0.5.8;
+pragma solidity ^0.5.3;
 
+import "openzeppelin-solidity/contracts/utils/ReentrancyGuard.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
@@ -9,14 +10,11 @@ import "./interfaces/IStableToken.sol";
 
 import "../common/Initializable.sol";
 import "../common/UsingRegistry.sol";
-import "../common/interfaces/IERC20Token.sol";
-
 
 /**
  * @title Ensures price stability of StableTokens with respect to their pegs
  */
-contract Reserve is IReserve, Ownable, Initializable, UsingRegistry {
-
+contract Reserve is IReserve, Ownable, Initializable, UsingRegistry, ReentrancyGuard {
   using SafeMath for uint256;
 
   struct TobinTaxCache {
@@ -44,10 +42,7 @@ contract Reserve is IReserve, Ownable, Initializable, UsingRegistry {
 
   function() external payable {} // solhint-disable no-empty-blocks
 
-  function initialize(
-    address registryAddress,
-    uint256 _tobinTaxStalenessThreshold
-  )
+  function initialize(address registryAddress, uint256 _tobinTaxStalenessThreshold)
     external
     initializer
   {
@@ -70,7 +65,7 @@ contract Reserve is IReserve, Ownable, Initializable, UsingRegistry {
    * @notice Add a token that the reserve will stablize.
    * @param token The address of the token being stabilized.
    */
-  function addToken(address token) external onlyOwner returns (bool) {
+  function addToken(address token) external onlyOwner nonReentrant returns (bool) {
     require(!isToken[token], "token addr already registered");
     // Require an exchange rate between the new token and Gold exists.
     address sortedOraclesAddress = registry.getAddressForOrDie(SORTED_ORACLES_REGISTRY_ID);
@@ -90,27 +85,23 @@ contract Reserve is IReserve, Ownable, Initializable, UsingRegistry {
    * @param token The address of the token no longer being stabilized.
    * @param index The index of the token in _tokens.
    */
-  function removeToken(
-    address token,
-    uint256 index
-  )
+  function removeToken(address token, uint256 index)
     external
     onlyOwner
     isStableToken(token)
     returns (bool)
   {
     require(
-      index < _tokens.length && _tokens[index] == token, 
+      index < _tokens.length && _tokens[index] == token,
       "index into tokens list not mapped to token"
     );
     isToken[token] = false;
-    address lastItem = _tokens[_tokens.length-1];
+    address lastItem = _tokens[_tokens.length - 1];
     _tokens[index] = lastItem;
     _tokens.length--;
     emit TokenRemoved(token, index);
     return true;
   }
-
 
   /**
    * @notice Gives an address permission to spend Reserve funds.
@@ -131,30 +122,13 @@ contract Reserve is IReserve, Ownable, Initializable, UsingRegistry {
   }
 
   /**
-   * @notice Burns all tokens held by the Reserve.
-   * @param token The address of the token to burn.
-   */
-  function burnToken(address token) external isStableToken(token) returns (bool) {
-    IStableToken stableToken = IStableToken(token);
-    require(stableToken.burn(stableToken.balanceOf(address(this))), "reserve token burn failed");
-    return true;
-  }
-
-  /**
    * @notice Transfer gold.
    * @param to The address that will receive the gold.
    * @param value The amount of gold to transfer.
    */
-  function transferGold(
-    address to,
-    uint256 value
-  )
-    external
-    returns (bool)
-  {
+  function transferGold(address to, uint256 value) external returns (bool) {
     require(isSpender[msg.sender], "sender not allowed to transfer Reserve funds");
-    IERC20Token goldToken = IERC20Token(registry.getAddressForOrDie(GOLD_TOKEN_REGISTRY_ID));
-    require(goldToken.transfer(to, value), "transfer of gold token failed");
+    require(getGoldToken().transfer(to, value), "transfer of gold token failed");
     return true;
   }
 
@@ -162,7 +136,7 @@ contract Reserve is IReserve, Ownable, Initializable, UsingRegistry {
    * @notice Returns the tobin tax, recomputing it if it's stale.
    * @return The tobin tax amount as a fraction.
    */
-  function getOrComputeTobinTax() external returns (uint256, uint256) {
+  function getOrComputeTobinTax() external nonReentrant returns (uint256, uint256) {
     // solhint-disable-next-line not-rely-on-time
     if (now.sub(tobinTaxCache.timestamp) > tobinTaxStalenessThreshold) {
       tobinTaxCache.numerator = uint128(computeTobinTax());
@@ -213,11 +187,7 @@ contract Reserve is IReserve, Ownable, Initializable, UsingRegistry {
    * @param token The address of the token to mint.
    * @param value The amount of tokens to mint.
    */
-  function mintToken(
-    address to,
-    address token,
-    uint256 value
-  )
+  function mintToken(address to, address token, uint256 value)
     private
     isStableToken(token)
     returns (bool)
