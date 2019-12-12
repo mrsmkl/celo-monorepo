@@ -70,7 +70,7 @@ async function updateDB(lst: any[], remove: any[]) {
   await client.query(
     'INSERT INTO competitors (address, multiplier)' +
       " SELECT decode(m.address, 'hex') AS address, m.multiplier FROM json_populate_recordset(null::json_type, $1) AS m" +
-      ' ON CONFLICT (address) DO UPDATE SET multiplier = EXCLUDED.multiplier RETURNING *',
+      ' ON CONFLICT (address) DO UPDATE SET multiplier = EXCLUDED.multiplier',
     [JSON.stringify(lst)]
   )
   console.log('Removing', remove)
@@ -127,7 +127,7 @@ async function processClaims(kit: ContractKit, address: string, info: IdentityMe
     await client.query(
       'INSERT INTO claims (address, claimed_address)' +
         " SELECT decode(m.address,'hex'), decode(m.claimed_address,'hex') FROM json_populate_recordset(null::json_assoc, $1) AS m" +
-        ' ON CONFLICT (address, claimed_address) DO NOTHING RETURNING *',
+        ' ON CONFLICT (address, claimed_address) DO NOTHING',
       [
         JSON.stringify(
           lst.map((a) => {
