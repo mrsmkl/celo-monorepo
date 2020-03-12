@@ -47,14 +47,19 @@ async function main() {
   const web3 = new Web3(LEADERBOARD_WEB3)
   const accounts = await web3.eth.getAccounts()
 
-  const current = await web3.eth.getBlockNumber()
+  const current = 0 // await web3.eth.getBlockNumber()
   const block = await web3.eth.getBlock(current)
   const header = headerFromBlock(web3, block)
-  const longHeader = fs.readFileSync('header')
+  console.log(header)
+
+  const longHeader = fs
+    .readFileSync('header')
+    .toString()
+    .trim()
 
   /*
   let longest = ""
-  for (let i = 0; i < 1000; i++) {
+  for (let i = 0; i < 100; i++) {
     let header = headerFromBlock(web3, await web3.eth.getBlock(720*i))
     console.log(720*i, header)
     if (header.length > longest.length) {
@@ -62,6 +67,7 @@ async function main() {
     }
   }
   console.log("longest", longest)
+  process.exit()
   */
 
   const { abi, bytecode, contractName } = JSON.parse(
@@ -82,9 +88,11 @@ async function main() {
   for (let i = 0; i < 10; i++) {
     await bench.methods.baseline(100000).call()
     await bench.methods.baselineHash(100000).call()
-    await bench.methods.benchHashHeader(10000, header).call()
-    await bench.methods.benchHashHeader(10000, longHeader).call()
+    await bench.methods.benchReadHeader(10000, header).call()
+    await bench.methods.benchReadHeader(1000, longHeader).call()
     /*
+    await bench.methods.benchHashHeader(10000, header).call()
+    await bench.methods.benchHashHeader(1000, longHeader).call()
     await bench.methods.benchEpochsize(10000).call()
     await bench.methods.benchNumValidators(10000).call()
     await bench.methods.benchGetValidator(10000).call()
