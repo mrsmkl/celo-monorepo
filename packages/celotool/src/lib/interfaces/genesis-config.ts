@@ -2,6 +2,7 @@ import { AccountAndBalance, ConsensusType, Validator } from '../generate_utils'
 
 export interface GenesisConfig {
   validators?: Validator[]
+  numValidators?: number
   consensusType?: ConsensusType
   initialAccounts?: AccountAndBalance[]
   blockTime?: number

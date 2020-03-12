@@ -252,7 +252,7 @@ export function getContext(gethConfig: GethRunConfig, verbose: boolean = verbose
     'jazz ripple brown cloth door bridge pen danger deer thumb cable prepare negative library vast'
   const validatorInstances = gethConfig.instances.filter((x: any) => x.validating)
 
-  const numValidators = validatorInstances.length
+  const numValidators = gethConfig.numValidators || validatorInstances.length
 
   const validatorPrivateKeys = getPrivateKeysFor(AccountType.VALIDATOR, mnemonic, numValidators)
   const attestationKeys = getPrivateKeysFor(AccountType.ATTESTATION, mnemonic, numValidators)
@@ -291,7 +291,7 @@ export function getContext(gethConfig: GethRunConfig, verbose: boolean = verbose
       fs.mkdirSync(gethConfig.runPath, { recursive: true })
     }
 
-    await writeGenesis(gethConfig, validators, verbose)
+    await writeGenesis(gethConfig, validators, validatorInstances.length, verbose)
 
     let bootnodeEnode: string = ''
 

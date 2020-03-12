@@ -7,6 +7,7 @@ export interface GethRunConfig {
   migrateTo?: number
   migrationOverrides?: any
   keepData?: boolean
+  numValidators?: number
   // ??
   useBootnode?: boolean
   // genesis config

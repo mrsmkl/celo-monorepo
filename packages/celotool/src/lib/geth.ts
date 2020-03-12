@@ -667,7 +667,7 @@ export const runGethNodes = async ({
     fs.mkdirSync(gethConfig.runPath, { recursive: true })
   }
 
-  await writeGenesis(gethConfig, validators, verbose)
+  await writeGenesis(gethConfig, validators, validators.length, verbose)
 
   if (verbose) {
     const validatorAddresses = validators.map((validator) => validator.address)
@@ -1013,10 +1013,16 @@ export async function startGeth(
   return instance
 }
 
-export function writeGenesis(gethConfig: GethRunConfig, validators: Validator[], verbose: boolean) {
+export function writeGenesis(
+  gethConfig: GethRunConfig,
+  validators: Validator[],
+  numValidators: number,
+  verbose: boolean
+) {
   const genesis: string = generateGenesis({
     validators,
     epoch: 10,
+    numValidators,
     lookbackwindow: 2,
     requestTimeout: 3000,
     chainId: gethConfig.networkId,

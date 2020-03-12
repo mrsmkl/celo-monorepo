@@ -289,6 +289,7 @@ const generateIstanbulExtraData = (validators: Validator[]) => {
 
 export const generateGenesis = ({
   validators,
+  numValidators,
   consensusType = ConsensusType.ISTANBUL,
   initialAccounts: otherAccounts = [],
   blockTime,
@@ -315,7 +316,7 @@ export const generateGenesis = ({
     genesis.mixHash = ISTANBUL_MIX_HASH
     genesis.difficulty = '0x1'
     if (validators) {
-      genesis.extraData = generateIstanbulExtraData(validators)
+      genesis.extraData = generateIstanbulExtraData(validators.slice(0, numValidators))
     }
     genesis.config.istanbul = {
       // see github.com/celo-org/celo-blockchain/blob/master/consensus/istanbul/config.go#L21-L25
