@@ -84,4 +84,25 @@ contract Benchmark is UsingPrecompiles {
     return acc;
   }
 
+  function benchReadSealHeader(uint256 num, bytes memory header) public view returns (uint256) {
+    uint256 acc = num;
+    for (uint256 i = 0; i < num; i++) {
+      acc = acc + uint256(getVerifiedSealBitmapFromHeader(header));
+    }
+    return acc;
+  }
+
+  function benchFraction(uint256 num, uint256 exponent, uint256 _decimals) public view {
+    for (uint256 i = 0; i < num; i++) {
+      fractionMulExp(
+        uint256(keccak256("1")),
+        uint256(keccak256("2")),
+        uint256(keccak256("3")),
+        uint256(keccak256("4")),
+        exponent,
+        _decimals
+      );
+    }
+  }
+
 }

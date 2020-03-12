@@ -47,10 +47,9 @@ async function main() {
   const web3 = new Web3(LEADERBOARD_WEB3)
   const accounts = await web3.eth.getAccounts()
 
-  const current = 0 // await web3.eth.getBlockNumber()
+  const current = await web3.eth.getBlockNumber()
   const block = await web3.eth.getBlock(current)
   const header = headerFromBlock(web3, block)
-  console.log(header)
 
   const longHeader = fs
     .readFileSync('header')
@@ -85,12 +84,27 @@ async function main() {
   const blsPublicKey = getBlsPublicKey(privateKey)
   const blsPop = getBlsPoP(address, privateKey)
 
+  // verifyaggregated seal takes like 5ms for one validator
+
+  await bench.methods.baseline(100000).call()
+  await bench.methods.baselineHash(100000).call()
+  await bench.methods.benchFraction(10000, 10, 10).call()
+  await bench.methods.benchFraction(10000, 50, 10).call()
+  await bench.methods.benchFraction(1000, 100, 10).call()
+  await bench.methods.benchFraction(1000, 200, 10).call()
+  await bench.methods.benchFraction(1000, 400, 10).call()
+  await bench.methods.benchFraction(1000, 800, 10).call()
+  await bench.methods.benchFraction(100, 1600, 10).call()
+  await bench.methods.benchFraction(100, 3200, 10).call()
+  await bench.methods.benchFraction(100, 6400, 10).call()
+  await bench.methods.benchFraction(10, 12800, 10).call()
+  await bench.methods.benchFraction(10, 25600, 10).call()
+  await bench.methods.benchFraction(10, 51200, 10).call()
+
   for (let i = 0; i < 10; i++) {
+    /*
     await bench.methods.baseline(100000).call()
     await bench.methods.baselineHash(100000).call()
-    await bench.methods.benchReadHeader(10000, header).call()
-    await bench.methods.benchReadHeader(1000, longHeader).call()
-    /*
     await bench.methods.benchHashHeader(10000, header).call()
     await bench.methods.benchHashHeader(1000, longHeader).call()
     await bench.methods.benchEpochsize(10000).call()
@@ -98,6 +112,10 @@ async function main() {
     await bench.methods.benchGetValidator(10000).call()
     await bench.methods.benchParentSeal(10000).call()
     await bench.methods.benchPoP(1000, address, blsPublicKey, blsPop).call()
+    await bench.methods.benchReadHeader(10000, header).call()
+    await bench.methods.benchReadHeader(1000, longHeader).call()
+    await bench.methods.benchReadSealHeader(1000, header).call()
+    await bench.methods.benchReadSealHeader(100, longHeader).call()
     */
   }
 }
