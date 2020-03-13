@@ -167,6 +167,7 @@ export async function migrateContracts(
       },
       election: {
         minElectableValidators: '90',
+        maxElectableValidators: '100',
       },
       epochRewards: {
         frozen: false,
@@ -291,8 +292,8 @@ export function getContext(gethConfig: GethRunConfig, verbose: boolean = verbose
       fs.mkdirSync(gethConfig.runPath, { recursive: true })
     }
 
-    //    await writeGenesis(gethConfig, validators, validatorInstances.length, verbose)
-    await writeGenesis(gethConfig, validators, numValidators, verbose)
+    await writeGenesis(gethConfig, validators, validatorInstances.length, verbose)
+    // await writeGenesis(gethConfig, validators, numValidators, verbose)
 
     let bootnodeEnode: string = ''
 

@@ -105,4 +105,16 @@ contract Benchmark is UsingPrecompiles {
     }
   }
 
+  uint256[] lst;
+
+  function addList(uint256 n, uint256 elem) public {
+    for (uint256 i = 0; i < n; i++) {
+      lst.push(elem);
+    }
+  }
+
+  function getList() public view returns (uint256[] memory) {
+    return lst;
+  }
+
 }

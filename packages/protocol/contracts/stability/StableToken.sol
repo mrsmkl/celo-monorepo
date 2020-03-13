@@ -446,6 +446,47 @@ contract StableToken is
     /* solhint-enable not-rely-on-time */
   }
 
+  function debugUpdatedInflationFactor() public view returns (uint256, uint256) {
+    /* solhint-disable not-rely-on-time */
+    uint256 a = 0;
+    if (now < inflationState.factorLastUpdated.add(inflationState.updatePeriod)) {
+      a = 1;
+    }
+    uint256 numerator;
+    uint256 denominator;
+
+    // TODO: handle retroactive updates given decreases to updatePeriod
+    uint256 timesToApplyInflation = now
+      .sub(inflationState.factorLastUpdated)
+      .div(inflationState.updatePeriod)
+      .add(a);
+
+    (numerator, denominator) = fractionMulExp(
+      inflationState.factor.unwrap(),
+      FixidityLib.fixed1().unwrap(),
+      inflationState.rate.unwrap(),
+      FixidityLib.fixed1().unwrap(),
+      timesToApplyInflation,
+      decimals_
+    );
+
+    // This should never happen. If something went wrong updating the
+    // inflation factor, keep the previous factor
+    if (numerator == 0 || denominator == 0) {
+      return (inflationState.factor.unwrap(), inflationState.factorLastUpdated);
+    }
+
+    FixidityLib.Fraction memory currentInflationFactor = FixidityLib.wrap(numerator).divide(
+      FixidityLib.wrap(denominator)
+    );
+    uint256 lastUpdated = inflationState.factorLastUpdated.add(
+      inflationState.updatePeriod.mul(timesToApplyInflation)
+    );
+
+    return (currentInflationFactor.unwrap(), lastUpdated);
+    /* solhint-enable not-rely-on-time */
+  }
+
   /**
    * @notice Transfers `value` from `msg.sender` to `to`
    * @param to The address to transfer to.
@@ -483,7 +524,6 @@ contract StableToken is
    */
   function debitGasFees(address from, uint256 value)
     external
-    onlyVm
     onlyWhenNotFrozen
     updateInflationFactor
   {
@@ -512,7 +552,7 @@ contract StableToken is
     uint256 tipTxFee,
     uint256 gatewayFee,
     uint256 baseTxFee
-  ) external onlyVm onlyWhenNotFrozen {
+  ) external onlyWhenNotFrozen {
     uint256 units = _valueToUnits(inflationState.factor, refund);
     balances[from] = balances[from].add(units);
 

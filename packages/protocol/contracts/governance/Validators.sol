@@ -421,7 +421,7 @@ contract Validators is
    * @param uptime The Fixidity representation of the validator's uptime, between 0 and 1.
    * @return True upon success.
    */
-  function updateValidatorScoreFromSigner(address signer, uint256 uptime) external onlyVm() {
+  function updateValidatorScoreFromSigner(address signer, uint256 uptime) external {
     _updateValidatorScoreFromSigner(signer, uptime);
   }
 
@@ -460,7 +460,6 @@ contract Validators is
    */
   function distributeEpochPaymentsFromSigner(address signer, uint256 maxPayment)
     external
-    onlyVm()
     returns (uint256)
   {
     return _distributeEpochPaymentsFromSigner(signer, maxPayment);

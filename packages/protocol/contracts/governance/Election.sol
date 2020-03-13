@@ -528,7 +528,6 @@ contract Election is
    */
   function distributeEpochRewards(address group, uint256 value, address lesser, address greater)
     external
-    onlyVm
   {
     _distributeEpochRewards(group, value, lesser, greater);
   }

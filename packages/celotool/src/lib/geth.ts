@@ -667,7 +667,9 @@ export const runGethNodes = async ({
     fs.mkdirSync(gethConfig.runPath, { recursive: true })
   }
 
-  await writeGenesis(gethConfig, validators, validators.length, verbose)
+  console.info('instances', gethConfig.instances.length)
+
+  await writeGenesis(gethConfig, validators, gethConfig.instances.length, verbose)
 
   if (verbose) {
     const validatorAddresses = validators.map((validator) => validator.address)

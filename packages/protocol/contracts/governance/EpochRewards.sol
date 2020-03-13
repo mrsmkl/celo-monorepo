@@ -448,7 +448,7 @@ contract EpochRewards is
    *   voting Gold fraction.
    * @dev Only called directly by the protocol.
    */
-  function updateTargetVotingYield() external onlyVm onlyWhenNotFrozen {
+  function updateTargetVotingYield() external onlyWhenNotFrozen {
     _updateTargetVotingYield();
   }
 

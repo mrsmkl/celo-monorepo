@@ -307,6 +307,8 @@ export const generateGenesis = ({
 
   genesis.config.chainId = chainId
 
+  console.info(`Generating genesis for ${numValidators} validator`)
+
   if (consensusType === ConsensusType.CLIQUE) {
     genesis.config.clique = {
       period: blockTime,
