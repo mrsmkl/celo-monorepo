@@ -1,0 +1,67 @@
+/// <reference types="node" />
+import { Address } from '@celo/contractkit';
+import { AccountsWrapper } from '@celo/contractkit/lib/wrappers/Accounts';
+import { GovernanceWrapper } from '@celo/contractkit/lib/wrappers/Governance';
+import { LockedGoldWrapper } from '@celo/contractkit/lib/wrappers/LockedGold';
+import { MultiSigWrapper } from '@celo/contractkit/lib/wrappers/MultiSig';
+import { ValidatorsWrapper } from '@celo/contractkit/lib/wrappers/Validators';
+import BigNumber from 'bignumber.js';
+import { BaseCommand } from '../base';
+export interface CommandCheck {
+    name: string;
+    errorMessage?: string;
+    run(): Promise<boolean> | boolean;
+}
+export declare function check(name: string, predicate: () => Promise<boolean> | boolean, errorMessage?: string): CommandCheck;
+declare type Resolve<A> = A extends Promise<infer T> ? T : A;
+export declare function newCheckBuilder(cmd: BaseCommand, signer?: Address): CheckBuilder;
+declare class CheckBuilder {
+    private cmd;
+    private signer?;
+    private checks;
+    constructor(cmd: BaseCommand, signer?: string | undefined);
+    get web3(): import("web3").default;
+    get kit(): import("@celo/contractkit").ContractKit;
+    withValidators<A>(f: (validators: ValidatorsWrapper, signer: Address, account: Address, ctx: CheckBuilder) => A): () => Promise<Resolve<A>>;
+    withLockedGold<A>(f: (lockedGold: LockedGoldWrapper, signer: Address, account: Address, validators: ValidatorsWrapper) => A): () => Promise<Resolve<A>>;
+    withAccounts<A>(f: (accounts: AccountsWrapper) => A): () => Promise<Resolve<A>>;
+    withGovernance<A>(f: (accounts: GovernanceWrapper) => A): () => Promise<Resolve<A>>;
+    addCheck(name: string, predicate: () => Promise<boolean> | boolean, errorMessage?: string): this;
+    addConditionalCheck(name: string, runCondition: boolean, predicate: () => Promise<boolean> | boolean, errorMessage?: string): this;
+    isApprover: (account: string) => this;
+    proposalExists: (proposalID: string) => this;
+    proposalInStage: (proposalID: string, stage: "None" | "Queued" | "Approval" | "Referendum" | "Execution" | "Expiration") => this;
+    proposalIsPassing: (proposalID: string) => this;
+    hotfixIsPassing: (hash: Buffer) => this;
+    hotfixNotExecuted: (hash: Buffer) => this;
+    canSign: (account: string) => this;
+    canSignValidatorTxs: () => this;
+    signerAccountIsValidator: () => this;
+    signerAccountIsValidatorGroup: () => this;
+    isValidator: (account: string) => this;
+    isValidatorGroup: (account: string) => this;
+    isNotValidator: () => this;
+    isNotValidatorGroup: () => this;
+    signerMeetsValidatorBalanceRequirements: () => this;
+    signerMeetsValidatorGroupBalanceRequirements: () => this;
+    meetsValidatorBalanceRequirements: (account: string) => this;
+    meetsValidatorGroupBalanceRequirements: (account: string) => this;
+    isNotAccount: (address: string) => this;
+    isSignerOrAccount: () => this;
+    isVoteSignerOrAccount: () => this;
+    isAccount: (address: string) => this;
+    isNotVoting: (address: string) => this;
+    hasEnoughGold: (account: string, value: BigNumber) => this;
+    exceedsProposalMinDeposit: (deposit: BigNumber) => this;
+    hasEnoughLockedGold: (value: BigNumber) => this;
+    hasEnoughNonvotingLockedGold: (value: BigNumber) => this;
+    hasEnoughLockedGoldToUnlock: (value: BigNumber) => this;
+    isNotValidatorGroupMember: () => this;
+    validatorDeregisterDurationPassed: () => this;
+    resetSlashingmultiplierPeriodPassed: () => this;
+    hasACommissionUpdateQueued: () => this;
+    hasCommissionUpdateDelayPassed: () => this;
+    isMultiSigOwner: (from: string, multisig: MultiSigWrapper) => this;
+    runChecks(): Promise<undefined>;
+}
+export {};
